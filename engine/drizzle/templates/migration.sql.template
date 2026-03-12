@@ -1,0 +1,16 @@
+-- Migration: {{MIGRATION_NAME}}
+-- Created: {{DATE}}
+-- Description: {{DESCRIPTION}}
+
+-- ============================================
+-- UP Migration
+-- ============================================
+
+-- Add your migration SQL here
+
+
+-- ============================================
+-- DOWN Migration (for rollback)
+-- ============================================
+-- Note: Rollback logic should be added in a separate down migration file
+-- or documented here for manual rollback if needed

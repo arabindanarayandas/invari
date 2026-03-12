@@ -1,0 +1,34 @@
+{
+  "version": "7",
+  "dialect": "postgresql",
+  "entries": [
+    {
+      "idx": 0,
+      "version": "7",
+      "when": 1770066939831,
+      "tag": "0000_thick_slyde",
+      "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1770070655416,
+      "tag": "0001_worried_dakota_north",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1738648800000,
+      "tag": "0002_rename_projects_to_agents",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1738649000000,
+      "tag": "0003_fix_agent_id_columns",
+      "breakpoints": true
+    }
+  ]
+}

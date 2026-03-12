@@ -1,0 +1,75 @@
+openapi: 3.0.0
+info:
+  title: Vapi Booking Service
+  version: 1.0.1
+  description: API for checking availability and booking appointments via voice agents
+servers:
+  - url: https://webhook.site/ec19c7ad-57b2-4baf-a7d2-73c8023045ff
+    description: Demo webhook endpoint
+paths:
+  /api/check_availability:
+    post:
+      summary: Check if a slot is open
+      description: Verify availability for a specific date and party size
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - date
+                - partySize
+              properties:
+                date:
+                  type: string
+                  format: date-time
+                  description: "Must be strict ISO-8601 format"
+                  example: "2024-03-15T18:30:00Z"
+                partySize:
+                  type: integer
+                  description: "Must be a number, not a string"
+                  example: 4
+                  minimum: 1
+                  maximum: 20
+                userEmail:
+                  type: string
+                  format: email
+                  description: "Must be camelCase format"
+                  example: "john.doe@example.com"
+            examples:
+              valid_request:
+                summary: Valid booking request
+                value:
+                  date: "2024-03-15T18:30:00Z"
+                  partySize: 4
+                  userEmail: "john.doe@example.com"
+              minimal_request:
+                summary: Minimal request without email
+                value:
+                  date: "2024-03-15T19:00:00Z"
+                  partySize: 2
+      responses:
+        '200':
+          description: Availability check successful
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  available:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: "Slot is available"
+        '400':
+          description: Invalid request format
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: "Invalid date format"

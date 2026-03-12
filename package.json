@@ -1,0 +1,28 @@
+{
+  "name": "invari",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "author": "Arabinda Narayan Das & Dhritiman Nath",
+  "license": "PolyForm-Noncommercial-1.0.0",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/arabindanarayandas/invari.git"
+  },
+  "scripts": {
+    "dev": "pnpm --filter web-console dev",
+    "dev:engine": "pnpm --filter engine dev",
+    "dev:all": "concurrently \"pnpm dev:engine\" \"pnpm dev\" --names \"ENGINE,WEB\" --prefix-colors \"blue,green\"",
+    "build": "pnpm --filter engine build && pnpm --filter web-console build",
+    "build:engine": "pnpm --filter engine build",
+    "build:web": "pnpm --filter web-console build",
+    "build:demo": "pnpm --filter web-console build:demo",
+    "docker:build": "docker build -t invari:latest .",
+    "docker:up": "docker-compose up",
+    "docker:down": "docker-compose down",
+    "lint": "pnpm --filter web-console lint"
+  },
+  "devDependencies": {
+    "concurrently": "^9.2.1"
+  }
+}
