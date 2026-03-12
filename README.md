@@ -183,6 +183,5 @@ PORT=3001
 ## Links
 
 - Website: [invari.ai](https://invari.ai)
-- Live demo: [lab.invari.ai](https://lab.invari.ai)
 - Feedback: [Leave feedback](https://forms.gle/ji3LcBXE6SVeVenq7)
 
