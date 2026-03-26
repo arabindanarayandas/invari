@@ -1,4 +1,5 @@
-import { BrowserRouter, Routes, Route, Navigate, useNavigate, useParams } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, Navigate, useNavigate, useParams, useSearchParams } from 'react-router-dom';
+import { GoogleOAuthProvider } from '@react-oauth/google';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import LoginPage from './pages/LoginPage';
 import ApplicationsPage from './pages/ApplicationsPage';
@@ -6,8 +7,32 @@ import DashboardPage from './pages/DashboardPage';
 import GlobalDashboardPage from './pages/GlobalDashboardPage';
 import DemoLandingPage from './pages/DemoLandingPage';
 import PlaygroundPage from './pages/PlaygroundPage';
+import AnalysisPage from './pages/AnalysisPage';
+import LandingPage from './pages/LandingPage';
+import HowItWorksPage from './pages/HowItWorksPage';
+import PricingPage from './pages/PricingPage';
+import ContactPage from './pages/ContactPage';
 import { useState, useEffect } from 'react';
 import apiClient from './api/client';
+
+// Login Route wrapper - handles returnTo redirect for authenticated users
+function LoginRouteWrapper() {
+  const { isAuthenticated } = useAuth();
+  const [searchParams] = useSearchParams();
+
+  if (isAuthenticated) {
+    const returnTo = searchParams.get('returnTo');
+    const action = searchParams.get('action');
+
+    if (returnTo) {
+      const redirectUrl = action ? `${returnTo}?action=${action}` : returnTo;
+      return <Navigate to={redirectUrl} replace />;
+    }
+    return <Navigate to="/dashboard" replace />;
+  }
+
+  return <LoginPage />;
+}
 
 // Protected Route wrapper
 function ProtectedRoute({ children }) {
@@ -15,8 +40,8 @@ function ProtectedRoute({ children }) {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-[#0A0A0B] flex items-center justify-center">
-        <div className="text-slate-400">Loading...</div>
+      <div className="min-h-screen bg-surface flex items-center justify-center">
+        <div className="text-on-surface-variant">Loading...</div>
       </div>
     );
   }
@@ -117,8 +142,8 @@ function DashboardPageWrapper() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-[#0A0A0B] flex items-center justify-center">
-        <div className="text-slate-400">Loading agent...</div>
+      <div className="min-h-screen bg-surface flex items-center justify-center">
+        <div className="text-on-surface-variant">Loading agent...</div>
       </div>
     );
   }
@@ -141,34 +166,43 @@ function AppContent() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-[#0A0A0B] flex items-center justify-center">
-        <div className="text-slate-400">Loading...</div>
+      <div className="min-h-screen bg-surface flex items-center justify-center">
+        <div className="text-on-surface-variant">Loading...</div>
       </div>
     );
   }
 
   return (
     <Routes>
-      <Route path="/login" element={isAuthenticated ? <Navigate to="/dashboard" replace /> : <LoginPage />} />
+      <Route path="/" element={<LandingPage />} />
+      <Route path="/how-it-works" element={<HowItWorksPage />} />
+      <Route path="/pricing" element={<PricingPage />} />
+      <Route path="/contact" element={<ContactPage />} />
+      <Route path="/login" element={<LoginRouteWrapper />} />
       <Route path="/dashboard" element={<ProtectedRoute><GlobalDashboardPageWrapper /></ProtectedRoute>} />
       <Route path="/agents" element={<ProtectedRoute><ApplicationsPageWrapper /></ProtectedRoute>} />
       <Route path="/agents/:id" element={<ProtectedRoute><DashboardPageWrapper /></ProtectedRoute>} />
-      {/* Public demo routes — no authentication required */}
+      {/* Public demo routes */}
       <Route path="/demo" element={<DemoLandingPage />} />
       <Route path="/playground" element={<PlaygroundPage />} />
-      <Route path="/" element={<Navigate to={isAuthenticated ? "/dashboard" : "/login"} replace />} />
+      <Route path="/analysis" element={<AnalysisPage />} />
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
   );
 }
 
 function App() {
+  // Get Google Client ID from environment variable
+  const googleClientId = import.meta.env.VITE_GOOGLE_CLIENT_ID || '';
+
   return (
-    <BrowserRouter>
-      <AuthProvider>
-        <AppContent />
-      </AuthProvider>
-    </BrowserRouter>
+    <GoogleOAuthProvider clientId={googleClientId}>
+      <BrowserRouter>
+        <AuthProvider>
+          <AppContent />
+        </AuthProvider>
+      </BrowserRouter>
+    </GoogleOAuthProvider>
   );
 }
 

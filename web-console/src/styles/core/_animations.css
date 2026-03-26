@@ -1,0 +1,220 @@
+/**
+ * Animation & Transition System
+ * Reusable animation tokens and keyframes
+ */
+
+@layer invari.animations {
+  :root {
+    /* ===== Transition Presets ===== */
+
+    --transition-colors: color var(--duration-normal) var(--ease-in-out),
+                         background-color var(--duration-normal) var(--ease-in-out),
+                         border-color var(--duration-normal) var(--ease-in-out);
+
+    --transition-opacity: opacity var(--duration-normal) var(--ease-in-out);
+
+    --transition-transform: transform var(--duration-normal) var(--ease-out);
+
+    --transition-all: all var(--duration-normal) var(--ease-in-out);
+
+    --transition-shadow: box-shadow var(--duration-normal) var(--ease-in-out);
+
+    --transition-size: width var(--duration-normal) var(--ease-out),
+                       height var(--duration-normal) var(--ease-out);
+
+    --transition-fast: all var(--duration-fast) var(--ease-in-out);
+
+    --transition-slow: all var(--duration-slow) var(--ease-in-out);
+  }
+
+  /* Respect user preferences for reduced motion */
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }
+  }
+
+  /* ===== Keyframe Animations ===== */
+
+  /* Fade In */
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
+  }
+
+  /* Fade Out */
+  @keyframes fadeOut {
+    from {
+      opacity: 1;
+    }
+    to {
+      opacity: 0;
+    }
+  }
+
+  /* Slide Down */
+  @keyframes slideDown {
+    from {
+      transform: translateY(-1rem);
+      opacity: 0;
+    }
+    to {
+      transform: translateY(0);
+      opacity: 1;
+    }
+  }
+
+  /* Slide Up */
+  @keyframes slideUp {
+    from {
+      transform: translateY(1rem);
+      opacity: 0;
+    }
+    to {
+      transform: translateY(0);
+      opacity: 1;
+    }
+  }
+
+  /* Slide In Right */
+  @keyframes slideInRight {
+    from {
+      transform: translateX(-1rem);
+      opacity: 0;
+    }
+    to {
+      transform: translateX(0);
+      opacity: 1;
+    }
+  }
+
+  /* Slide In Left */
+  @keyframes slideInLeft {
+    from {
+      transform: translateX(1rem);
+      opacity: 0;
+    }
+    to {
+      transform: translateX(0);
+      opacity: 1;
+    }
+  }
+
+  /* Scale In */
+  @keyframes scaleIn {
+    from {
+      transform: scale(0.95);
+      opacity: 0;
+    }
+    to {
+      transform: scale(1);
+      opacity: 1;
+    }
+  }
+
+  /* Scale Out */
+  @keyframes scaleOut {
+    from {
+      transform: scale(1);
+      opacity: 1;
+    }
+    to {
+      transform: scale(0.95);
+      opacity: 0;
+    }
+  }
+
+  /* Spin */
+  @keyframes spin {
+    from {
+      transform: rotate(0deg);
+    }
+    to {
+      transform: rotate(360deg);
+    }
+  }
+
+  /* Pulse */
+  @keyframes pulse {
+    0%, 100% {
+      opacity: 1;
+    }
+    50% {
+      opacity: 0.5;
+    }
+  }
+
+  /* Bounce */
+  @keyframes bounce {
+    0%, 100% {
+      transform: translateY(0);
+    }
+    50% {
+      transform: translateY(-0.5rem);
+    }
+  }
+
+  /* Shimmer (for skeleton loaders) */
+  @keyframes shimmer {
+    0% {
+      background-position: -1000px 0;
+    }
+    100% {
+      background-position: 1000px 0;
+    }
+  }
+
+  /* Progress Bar */
+  @keyframes progress {
+    0% {
+      transform: translateX(-100%);
+    }
+    100% {
+      transform: translateX(100%);
+    }
+  }
+
+  /* Shake (for errors) */
+  @keyframes shake {
+    0%, 100% {
+      transform: translateX(0);
+    }
+    10%, 30%, 50%, 70%, 90% {
+      transform: translateX(-0.5rem);
+    }
+    20%, 40%, 60%, 80% {
+      transform: translateX(0.5rem);
+    }
+  }
+
+  /* Modal Backdrop */
+  @keyframes backdropIn {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
+  }
+
+  /* Tooltip */
+  @keyframes tooltipIn {
+    from {
+      opacity: 0;
+      transform: scale(0.9) translateY(0.25rem);
+    }
+    to {
+      opacity: 1;
+      transform: scale(1) translateY(0);
+    }
+  }
+}

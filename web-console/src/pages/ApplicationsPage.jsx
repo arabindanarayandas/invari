@@ -1,29 +1,55 @@
 import { useState, useEffect } from 'react';
+import { useNavigate as useNavigateHook, useSearchParams } from 'react-router-dom';
 import { Shield, Plus, Folder, Calendar, Activity, ExternalLink, Edit2 } from 'lucide-react';
-import Card from '../components/Card';
+import { Card, Button } from '../components/design-system';
 import CreateApplicationModal from '../components/CreateApplicationModal';
 import EditProjectModal from '../components/EditProjectModal';
 import Sidebar from '../components/Sidebar';
 import apiClient from '../api/client';
 
 const ApplicationsPage = ({ onSelectApplication, onNavigate, onLogout }) => {
+  const navigate = useNavigateHook();
+  const [searchParams] = useSearchParams();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [selectedAgent, setSelectedAgent] = useState(null);
   const [applications, setApplications] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [pendingSpec, setPendingSpec] = useState(null);
 
   useEffect(() => {
     loadAgents();
-  }, []);
+
+    // Check for URL action param (from login redirect)
+    const action = searchParams.get('action');
+
+    if (action === 'createAgent') {
+      // Check for pending trial spec in localStorage
+      const pendingTrialSpec = localStorage.getItem('pendingTrialSpec');
+      if (pendingTrialSpec) {
+        try {
+          const specData = JSON.parse(pendingTrialSpec);
+          setPendingSpec(specData);
+          setIsModalOpen(true);
+          // Clear localStorage
+          localStorage.removeItem('pendingTrialSpec');
+        } catch (err) {
+          console.error('Failed to parse pending spec:', err);
+          localStorage.removeItem('pendingTrialSpec');
+        }
+      }
+
+      // Clean up URL params
+      navigate('/agents', { replace: true });
+    }
+  }, [searchParams, navigate]);
 
   const loadAgents = async () => {
     try {
       setLoading(true);
       const response = await apiClient.getAgents();
       if (response.success) {
-        // Backend already sends endpoints array and spec, just add endpointsCount
         const transformedAgents = response.data.map(agent => ({
           ...agent,
           endpointsCount: agent.endpoints?.length || 0
@@ -60,11 +86,10 @@ const ApplicationsPage = ({ onSelectApplication, onNavigate, onLogout }) => {
       setError(null);
 
       if (appData.mode === 'auto-sync') {
-        // Auto-sync mode: Create agent with schema source URL and sync interval
         const agentResponse = await apiClient.createAgent(
           appData.name,
-          null, // targetBaseUrl is optional
-          null, // openApiSpec
+          null,
+          null,
           appData.schemaSourceUrl,
           appData.schemaSyncInterval
         );
@@ -73,10 +98,9 @@ const ApplicationsPage = ({ onSelectApplication, onNavigate, onLogout }) => {
           throw new Error(agentResponse.error || 'Failed to create agent');
         }
       } else {
-        // Upload mode: Create agent and upload schema
         const agentResponse = await apiClient.createAgent(
           appData.name,
-          null // targetBaseUrl is optional for validation-only mode
+          null
         );
 
         if (!agentResponse.success) {
@@ -85,18 +109,16 @@ const ApplicationsPage = ({ onSelectApplication, onNavigate, onLogout }) => {
 
         const agent = agentResponse.data;
 
-        // Upload the OpenAPI schema
         if (appData.spec) {
           await apiClient.uploadSchema(agent.id, appData.spec, appData.version);
         }
       }
 
-      // Reload agents
       await loadAgents();
       setIsModalOpen(false);
     } catch (err) {
       setError(err.message);
-      throw err; // Re-throw to show error in modal
+      throw err;
     }
   };
 
@@ -104,7 +126,6 @@ const ApplicationsPage = ({ onSelectApplication, onNavigate, onLogout }) => {
     try {
       setError(null);
 
-      // Step 1: Update agent details (name, targetBaseUrl, auto-sync settings)
       if (Object.keys(updateData).length > 0) {
         const updateResponse = await apiClient.updateAgent(agentId, updateData);
         if (!updateResponse.success) {
@@ -112,163 +133,158 @@ const ApplicationsPage = ({ onSelectApplication, onNavigate, onLogout }) => {
         }
       }
 
-      // Step 2: Upload new schema if in upload mode and file provided
       if (schemaMode === 'upload' && schemaFile) {
         await apiClient.uploadSchema(agentId, schemaFile, schemaFile.info?.version || '1.0.0');
       }
 
-      // Step 3: Reload agents
       await loadAgents();
       setIsEditModalOpen(false);
       setSelectedAgent(null);
     } catch (err) {
       setError(err.message);
-      throw err; // Re-throw to show error in modal
+      throw err;
     }
   };
 
   const openEditModal = (e, agent) => {
-    e.stopPropagation(); // Prevent card click
+    e.stopPropagation();
     setSelectedAgent(agent);
     setIsEditModalOpen(true);
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 text-slate-700 font-sans flex">
-      {/* Sidebar */}
+    <div className="min-h-screen bg-surface text-on-surface font-sans flex">
       <Sidebar activeView="applications" onNavigate={onNavigate} onLogout={onLogout} />
 
-      {/* Main Content */}
-      <div className="flex-1 ml-64 p-6">
-
-      {/* Page Header */}
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold text-slate-900 mb-2">My Agents</h1>
-        <p className="text-slate-600">
-          Manage your AI agents and monitor their security status
-        </p>
-      </div>
-
-      {/* Error Message */}
-      {error && (
-        <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg text-red-700">
-          {error}
-        </div>
-      )}
-
-      {/* Loading State */}
-      {loading ? (
-        <div className="flex justify-center items-center py-20">
-          <div className="text-slate-600">Loading agents...</div>
-        </div>
-      ) : applications.length === 0 ? (
-        /* Empty State */
-        <div className="flex flex-col items-center justify-center py-20">
-          <div className="w-20 h-20 bg-slate-100 border border-slate-200 rounded-xl flex items-center justify-center mb-6">
-            <Folder className="w-10 h-10 text-slate-400" />
-          </div>
-          <h2 className="text-lg font-semibold text-slate-900 mb-2">No agents yet</h2>
-          <p className="text-slate-600 mb-8 text-center max-w-md">
-            Get started by creating your first agent and uploading your API specification
+      <div className="flex-1 ml-60 p-6">
+        <div className="mb-8">
+          <h1 className="text-display-sm font-bold text-on-surface mb-2">My Agents</h1>
+          <p className="text-on-surface-variant text-body-md">
+            Manage your AI agents and monitor their security status
           </p>
-          <button
-            onClick={() => setIsModalOpen(true)}
-            className="flex items-center gap-2 px-6 py-3 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg font-medium transition-all shadow-sm"
-          >
-            <Plus className="w-5 h-5" />
-            Create Your First Agent
-          </button>
         </div>
-      ) : (
-        <>
-          {/* Create New Button */}
-          <div className="mb-6 flex justify-end">
-            <button
+
+        {error && (
+          <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-sm text-red-700">
+            {error}
+          </div>
+        )}
+
+        {loading ? (
+          <div className="flex justify-center items-center py-20">
+            <div className="text-on-surface-variant">Loading agents...</div>
+          </div>
+        ) : applications.length === 0 ? (
+          <div className="flex flex-col items-center justify-center py-20">
+            <div className="w-20 h-20 bg-surface-container-low border border-outline-variant rounded-md flex items-center justify-center mb-6">
+              <Folder className="w-10 h-10 text-on-surface-variant" />
+            </div>
+            <h2 className="text-heading-md font-semibold text-on-surface mb-2">No agents yet</h2>
+            <p className="text-on-surface-variant text-body-md mb-8 text-center max-w-md">
+              Get started by creating your first agent and uploading your API specification
+            </p>
+            <Button
+              variant="primary"
+              size="lg"
               onClick={() => setIsModalOpen(true)}
-              className="flex items-center gap-2 px-4 py-2 bg-slate-900 hover:bg-slate-800 text-white rounded-lg font-medium transition-all text-sm shadow-sm"
             >
-              <Plus className="w-4 h-4" />
-              New Agent
-            </button>
+              <Plus className="w-5 h-5" />
+              Create Your First Agent
+            </Button>
           </div>
-
-          {/* Agents Cards */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {applications.map((app) => (
-              <Card
-                key={app.id}
-                className="p-6 hover:border-slate-800 hover:shadow-lg hover:scale-[1.02] transition-all cursor-pointer group"
-                onClick={() => {
-                  console.log('Card clicked!', app);
-                  onSelectApplication(app);
-                }}
+        ) : (
+          <>
+            <div className="mb-6 flex justify-end">
+              <Button
+                variant="primary"
+                size="md"
+                onClick={() => setIsModalOpen(true)}
               >
-                <div className="flex items-start justify-between mb-4">
-                  <div className="w-12 h-12 bg-slate-100 border border-slate-200 rounded-lg flex items-center justify-center group-hover:bg-slate-900 transition-colors">
-                    <Shield className="w-6 h-6 text-slate-600 group-hover:text-white transition-colors" />
+                <Plus className="w-4 h-4" />
+                New Agent
+              </Button>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {applications.map((app) => (
+                <Card
+                  key={app.id}
+                  variant="outlined"
+                  hover={true}
+                  className="p-6 cursor-pointer group transition-all duration-150"
+                  onClick={() => {
+                    console.log('Card clicked!', app);
+                    onSelectApplication(app);
+                  }}
+                >
+                  <div className="flex items-start justify-between mb-4">
+                    <div className="w-12 h-12 bg-surface-container-low border border-outline-variant rounded-sm flex items-center justify-center group-hover:bg-primary transition-colors">
+                      <Shield className="w-6 h-6 text-on-surface group-hover:text-white transition-colors" />
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <button
+                        onClick={(e) => openEditModal(e, app)}
+                        className="p-2 hover:bg-surface-container-high rounded-sm transition-colors"
+                        title="Edit agent"
+                      >
+                        <Edit2 className="w-4 h-4 text-on-surface-variant hover:text-on-surface transition-colors" />
+                      </button>
+                      <ExternalLink className="w-4 h-4 text-on-surface-variant group-hover:text-on-surface transition-colors" />
+                    </div>
                   </div>
-                  <div className="flex items-center gap-2">
-                    <button
-                      onClick={(e) => openEditModal(e, app)}
-                      className="p-2 hover:bg-slate-100 rounded-lg transition-colors"
-                      title="Edit agent"
-                    >
-                      <Edit2 className="w-4 h-4 text-slate-400 hover:text-slate-900 transition-colors" />
-                    </button>
-                    <ExternalLink className="w-4 h-4 text-slate-400 group-hover:text-slate-900 transition-colors" />
+
+                  <h3 className="text-body-lg font-semibold text-on-surface mb-2 group-hover:text-primary transition-colors">
+                    {app.name}
+                  </h3>
+
+                  <p className="text-body-sm text-on-surface-variant mb-4 line-clamp-2">
+                    {app.description || 'No description provided'}
+                  </p>
+
+                  <div className="space-y-2 mb-4">
+                    <div className="flex items-center gap-2 text-label-md text-on-surface-variant font-mono">
+                      <Activity className="w-3 h-3" />
+                      <span>{app.endpointsCount} endpoints</span>
+                    </div>
+                    <div className="flex items-center gap-2 text-label-md text-on-surface-variant font-mono">
+                      <Calendar className="w-3 h-3" />
+                      <span>Created {new Date(app.createdAt).toLocaleDateString()}</span>
+                    </div>
                   </div>
-                </div>
 
-                <h3 className="text-sm font-semibold text-slate-900 mb-2 group-hover:text-slate-900 transition-colors">
-                  {app.name}
-                </h3>
-
-                <p className="text-sm text-slate-600 mb-4 line-clamp-2">
-                  {app.description || 'No description provided'}
-                </p>
-
-                <div className="space-y-2 mb-4">
-                  <div className="flex items-center gap-2 text-xs text-slate-500">
-                    <Activity className="w-3 h-3" />
-                    <span className="font-mono">{app.endpointsCount} endpoints</span>
+                  <div className="pt-4 border-t border-outline-variant">
+                    <div className="flex items-center gap-2">
+                      <div className="w-2 h-2 rounded-full bg-success"></div>
+                      <span className="text-label-sm text-on-surface-variant">Active</span>
+                    </div>
                   </div>
-                  <div className="flex items-center gap-2 text-xs text-slate-500">
-                    <Calendar className="w-3 h-3" />
-                    <span className="font-mono">Created {new Date(app.createdAt).toLocaleDateString()}</span>
-                  </div>
-                </div>
+                </Card>
+              ))}
+            </div>
+          </>
+        )}
 
-                <div className="pt-4 border-t border-slate-200">
-                  <div className="flex items-center gap-2">
-                    <div className="w-2 h-2 rounded-full bg-emerald-500"></div>
-                    <span className="text-xs text-slate-600">Active</span>
-                  </div>
-                </div>
-              </Card>
-            ))}
-          </div>
-        </>
-      )}
+        {isModalOpen && (
+          <CreateApplicationModal
+            onClose={() => {
+              setIsModalOpen(false);
+              setPendingSpec(null);
+            }}
+            onCreate={handleCreateApp}
+            initialSpec={pendingSpec}
+          />
+        )}
 
-      {/* Create Agent Modal */}
-      {isModalOpen && (
-        <CreateApplicationModal
-          onClose={() => setIsModalOpen(false)}
-          onCreate={handleCreateApp}
-        />
-      )}
-
-      {/* Edit Agent Modal */}
-      {isEditModalOpen && selectedAgent && (
-        <EditProjectModal
-          project={selectedAgent}
-          onClose={() => {
-            setIsEditModalOpen(false);
-            setSelectedAgent(null);
-          }}
-          onUpdate={handleEditAgent}
-        />
-      )}
+        {isEditModalOpen && selectedAgent && (
+          <EditProjectModal
+            project={selectedAgent}
+            onClose={() => {
+              setIsEditModalOpen(false);
+              setSelectedAgent(null);
+            }}
+            onUpdate={handleEditAgent}
+          />
+        )}
       </div>
     </div>
   );

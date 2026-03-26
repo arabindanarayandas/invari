@@ -92,6 +92,50 @@ export class AuthController {
   }
 
   /**
+   * POST /api/auth/google
+   */
+  async googleLogin(req: Request, res: Response) {
+    try {
+      const { credential } = req.body;
+
+      if (!credential) {
+        return res.status(400).json({
+          success: false,
+          error: 'Google credential is required',
+        });
+      }
+
+      const result = await authService.googleLogin(credential);
+
+      return res.status(200).json({
+        success: true,
+        data: result,
+      });
+    } catch (error) {
+      if (error instanceof Error) {
+        if (error.message === 'Invalid Google credential' || error.message === 'Invalid Google token payload') {
+          return res.status(401).json({
+            success: false,
+            error: error.message,
+          });
+        }
+        if (error.message.includes('already exists')) {
+          return res.status(409).json({
+            success: false,
+            error: error.message,
+          });
+        }
+      }
+
+      console.error('Google login error:', error);
+      return res.status(500).json({
+        success: false,
+        error: 'Internal server error',
+      });
+    }
+  }
+
+  /**
    * GET /api/auth/me
    */
   async getCurrentUser(req: Request, res: Response) {

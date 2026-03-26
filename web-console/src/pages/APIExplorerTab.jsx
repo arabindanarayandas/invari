@@ -129,16 +129,16 @@ const APIExplorerTab = ({ application }) => {
   const getMethodColor = (method) => {
     switch (method) {
       case 'GET':
-        return 'bg-blue-500/20 text-blue-700 border-blue-300';
+        return 'bg-primary/10 text-primary border-primary/20';
       case 'POST':
-        return 'bg-emerald-500/20 text-emerald-700 border-emerald-300';
+        return 'bg-success/10 text-success border-success/20';
       case 'PUT':
       case 'PATCH':
-        return 'bg-amber-500/20 text-amber-700 border-amber-300';
+        return 'bg-warning/10 text-warning border-warning/20';
       case 'DELETE':
-        return 'bg-red-500/20 text-red-700 border-red-300';
+        return 'bg-error/10 text-error border-error/20';
       default:
-        return 'bg-slate-500/20 text-slate-700 border-slate-300';
+        return 'bg-surface-container-low text-on-surface-variant border-outline-variant';
     }
   };
 
@@ -162,37 +162,37 @@ const APIExplorerTab = ({ application }) => {
     <div className="grid grid-cols-12 gap-6">
       {/* Left Panel: Version Selector */}
       <div className="col-span-4 space-y-4">
-        <Card className="p-4 shadow-sm">
-          <h3 className="text-sm font-semibold text-slate-900 mb-3">Schema Versions</h3>
+        <Card className="p-4">
+          <h3 className="text-body-sm font-semibold text-on-surface mb-3">Schema Versions</h3>
 
           {/* Filter Tabs */}
           <div className="flex gap-2 mb-3">
             <button
               onClick={() => setSchemaFilter('all')}
-              className={`flex-1 px-2 py-1 text-xs font-medium rounded transition-all ${
+              className={`flex-1 px-2 py-1 text-label-sm font-medium rounded-sm transition-all ${
                 schemaFilter === 'all'
-                  ? 'bg-slate-900 text-white'
-                  : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                  ? 'bg-primary text-white'
+                  : 'bg-surface-container-low text-on-surface-variant hover:bg-surface-container-high'
               }`}
             >
               All
             </button>
             <button
               onClick={() => setSchemaFilter('manual')}
-              className={`flex-1 px-2 py-1 text-xs font-medium rounded transition-all ${
+              className={`flex-1 px-2 py-1 text-label-sm font-medium rounded-sm transition-all ${
                 schemaFilter === 'manual'
-                  ? 'bg-slate-900 text-white'
-                  : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                  ? 'bg-primary text-white'
+                  : 'bg-surface-container-low text-on-surface-variant hover:bg-surface-container-high'
               }`}
             >
               Manual
             </button>
             <button
               onClick={() => setSchemaFilter('auto-sync')}
-              className={`flex-1 px-2 py-1 text-xs font-medium rounded transition-all ${
+              className={`flex-1 px-2 py-1 text-label-sm font-medium rounded-sm transition-all ${
                 schemaFilter === 'auto-sync'
-                  ? 'bg-slate-900 text-white'
-                  : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                  ? 'bg-primary text-white'
+                  : 'bg-surface-container-low text-on-surface-variant hover:bg-surface-container-high'
               }`}
             >
               Auto-Sync
@@ -202,12 +202,12 @@ const APIExplorerTab = ({ application }) => {
           {/* Schema List */}
           {loading ? (
             <div className="flex items-center justify-center h-64">
-              <Loader className="w-6 h-6 text-slate-400 animate-spin" />
+              <Loader className="w-6 h-6 text-on-surface-variant animate-spin" />
             </div>
           ) : filteredSchemas.length === 0 ? (
             <div className="text-center py-8">
-              <FileText className="w-12 h-12 text-slate-400 mx-auto mb-2" />
-              <p className="text-sm text-slate-600">No schemas found</p>
+              <FileText className="w-12 h-12 text-on-surface-variant mx-auto mb-2" />
+              <p className="text-body-sm text-on-surface-variant">No schemas found</p>
             </div>
           ) : (
             <div className="space-y-2 max-h-[600px] overflow-y-auto">
@@ -215,33 +215,33 @@ const APIExplorerTab = ({ application }) => {
                 <button
                   key={schema.id}
                   onClick={() => setSelectedSchema(schema)}
-                  className={`w-full text-left p-3 rounded-lg border-2 transition-all ${
+                  className={`w-full text-left p-3 rounded-sm border-2 transition-all ${
                     selectedSchema?.id === schema.id
-                      ? 'border-indigo-500 bg-indigo-50'
-                      : 'border-slate-200 hover:border-slate-300 bg-white'
+                      ? 'border-primary bg-primary/10'
+                      : 'border-outline-variant hover:border-outline bg-surface'
                   }`}
                 >
                   <div className="flex items-start justify-between mb-1">
                     <div className="flex items-center gap-2">
                       {schema.isActive && (
-                        <CheckCircle className="w-4 h-4 text-emerald-600" />
+                        <CheckCircle className="w-4 h-4 text-success" />
                       )}
-                      <span className="text-xs font-semibold text-slate-900">
+                      <span className="text-label-sm font-semibold text-on-surface">
                         {schema.specVersion}
                       </span>
                     </div>
-                    <span className={`px-2 py-0.5 text-[10px] font-semibold rounded ${
+                    <span className={`px-2 py-0.5 text-label-sm font-semibold rounded-sm ${
                       schema.sourceType === 'auto-sync'
-                        ? 'bg-blue-100 text-blue-700'
-                        : 'bg-slate-100 text-slate-700'
+                        ? 'bg-primary/10 text-primary'
+                        : 'bg-surface-container-low text-on-surface-variant'
                     }`}>
                       {schema.sourceType === 'auto-sync' ? 'Auto' : 'Manual'}
                     </span>
                   </div>
-                  <div className="text-xs text-slate-600 mb-1">
+                  <div className="text-label-sm text-on-surface-variant mb-1">
                     {schema.endpointCount} endpoints
                   </div>
-                  <div className="text-[10px] text-slate-500">
+                  <div className="text-label-sm text-on-surface-variant">
                     {new Date(schema.createdAt).toLocaleString()}
                   </div>
                 </button>
@@ -254,21 +254,21 @@ const APIExplorerTab = ({ application }) => {
       {/* Right Panel: Endpoint Explorer */}
       <div className="col-span-8 space-y-4">
         {/* Header */}
-        <Card className="p-4 shadow-sm">
+        <Card className="p-4">
           <div className="flex items-center justify-between mb-3">
             <div>
-              <h3 className="text-sm font-semibold text-slate-900">
+              <h3 className="text-body-sm font-semibold text-on-surface">
                 {endpoints?.title || 'API Endpoints'}
               </h3>
-              <p className="text-xs text-slate-600">
+              <p className="text-label-sm text-on-surface-variant">
                 Version: {selectedSchema?.specVersion || 'N/A'}
                 {selectedSchema?.isActive && (
-                  <span className="ml-2 text-emerald-600 font-semibold">(Active)</span>
+                  <span className="ml-2 text-success font-semibold">(Active)</span>
                 )}
               </p>
             </div>
             {endpoints && endpoints.endpointCount > 0 && (
-              <span className="text-xs text-slate-600">
+              <span className="text-label-sm text-on-surface-variant">
                 {filteredEndpoints.length} of {endpoints.endpointCount} endpoints
               </span>
             )}
@@ -279,7 +279,7 @@ const APIExplorerTab = ({ application }) => {
             <select
               value={compareSchemaId || ''}
               onChange={(e) => setCompareSchemaId(e.target.value)}
-              className="flex-1 px-3 py-2 text-sm border border-slate-300 rounded-lg focus:outline-none focus:border-indigo-300"
+              className="flex-1 px-3 py-2 text-body-sm border border-outline-variant rounded-sm focus:outline-none focus:border-primary text-on-surface"
             >
               <option value="">Select version to compare...</option>
               {schemas
@@ -293,7 +293,7 @@ const APIExplorerTab = ({ application }) => {
             <button
               onClick={handleCompare}
               disabled={!compareSchemaId || diffLoading}
-              className="px-4 py-2 bg-slate-900 hover:bg-slate-800 disabled:bg-slate-300 disabled:text-slate-500 text-white rounded-lg font-medium text-sm transition-all disabled:cursor-not-allowed flex items-center gap-2"
+              className="px-4 py-2 bg-primary hover:bg-blue-700 disabled:bg-surface-container-high disabled:text-on-surface-variant text-white rounded-sm font-medium text-body-sm transition-all disabled:cursor-not-allowed flex items-center gap-2"
             >
               <GitCompare className="w-4 h-4" />
               {diffLoading ? 'Comparing...' : 'Compare'}
@@ -303,49 +303,49 @@ const APIExplorerTab = ({ application }) => {
 
         {/* Diff View or Endpoint Explorer */}
         {compareMode && diffData ? (
-          <Card className="p-4 shadow-sm">
+          <Card className="p-4">
             <div className="mb-4">
-              <h4 className="text-sm font-semibold text-slate-900 mb-2">Comparison Results</h4>
-              <p className="text-xs text-slate-600">
+              <h4 className="text-body-sm font-semibold text-on-surface mb-2">Comparison Results</h4>
+              <p className="text-label-sm text-on-surface-variant">
                 Comparing {diffData.fromSchema.version} → {diffData.toSchema.version}
               </p>
-              <div className="flex gap-4 mt-2 text-xs">
-                <span className="text-emerald-600">+{diffData.summary.added} added</span>
-                <span className="text-red-600">-{diffData.summary.removed} removed</span>
-                <span className="text-amber-600">~{diffData.summary.modified} modified</span>
-                <span className="text-slate-600">{diffData.summary.unchanged} unchanged</span>
+              <div className="flex gap-4 mt-2 text-label-sm">
+                <span className="text-success">+{diffData.summary.added} added</span>
+                <span className="text-error">-{diffData.summary.removed} removed</span>
+                <span className="text-warning">~{diffData.summary.modified} modified</span>
+                <span className="text-on-surface-variant">{diffData.summary.unchanged} unchanged</span>
               </div>
             </div>
 
             <div className="space-y-2 max-h-[500px] overflow-y-auto">
               {/* Added Endpoints */}
               {diffData.added.map((endpoint, idx) => (
-                <div key={`added-${idx}`} className="p-3 bg-emerald-50 border-l-4 border-emerald-500 rounded">
+                <div key={`added-${idx}`} className="p-3 bg-success/10 border-l-4 border-success rounded-sm">
                   <div className="flex items-center gap-2">
-                    <span className="text-xs font-bold text-emerald-700">+ ADDED</span>
-                    <span className={`px-2 py-0.5 text-[10px] font-bold rounded border ${getMethodColor(endpoint.method)}`}>
+                    <span className="text-label-sm font-bold text-success">+ ADDED</span>
+                    <span className={`px-2 py-0.5 text-label-sm font-bold rounded-sm border ${getMethodColor(endpoint.method)}`}>
                       {endpoint.method}
                     </span>
-                    <span className="text-xs font-mono text-slate-900">{endpoint.path}</span>
+                    <span className="text-label-sm font-mono text-on-surface">{endpoint.path}</span>
                   </div>
                   {endpoint.summary && (
-                    <p className="text-xs text-slate-600 mt-1">{endpoint.summary}</p>
+                    <p className="text-label-sm text-on-surface-variant mt-1">{endpoint.summary}</p>
                   )}
                 </div>
               ))}
 
               {/* Removed Endpoints */}
               {diffData.removed.map((endpoint, idx) => (
-                <div key={`removed-${idx}`} className="p-3 bg-red-50 border-l-4 border-red-500 rounded">
+                <div key={`removed-${idx}`} className="p-3 bg-error/10 border-l-4 border-error rounded-sm">
                   <div className="flex items-center gap-2">
-                    <span className="text-xs font-bold text-red-700">- REMOVED</span>
-                    <span className={`px-2 py-0.5 text-[10px] font-bold rounded border ${getMethodColor(endpoint.method)}`}>
+                    <span className="text-label-sm font-bold text-error">- REMOVED</span>
+                    <span className={`px-2 py-0.5 text-label-sm font-bold rounded-sm border ${getMethodColor(endpoint.method)}`}>
                       {endpoint.method}
                     </span>
-                    <span className="text-xs font-mono text-slate-900">{endpoint.path}</span>
+                    <span className="text-label-sm font-mono text-on-surface">{endpoint.path}</span>
                   </div>
                   {endpoint.summary && (
-                    <p className="text-xs text-slate-600 mt-1">{endpoint.summary}</p>
+                    <p className="text-label-sm text-on-surface-variant mt-1">{endpoint.summary}</p>
                   )}
                 </div>
               ))}
@@ -356,43 +356,43 @@ const APIExplorerTab = ({ application }) => {
                 const isExpanded = expandedDiffItems.has(diffItemId);
 
                 return (
-                  <div key={diffItemId} className="bg-amber-50 border-l-4 border-amber-500 rounded">
+                  <div key={diffItemId} className="bg-warning/10 border-l-4 border-warning rounded-sm">
                     <button
                       onClick={() => toggleDiffItem(diffItemId)}
                       className="w-full p-3 text-left"
                     >
                       <div className="flex items-center gap-2">
                         {isExpanded ? (
-                          <ChevronDown className="w-4 h-4 text-amber-700" />
+                          <ChevronDown className="w-4 h-4 text-warning" />
                         ) : (
-                          <ChevronRight className="w-4 h-4 text-amber-700" />
+                          <ChevronRight className="w-4 h-4 text-warning" />
                         )}
-                        <span className="text-xs font-bold text-amber-700">~ MODIFIED</span>
-                        <span className={`px-2 py-0.5 text-[10px] font-bold rounded border ${getMethodColor(endpoint.method)}`}>
+                        <span className="text-label-sm font-bold text-warning">~ MODIFIED</span>
+                        <span className={`px-2 py-0.5 text-label-sm font-bold rounded-sm border ${getMethodColor(endpoint.method)}`}>
                           {endpoint.method}
                         </span>
-                        <span className="text-xs font-mono text-slate-900">{endpoint.path}</span>
+                        <span className="text-label-sm font-mono text-on-surface">{endpoint.path}</span>
                       </div>
                       {endpoint.summary && (
-                        <p className="text-xs text-slate-600 mt-1 pl-6">{endpoint.summary}</p>
+                        <p className="text-label-sm text-on-surface-variant mt-1 pl-6">{endpoint.summary}</p>
                       )}
-                      <p className="text-xs text-amber-700 mt-1 pl-6">{endpoint.changes}</p>
+                      <p className="text-label-sm text-warning mt-1 pl-6">{endpoint.changes}</p>
                     </button>
 
                     {isExpanded && endpoint.detailedChanges && (
-                      <div className="px-3 pb-3 pl-9 space-y-3 border-t border-amber-200 pt-3">
+                      <div className="px-3 pb-3 pl-9 space-y-3 border-t border-warning/20 pt-3">
                         {/* Summary Changes */}
                         {endpoint.detailedChanges.summary && (
-                          <div className="p-2 bg-white rounded border border-amber-200">
-                            <h6 className="text-xs font-semibold text-slate-900 mb-1">Summary Changed</h6>
+                          <div className="p-2 bg-surface rounded-sm border border-warning/20">
+                            <h6 className="text-label-sm font-semibold text-on-surface mb-1">Summary Changed</h6>
                             <div className="space-y-1">
                               <div className="flex items-start gap-2">
-                                <span className="text-[10px] font-bold text-red-600">-</span>
-                                <span className="text-xs text-red-700 line-through">{endpoint.detailedChanges.summary.from || '(none)'}</span>
+                                <span className="text-label-sm font-bold text-error">-</span>
+                                <span className="text-label-sm text-error line-through">{endpoint.detailedChanges.summary.from || '(none)'}</span>
                               </div>
                               <div className="flex items-start gap-2">
-                                <span className="text-[10px] font-bold text-emerald-600">+</span>
-                                <span className="text-xs text-emerald-700">{endpoint.detailedChanges.summary.to || '(none)'}</span>
+                                <span className="text-label-sm font-bold text-success">+</span>
+                                <span className="text-label-sm text-success">{endpoint.detailedChanges.summary.to || '(none)'}</span>
                               </div>
                             </div>
                           </div>
@@ -400,16 +400,16 @@ const APIExplorerTab = ({ application }) => {
 
                         {/* Description Changes */}
                         {endpoint.detailedChanges.description && (
-                          <div className="p-2 bg-white rounded border border-amber-200">
-                            <h6 className="text-xs font-semibold text-slate-900 mb-1">Description Changed</h6>
+                          <div className="p-2 bg-surface rounded-sm border border-warning/20">
+                            <h6 className="text-label-sm font-semibold text-on-surface mb-1">Description Changed</h6>
                             <div className="space-y-1">
                               <div className="flex items-start gap-2">
-                                <span className="text-[10px] font-bold text-red-600">-</span>
-                                <span className="text-xs text-red-700 line-through">{endpoint.detailedChanges.description.from || '(none)'}</span>
+                                <span className="text-label-sm font-bold text-error">-</span>
+                                <span className="text-label-sm text-error line-through">{endpoint.detailedChanges.description.from || '(none)'}</span>
                               </div>
                               <div className="flex items-start gap-2">
-                                <span className="text-[10px] font-bold text-emerald-600">+</span>
-                                <span className="text-xs text-emerald-700">{endpoint.detailedChanges.description.to || '(none)'}</span>
+                                <span className="text-label-sm font-bold text-success">+</span>
+                                <span className="text-label-sm text-success">{endpoint.detailedChanges.description.to || '(none)'}</span>
                               </div>
                             </div>
                           </div>
@@ -417,22 +417,22 @@ const APIExplorerTab = ({ application }) => {
 
                         {/* Parameter Changes */}
                         {endpoint.detailedChanges.parameters && (
-                          <div className="p-2 bg-white rounded border border-amber-200">
-                            <h6 className="text-xs font-semibold text-slate-900 mb-2">Parameter Changes</h6>
+                          <div className="p-2 bg-surface rounded-sm border border-warning/20">
+                            <h6 className="text-label-sm font-semibold text-on-surface mb-2">Parameter Changes</h6>
                             <div className="space-y-2">
                               {/* Added Parameters */}
                               {endpoint.detailedChanges.parameters.added.map((param, pidx) => (
-                                <div key={`added-${pidx}`} className="flex items-start gap-2 p-2 bg-emerald-50 rounded">
-                                  <span className="text-[10px] font-bold text-emerald-600">+</span>
+                                <div key={`added-${pidx}`} className="flex items-start gap-2 p-2 bg-success/10 rounded-sm">
+                                  <span className="text-label-sm font-bold text-success">+</span>
                                   <div className="flex-1">
-                                    <div className="text-xs font-mono text-emerald-900">
-                                      {param.name} <span className="text-emerald-600">({param.in})</span>
+                                    <div className="text-label-sm font-mono text-success">
+                                      {param.name} <span className="text-success">({param.in})</span>
                                     </div>
-                                    <div className="text-[10px] text-emerald-700">
+                                    <div className="text-label-sm text-success">
                                       Type: {param.type}{param.required ? ' • Required' : ' • Optional'}
                                     </div>
                                     {param.description && (
-                                      <div className="text-[10px] text-emerald-600 mt-1">{param.description}</div>
+                                      <div className="text-label-sm text-success mt-1">{param.description}</div>
                                     )}
                                   </div>
                                 </div>
@@ -440,17 +440,17 @@ const APIExplorerTab = ({ application }) => {
 
                               {/* Removed Parameters */}
                               {endpoint.detailedChanges.parameters.removed.map((param, pidx) => (
-                                <div key={`removed-${pidx}`} className="flex items-start gap-2 p-2 bg-red-50 rounded">
-                                  <span className="text-[10px] font-bold text-red-600">-</span>
+                                <div key={`removed-${pidx}`} className="flex items-start gap-2 p-2 bg-error/10 rounded-sm">
+                                  <span className="text-label-sm font-bold text-error">-</span>
                                   <div className="flex-1">
-                                    <div className="text-xs font-mono text-red-900 line-through">
-                                      {param.name} <span className="text-red-600">({param.in})</span>
+                                    <div className="text-label-sm font-mono text-error line-through">
+                                      {param.name} <span className="text-error">({param.in})</span>
                                     </div>
-                                    <div className="text-[10px] text-red-700">
+                                    <div className="text-label-sm text-error">
                                       Type: {param.type}{param.required ? ' • Required' : ' • Optional'}
                                     </div>
                                     {param.description && (
-                                      <div className="text-[10px] text-red-600 mt-1">{param.description}</div>
+                                      <div className="text-label-sm text-error mt-1">{param.description}</div>
                                     )}
                                   </div>
                                 </div>
@@ -458,24 +458,24 @@ const APIExplorerTab = ({ application }) => {
 
                               {/* Modified Parameters */}
                               {endpoint.detailedChanges.parameters.modified.map((param, pidx) => (
-                                <div key={`modified-${pidx}`} className="flex items-start gap-2 p-2 bg-amber-50 rounded">
-                                  <span className="text-[10px] font-bold text-amber-600">~</span>
+                                <div key={`modified-${pidx}`} className="flex items-start gap-2 p-2 bg-warning/10 rounded-sm">
+                                  <span className="text-label-sm font-bold text-warning">~</span>
                                   <div className="flex-1">
-                                    <div className="text-xs font-mono text-amber-900">
-                                      {param.name} <span className="text-amber-600">({param.in})</span>
+                                    <div className="text-label-sm font-mono text-warning">
+                                      {param.name} <span className="text-warning">({param.in})</span>
                                     </div>
                                     {param.changes.required && (
-                                      <div className="text-[10px] text-amber-700 mt-1">
+                                      <div className="text-label-sm text-warning mt-1">
                                         Required: {param.changes.required.from ? 'true' : 'false'} → {param.changes.required.to ? 'true' : 'false'}
                                       </div>
                                     )}
                                     {param.changes.schema && (
-                                      <div className="text-[10px] text-amber-700 mt-1">
+                                      <div className="text-label-sm text-warning mt-1">
                                         Type changed
                                       </div>
                                     )}
                                     {param.changes.description && (
-                                      <div className="text-[10px] text-amber-700 mt-1">
+                                      <div className="text-label-sm text-warning mt-1">
                                         Description changed
                                       </div>
                                     )}
@@ -488,21 +488,21 @@ const APIExplorerTab = ({ application }) => {
 
                         {/* Request Body Changes */}
                         {endpoint.detailedChanges.requestBody && (
-                          <div className="p-2 bg-white rounded border border-amber-200">
-                            <h6 className="text-xs font-semibold text-slate-900 mb-1">Request Body Changed</h6>
+                          <div className="p-2 bg-surface rounded-sm border border-warning/20">
+                            <h6 className="text-label-sm font-semibold text-on-surface mb-1">Request Body Changed</h6>
                             {endpoint.detailedChanges.requestBody.type === 'added' && (
-                              <div className="p-2 bg-emerald-50 rounded">
-                                <span className="text-[10px] font-bold text-emerald-600">+ Added request body</span>
+                              <div className="p-2 bg-success/10 rounded-sm">
+                                <span className="text-label-sm font-bold text-success">+ Added request body</span>
                               </div>
                             )}
                             {endpoint.detailedChanges.requestBody.type === 'removed' && (
-                              <div className="p-2 bg-red-50 rounded">
-                                <span className="text-[10px] font-bold text-red-600">- Removed request body</span>
+                              <div className="p-2 bg-error/10 rounded-sm">
+                                <span className="text-label-sm font-bold text-error">- Removed request body</span>
                               </div>
                             )}
                             {endpoint.detailedChanges.requestBody.type === 'modified' && (
-                              <div className="p-2 bg-amber-50 rounded">
-                                <span className="text-[10px] font-bold text-amber-600">~ Request body schema modified</span>
+                              <div className="p-2 bg-warning/10 rounded-sm">
+                                <span className="text-label-sm font-bold text-warning">~ Request body schema modified</span>
                               </div>
                             )}
                           </div>
@@ -510,15 +510,15 @@ const APIExplorerTab = ({ application }) => {
 
                         {/* Response Changes */}
                         {endpoint.detailedChanges.responses && (
-                          <div className="p-2 bg-white rounded border border-amber-200">
-                            <h6 className="text-xs font-semibold text-slate-900 mb-2">Response Changes</h6>
+                          <div className="p-2 bg-surface rounded-sm border border-warning/20">
+                            <h6 className="text-label-sm font-semibold text-on-surface mb-2">Response Changes</h6>
                             <div className="space-y-2">
                               {/* Added Responses */}
                               {endpoint.detailedChanges.responses.added.map((resp, ridx) => (
-                                <div key={`added-${ridx}`} className="flex items-start gap-2 p-2 bg-emerald-50 rounded">
-                                  <span className="text-[10px] font-bold text-emerald-600">+</span>
+                                <div key={`added-${ridx}`} className="flex items-start gap-2 p-2 bg-success/10 rounded-sm">
+                                  <span className="text-label-sm font-bold text-success">+</span>
                                   <div className="flex-1">
-                                    <div className="text-xs font-mono text-emerald-900">
+                                    <div className="text-label-sm font-mono text-success">
                                       {resp.statusCode} {resp.description}
                                     </div>
                                   </div>
@@ -527,10 +527,10 @@ const APIExplorerTab = ({ application }) => {
 
                               {/* Removed Responses */}
                               {endpoint.detailedChanges.responses.removed.map((resp, ridx) => (
-                                <div key={`removed-${ridx}`} className="flex items-start gap-2 p-2 bg-red-50 rounded">
-                                  <span className="text-[10px] font-bold text-red-600">-</span>
+                                <div key={`removed-${ridx}`} className="flex items-start gap-2 p-2 bg-error/10 rounded-sm">
+                                  <span className="text-label-sm font-bold text-error">-</span>
                                   <div className="flex-1">
-                                    <div className="text-xs font-mono text-red-900 line-through">
+                                    <div className="text-label-sm font-mono text-error line-through">
                                       {resp.statusCode} {resp.description}
                                     </div>
                                   </div>
@@ -539,10 +539,10 @@ const APIExplorerTab = ({ application }) => {
 
                               {/* Modified Responses */}
                               {endpoint.detailedChanges.responses.modified.map((resp, ridx) => (
-                                <div key={`modified-${ridx}`} className="flex items-start gap-2 p-2 bg-amber-50 rounded">
-                                  <span className="text-[10px] font-bold text-amber-600">~</span>
+                                <div key={`modified-${ridx}`} className="flex items-start gap-2 p-2 bg-warning/10 rounded-sm">
+                                  <span className="text-label-sm font-bold text-warning">~</span>
                                   <div className="flex-1">
-                                    <div className="text-xs font-mono text-amber-900">
+                                    <div className="text-label-sm font-mono text-warning">
                                       {resp.statusCode} - Schema modified
                                     </div>
                                   </div>
@@ -561,16 +561,16 @@ const APIExplorerTab = ({ application }) => {
         ) : (
           <>
             {/* Search and Filters */}
-            <Card className="p-4 shadow-sm">
+            <Card className="p-4">
               <div className="flex items-center gap-3 mb-3">
                 <div className="flex-1 relative">
-                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-slate-400" />
+                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-on-surface-variant" />
                   <input
                     type="text"
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
                     placeholder="Search endpoints..."
-                    className="w-full pl-10 pr-4 py-2 text-sm border border-slate-300 rounded-lg focus:outline-none focus:border-indigo-300"
+                    className="w-full pl-10 pr-4 py-2 text-body-sm border border-outline-variant rounded-sm focus:outline-none focus:border-primary text-on-surface"
                   />
                 </div>
               </div>
@@ -581,10 +581,10 @@ const APIExplorerTab = ({ application }) => {
                   <button
                     key={method}
                     onClick={() => toggleMethod(method)}
-                    className={`px-3 py-1 text-xs font-bold rounded border transition-all ${
+                    className={`px-3 py-1 text-label-sm font-bold rounded-sm border transition-all ${
                       selectedMethods.includes(method)
                         ? getMethodColor(method)
-                        : 'bg-slate-100 text-slate-400 border-slate-200'
+                        : 'bg-surface-container-low text-on-surface-variant border-outline-variant'
                     }`}
                   >
                     {method}
@@ -596,20 +596,20 @@ const APIExplorerTab = ({ application }) => {
             {/* Endpoints List */}
             {endpointsLoading ? (
               <div className="flex items-center justify-center h-64">
-                <Loader className="w-6 h-6 text-slate-400 animate-spin" />
+                <Loader className="w-6 h-6 text-on-surface-variant animate-spin" />
               </div>
             ) : !endpoints ? (
               <div className="flex items-center justify-center h-64">
                 <div className="text-center">
-                  <FileText className="w-12 h-12 text-slate-400 mx-auto mb-2" />
-                  <p className="text-sm text-slate-600">Select a schema version to view endpoints</p>
+                  <FileText className="w-12 h-12 text-on-surface-variant mx-auto mb-2" />
+                  <p className="text-body-sm text-on-surface-variant">Select a schema version to view endpoints</p>
                 </div>
               </div>
             ) : filteredEndpoints.length === 0 ? (
               <div className="flex items-center justify-center h-64">
                 <div className="text-center">
-                  <AlertCircle className="w-12 h-12 text-slate-400 mx-auto mb-2" />
-                  <p className="text-sm text-slate-600">No endpoints match your filters</p>
+                  <AlertCircle className="w-12 h-12 text-on-surface-variant mx-auto mb-2" />
+                  <p className="text-body-sm text-on-surface-variant">No endpoints match your filters</p>
                 </div>
               </div>
             ) : (
@@ -619,26 +619,26 @@ const APIExplorerTab = ({ application }) => {
                   const isExpanded = expandedEndpoints.has(endpointId);
 
                   return (
-                    <Card key={endpointId} className="p-3 shadow-sm">
+                    <Card key={endpointId} className="p-3">
                       <button
                         onClick={() => toggleEndpoint(endpointId)}
                         className="w-full flex items-start justify-between group"
                       >
                         <div className="flex items-center gap-3 flex-1">
                           {isExpanded ? (
-                            <ChevronDown className="w-4 h-4 text-slate-400" />
+                            <ChevronDown className="w-4 h-4 text-on-surface-variant" />
                           ) : (
-                            <ChevronRight className="w-4 h-4 text-slate-400" />
+                            <ChevronRight className="w-4 h-4 text-on-surface-variant" />
                           )}
-                          <span className={`px-2 py-1 text-xs font-bold rounded border ${getMethodColor(endpoint.method)}`}>
+                          <span className={`px-2 py-1 text-label-sm font-bold rounded-sm border ${getMethodColor(endpoint.method)}`}>
                             {endpoint.method}
                           </span>
                           <div className="flex-1 text-left">
-                            <div className="text-sm font-mono text-slate-900">
+                            <div className="text-body-sm font-mono text-on-surface">
                               {endpoint.path}
                             </div>
                             {endpoint.summary && (
-                              <div className="text-xs text-slate-600 mt-0.5">
+                              <div className="text-label-sm text-on-surface-variant mt-0.5">
                                 {endpoint.summary}
                               </div>
                             )}
@@ -647,22 +647,22 @@ const APIExplorerTab = ({ application }) => {
                       </button>
 
                       {isExpanded && (
-                        <div className="mt-3 pl-7 space-y-3 border-t border-slate-200 pt-3">
+                        <div className="mt-3 pl-7 space-y-3 border-t border-outline-variant pt-3">
                           {endpoint.description && (
                             <div>
-                              <h5 className="text-xs font-semibold text-slate-900 mb-1">Description</h5>
-                              <p className="text-xs text-slate-600">{endpoint.description}</p>
+                              <h5 className="text-label-sm font-semibold text-on-surface mb-1">Description</h5>
+                              <p className="text-label-sm text-on-surface-variant">{endpoint.description}</p>
                             </div>
                           )}
 
                           {endpoint.parameters && endpoint.parameters.length > 0 && (
                             <div>
-                              <h5 className="text-xs font-semibold text-slate-900 mb-1">Parameters</h5>
+                              <h5 className="text-label-sm font-semibold text-on-surface mb-1">Parameters</h5>
                               <div className="space-y-1">
                                 {endpoint.parameters.map((param, pidx) => (
-                                  <div key={pidx} className="text-xs text-slate-600 font-mono">
+                                  <div key={pidx} className="text-label-sm text-on-surface-variant font-mono">
                                     {param.name} ({param.in}): {param.schema?.type || 'any'}
-                                    {param.required && <span className="text-red-600 ml-1">*</span>}
+                                    {param.required && <span className="text-error ml-1">*</span>}
                                   </div>
                                 ))}
                               </div>
@@ -671,9 +671,9 @@ const APIExplorerTab = ({ application }) => {
 
                           {endpoint.requestBody && (
                             <div>
-                              <h5 className="text-xs font-semibold text-slate-900 mb-1">Request Body</h5>
-                              <div className="p-2 bg-slate-50 rounded border border-slate-200">
-                                <pre className="text-xs text-slate-700 whitespace-pre-wrap">
+                              <h5 className="text-label-sm font-semibold text-on-surface mb-1">Request Body</h5>
+                              <div className="p-2 bg-surface-container-low rounded-sm border border-outline-variant">
+                                <pre className="text-label-sm text-on-surface-variant whitespace-pre-wrap">
                                   {JSON.stringify(endpoint.requestBody, null, 2)}
                                 </pre>
                               </div>
@@ -682,11 +682,11 @@ const APIExplorerTab = ({ application }) => {
 
                           {endpoint.responses && (
                             <div>
-                              <h5 className="text-xs font-semibold text-slate-900 mb-1">Responses</h5>
+                              <h5 className="text-label-sm font-semibold text-on-surface mb-1">Responses</h5>
                               <div className="space-y-2">
                                 {Object.keys(endpoint.responses).map((statusCode) => (
-                                  <div key={statusCode} className="p-2 bg-slate-50 rounded border border-slate-200">
-                                    <div className="text-xs font-semibold text-slate-900 mb-1">
+                                  <div key={statusCode} className="p-2 bg-surface-container-low rounded-sm border border-outline-variant">
+                                    <div className="text-label-sm font-semibold text-on-surface mb-1">
                                       {statusCode}: {endpoint.responses[statusCode].description || 'Response'}
                                     </div>
                                   </div>

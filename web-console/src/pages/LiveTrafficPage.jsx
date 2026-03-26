@@ -4,8 +4,7 @@ import {
   ArrowUpDown, ArrowUp, ArrowDown, GitCommit,
   ChevronLeft, ChevronRight
 } from 'lucide-react';
-import Card from '../components/Card';
-import Badge from '../components/Badge';
+import { Card, Badge, Button, Input } from '../components/design-system';
 import { useAgentLogs } from '../hooks/useAgentStats';
 
 const LiveTrafficPage = ({ application }) => {
@@ -72,19 +71,19 @@ const LiveTrafficPage = ({ application }) => {
     <div className="space-y-6">
       {/* Live Traffic Panel */}
       <div className="relative">
-        <Card className="bg-white shadow-sm flex flex-col h-[calc(100vh-250px)] min-h-[600px]">
-          <div className="p-4 border-b border-slate-200">
+        <Card variant="outlined" className="flex flex-col h-[calc(100vh-250px)] min-h-[600px]">
+          <div className="p-4 border-b border-outline-variant">
             <div className="flex items-center justify-between mb-3">
               <div className="flex items-center gap-2">
-                <Activity className="w-4 h-4 text-emerald-600" />
-                <h2 className="text-sm font-semibold text-slate-900">Live Traffic Monitor</h2>
+                <Activity className="w-4 h-4 text-success" />
+                <h2 className="text-body-sm font-semibold text-on-surface">Live Traffic Monitor</h2>
                 {isLive ? (
-                  <div className="flex items-center gap-1.5 px-2 py-0.5 bg-emerald-50 border border-emerald-200 rounded text-emerald-600 text-[10px] font-semibold">
-                    <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></div>
+                  <div className="flex items-center gap-1.5 px-2 py-0.5 bg-success/10 border border-success/20 rounded-xs text-success text-[10px] font-semibold font-mono">
+                    <div className="w-1.5 h-1.5 rounded-full bg-success animate-pulse"></div>
                     Live
                   </div>
                 ) : (
-                  <div className="flex items-center gap-1.5 px-2 py-0.5 bg-slate-50 border border-slate-200 rounded text-slate-600 text-[10px] font-semibold">
+                  <div className="flex items-center gap-1.5 px-2 py-0.5 bg-surface-container-low border border-outline-variant rounded-xs text-on-surface-variant text-[10px] font-semibold font-mono">
                     <Pause className="w-2.5 h-2.5" />
                     Paused
                   </div>
@@ -92,17 +91,17 @@ const LiveTrafficPage = ({ application }) => {
               </div>
               <button
                 onClick={() => setIsLive(!isLive)}
-                className={`p-1.5 border rounded transition-colors ${
+                className={`p-1.5 border rounded-sm transition-colors ${
                   isLive
-                    ? 'bg-slate-100 border-slate-300 hover:border-slate-400'
-                    : 'bg-emerald-50 border-emerald-200 hover:bg-emerald-100'
+                    ? 'bg-surface-container-low border-outline-variant hover:bg-surface-container-high'
+                    : 'bg-success/10 border-success/20 hover:bg-success/20'
                 }`}
                 title={isLive ? 'Pause traffic' : 'Resume traffic'}
               >
                 {isLive ? (
                   <Pause className="w-4 h-4 text-red-600" />
                 ) : (
-                  <Activity className="w-4 h-4 text-emerald-600" />
+                  <Activity className="w-4 h-4 text-success" />
                 )}
               </button>
             </div>
@@ -114,13 +113,13 @@ const LiveTrafficPage = ({ application }) => {
                 placeholder="Search endpoint..."
                 value={endpointSearch}
                 onChange={(e) => setEndpointSearch(e.target.value)}
-                className="flex-1 px-3 py-1.5 bg-white border border-slate-300 rounded text-xs text-slate-700 placeholder-slate-400 focus:outline-none focus:border-indigo-300"
+                className="flex-1 px-3 py-1.5 bg-surface-container-lowest border border-outline-variant rounded-sm text-label-sm text-on-surface placeholder-on-surface-variant focus:outline-none focus:border-primary"
               />
 
               <select
                 value={methodFilter || ''}
                 onChange={(e) => setMethodFilter(e.target.value || null)}
-                className="px-3 py-1.5 bg-white border border-slate-300 rounded text-xs text-slate-700 focus:outline-none focus:border-indigo-300"
+                className="px-3 py-1.5 bg-surface-container-lowest border border-outline-variant rounded-sm text-label-sm text-on-surface focus:outline-none focus:border-primary font-mono"
               >
                 <option value="">All Methods</option>
                 <option value="GET">GET</option>
@@ -133,11 +132,11 @@ const LiveTrafficPage = ({ application }) => {
           </div>
 
           {/* Table Header */}
-          <div className="px-4 py-2 bg-slate-50 border-b border-slate-200">
-            <div className="grid grid-cols-[auto_auto_1fr_auto_auto] gap-3 text-[10px] font-semibold text-slate-500 uppercase tracking-wider items-center">
+          <div className="px-4 py-2 bg-surface-container-low border-b border-outline-variant">
+            <div className="grid grid-cols-[auto_auto_1fr_auto_auto] gap-3 text-[10px] font-semibold text-on-surface-variant uppercase tracking-wider items-center font-mono">
               <button
                 onClick={() => handleSort('timestamp')}
-                className="flex items-center gap-1 hover:text-slate-700 transition-colors cursor-pointer w-32"
+                className="flex items-center gap-1 hover:text-on-surface transition-colors cursor-pointer w-32"
               >
                 Time
                 {renderSortIcon('timestamp')}
@@ -147,7 +146,7 @@ const LiveTrafficPage = ({ application }) => {
               <div className="w-24">Status</div>
               <button
                 onClick={() => handleSort('overheadMs')}
-                className="flex items-center justify-end gap-1 hover:text-slate-700 transition-colors cursor-pointer w-20"
+                className="flex items-center justify-end gap-1 hover:text-on-surface transition-colors cursor-pointer w-20"
               >
                 Overhead
                 {renderSortIcon('overheadMs')}
@@ -159,43 +158,42 @@ const LiveTrafficPage = ({ application }) => {
           <div className="flex-1 overflow-y-auto">
             {logsLoading ? (
               <div className="flex items-center justify-center py-12">
-                <div className="text-slate-600">Loading logs...</div>
+                <div className="text-on-surface-variant">Loading logs...</div>
               </div>
             ) : logs.length === 0 ? (
               <div className="flex items-center justify-center py-12">
-                <div className="text-slate-600">No requests logged yet</div>
+                <div className="text-on-surface-variant">No requests logged yet</div>
               </div>
             ) : (
               logs.map((log) => {
-                // Format timestamp
                 const timestamp = new Date(log.timestamp).toLocaleTimeString();
 
                 return (
                   <div
                     key={log.id}
-                    className={`px-4 py-3 border-b border-slate-200 transition-all ${
+                    className={`px-4 py-3 border-b border-outline-variant transition-all ${
                       selectedLog?.id === log.id
-                        ? 'bg-indigo-50 border-l-2 border-l-indigo-300'
-                        : 'hover:bg-slate-100'
+                        ? 'bg-primary/5 border-l-2 border-l-primary'
+                        : 'hover:bg-surface-container-high'
                     }`}
                   >
                     <div className="grid grid-cols-[auto_auto_1fr_auto_auto] gap-3 items-center">
-                      <div className="text-xs text-slate-500 font-mono w-32">
+                      <div className="text-label-sm text-on-surface-variant font-mono w-32">
                         {timestamp}
                       </div>
                       <div className="w-16">
-                        <span className={`px-1.5 py-0.5 text-[10px] font-bold rounded ${
-                          log.httpMethod === 'GET' ? 'bg-blue-100 text-blue-600' :
-                          log.httpMethod === 'POST' ? 'bg-emerald-100 text-emerald-600' :
-                          log.httpMethod === 'PUT' || log.httpMethod === 'PATCH' ? 'bg-amber-100 text-amber-600' :
-                          log.httpMethod === 'DELETE' ? 'bg-red-100 text-red-600' :
-                          'bg-slate-100 text-slate-600'
+                        <span className={`px-1.5 py-0.5 text-[10px] font-bold rounded-xs font-mono ${
+                          log.httpMethod === 'GET' ? 'bg-primary/10 text-primary border border-primary/20' :
+                          log.httpMethod === 'POST' ? 'bg-success/10 text-success border border-success/20' :
+                          log.httpMethod === 'PUT' || log.httpMethod === 'PATCH' ? 'bg-repair/10 text-repair border border-repair/20' :
+                          log.httpMethod === 'DELETE' ? 'bg-red-500/10 text-red-600 border border-red-500/20' :
+                          'bg-surface-container-high text-on-surface-variant border border-outline-variant'
                         }`}>
                           {log.httpMethod}
                         </span>
                       </div>
                       <div
-                        className="text-xs text-slate-600 font-mono truncate cursor-pointer"
+                        className="text-label-sm text-on-surface font-mono truncate cursor-pointer"
                         onClick={() => {
                           if (selectedLog?.id === log.id) {
                             setSelectedLog(null);
@@ -209,7 +207,7 @@ const LiveTrafficPage = ({ application }) => {
                       <div className="w-24">
                         <Badge status={log.status} />
                       </div>
-                      <div className="text-xs text-cyan-600 text-right font-mono w-20">
+                      <div className="text-label-sm text-primary text-right font-mono w-20">
                         {log.overheadMs}ms
                       </div>
                     </div>
@@ -221,8 +219,8 @@ const LiveTrafficPage = ({ application }) => {
 
           {/* Pagination Bar */}
           {pagination && pagination.totalPages > 1 && (
-            <div className="px-4 py-2.5 border-t border-slate-200 flex items-center justify-between bg-white">
-              <span className="text-xs text-slate-500">
+            <div className="px-4 py-2.5 border-t border-outline-variant flex items-center justify-between bg-surface-container-lowest">
+              <span className="text-label-sm text-on-surface-variant font-mono">
                 {pagination.total.toLocaleString()} total &middot; page {pagination.page} of {pagination.totalPages}
               </span>
 
@@ -230,14 +228,14 @@ const LiveTrafficPage = ({ application }) => {
                 <button
                   onClick={() => setPage(1)}
                   disabled={page <= 1}
-                  className="px-2 py-1 text-xs text-slate-600 border border-slate-300 rounded hover:bg-slate-50 disabled:opacity-40 disabled:cursor-not-allowed"
+                  className="px-2 py-1 text-label-sm text-on-surface border border-outline-variant rounded-sm hover:bg-surface-container-high disabled:opacity-40 disabled:cursor-not-allowed font-mono"
                 >
                   «
                 </button>
                 <button
                   onClick={() => setPage(p => Math.max(1, p - 1))}
                   disabled={page <= 1}
-                  className="p-1 text-slate-600 border border-slate-300 rounded hover:bg-slate-50 disabled:opacity-40 disabled:cursor-not-allowed"
+                  className="p-1 text-on-surface border border-outline-variant rounded-sm hover:bg-surface-container-high disabled:opacity-40 disabled:cursor-not-allowed"
                 >
                   <ChevronLeft className="w-3.5 h-3.5" />
                 </button>
@@ -252,15 +250,15 @@ const LiveTrafficPage = ({ application }) => {
                   }, [])
                   .map((p, idx) =>
                     p === '...' ? (
-                      <span key={`ellipsis-${idx}`} className="px-1 text-xs text-slate-400">…</span>
+                      <span key={`ellipsis-${idx}`} className="px-1 text-label-sm text-on-surface-variant">…</span>
                     ) : (
                       <button
                         key={p}
                         onClick={() => setPage(p)}
-                        className={`min-w-[26px] px-1.5 py-1 text-xs rounded border transition-colors ${
+                        className={`min-w-[26px] px-1.5 py-1 text-label-sm rounded-sm border transition-colors font-mono ${
                           page === p
-                            ? 'bg-indigo-600 text-white border-indigo-600'
-                            : 'text-slate-600 border-slate-300 hover:bg-slate-50'
+                            ? 'bg-primary text-white border-primary'
+                            : 'text-on-surface border-outline-variant hover:bg-surface-container-high'
                         }`}
                       >
                         {p}
@@ -272,14 +270,14 @@ const LiveTrafficPage = ({ application }) => {
                 <button
                   onClick={() => setPage(p => Math.min(pagination.totalPages, p + 1))}
                   disabled={page >= pagination.totalPages}
-                  className="p-1 text-slate-600 border border-slate-300 rounded hover:bg-slate-50 disabled:opacity-40 disabled:cursor-not-allowed"
+                  className="p-1 text-on-surface border border-outline-variant rounded-sm hover:bg-surface-container-high disabled:opacity-40 disabled:cursor-not-allowed"
                 >
                   <ChevronRight className="w-3.5 h-3.5" />
                 </button>
                 <button
                   onClick={() => setPage(pagination.totalPages)}
                   disabled={page >= pagination.totalPages}
-                  className="px-2 py-1 text-xs text-slate-600 border border-slate-300 rounded hover:bg-slate-50 disabled:opacity-40 disabled:cursor-not-allowed"
+                  className="px-2 py-1 text-label-sm text-on-surface border border-outline-variant rounded-sm hover:bg-surface-container-high disabled:opacity-40 disabled:cursor-not-allowed font-mono"
                 >
                   »
                 </button>

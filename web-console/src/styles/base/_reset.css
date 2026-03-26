@@ -1,0 +1,208 @@
+/**
+ * Modern CSS Reset
+ * Based on modern-normalize + custom resets for Invari design system
+ */
+
+@layer invari.reset {
+  /* Box sizing normalization */
+  *,
+  *::before,
+  *::after {
+    box-sizing: border-box;
+  }
+
+  /* Remove default margins and padding */
+  * {
+    margin: 0;
+    padding: 0;
+  }
+
+  /* HTML & Body defaults */
+  html {
+    -webkit-text-size-adjust: 100%;
+    tab-size: 4;
+    font-size: 16px; /* Enforce 4px grid base */
+  }
+
+  html:focus-within {
+    scroll-behavior: smooth;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    html:focus-within {
+      scroll-behavior: auto;
+    }
+  }
+
+  body {
+    min-height: 100vh;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+    line-height: var(--line-height-normal);
+    font-family: var(--font-family-sans);
+    font-size: var(--type-body-md-size);
+    color: var(--color-text-primary);
+    background-color: var(--color-surface);
+  }
+
+  /* Typography resets */
+  h1, h2, h3, h4, h5, h6 {
+    font-weight: var(--font-weight-semibold);
+    line-height: var(--line-height-tight);
+  }
+
+  p, h1, h2, h3, h4, h5, h6 {
+    overflow-wrap: break-word;
+  }
+
+  /* Remove list styles */
+  ul, ol {
+    list-style: none;
+  }
+
+  /* Form elements */
+  button, input, optgroup, select, textarea {
+    font-family: inherit;
+    font-size: 100%;
+    line-height: inherit;
+    color: inherit;
+    margin: 0;
+  }
+
+  button, select {
+    text-transform: none;
+  }
+
+  button, [type='button'], [type='reset'], [type='submit'] {
+    -webkit-appearance: button;
+    background-color: transparent;
+    background-image: none;
+  }
+
+  button, [role="button"] {
+    cursor: pointer;
+  }
+
+  button:disabled, [role="button"]:disabled {
+    cursor: not-allowed;
+  }
+
+  /* Remove default button styles */
+  button::-moz-focus-inner,
+  [type='button']::-moz-focus-inner,
+  [type='reset']::-moz-focus-inner,
+  [type='submit']::-moz-focus-inner {
+    border-style: none;
+    padding: 0;
+  }
+
+  /* Input resets */
+  input::-webkit-inner-spin-button,
+  input::-webkit-outer-spin-button {
+    height: auto;
+  }
+
+  [type='search'] {
+    -webkit-appearance: textfield;
+    outline-offset: -2px;
+  }
+
+  [type='search']::-webkit-search-decoration {
+    -webkit-appearance: none;
+  }
+
+  ::-webkit-file-upload-button {
+    -webkit-appearance: button;
+    font: inherit;
+  }
+
+  /* Media elements */
+  img, picture, video, canvas, svg {
+    display: block;
+    max-width: 100%;
+    height: auto;
+  }
+
+  svg {
+    vertical-align: middle;
+  }
+
+  /* Table resets */
+  table {
+    border-collapse: collapse;
+    border-spacing: 0;
+    text-indent: 0;
+  }
+
+  /* Link resets */
+  a {
+    color: inherit;
+    text-decoration: inherit;
+  }
+
+  /* Remove built-in form typography styles */
+  :-moz-focusring {
+    outline: auto;
+  }
+
+  :-moz-ui-invalid {
+    box-shadow: none;
+  }
+
+  /* Fix inconsistent appearance in Chrome and Safari */
+  progress {
+    vertical-align: baseline;
+  }
+
+  /* Correct cursor style for increment/decrement buttons in Chrome */
+  ::-webkit-inner-spin-button,
+  ::-webkit-outer-spin-button {
+    height: auto;
+  }
+
+  /* Correct display for Edge and IE */
+  summary {
+    display: list-item;
+  }
+
+  /* Template element */
+  template {
+    display: none;
+  }
+
+  /* Hidden attribute */
+  [hidden] {
+    display: none !important;
+  }
+
+  /* Accessibility improvements */
+  .sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border-width: 0;
+  }
+
+  /* Prevent text overflow */
+  .truncate {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  /* Remove focus outline for mouse users, keep for keyboard */
+  :focus:not(:focus-visible) {
+    outline: none;
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--color-focus-ring);
+    outline-offset: 2px;
+  }
+}

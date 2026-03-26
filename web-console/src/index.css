@@ -1,6 +1,327 @@
+/**
+ * Invari.ai Design System
+ * Main entry point - simplified and working
+ */
+
 @import "tailwindcss";
 
-body {
-  background-color: #f8fafc;
-  color: #1e293b;
+/* Font imports */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&display=swap');
+
+/* ===== CSS Custom Properties (Design Tokens) ===== */
+@layer base {
+  :root {
+    /* Colors */
+    --color-primary: #0052FF;
+    --color-repair: #D97706;
+    --color-success: #059669;
+
+    /* Surface hierarchy */
+    --color-surface: #F9F9FF;
+    --color-surface-container-low: #F0F3FF;
+    --color-surface-container-lowest: #FFFFFF;
+    --color-surface-container-high: #E8ECFF;
+
+    /* Text */
+    --color-on-surface: #1E293B;
+    --color-on-surface-variant: #64748B;
+    --color-outline-variant: #E5E7EB;
+
+    /* Typography */
+    --font-family-sans: Inter, system-ui, sans-serif;
+    --font-family-mono: 'JetBrains Mono', monospace;
+
+    /* Spacing (4px grid) */
+    --spacing-4: 1rem;
+    --spacing-8: 2rem;
+    --spacing-16: 4rem;
+    --spacing-60: 15rem;
+
+    /* Border radius */
+    --radius-xs: 0.125rem;
+    --radius-sm: 0.25rem;
+    --radius-md: 0.5rem;
+  }
+
+  /* Base styles */
+  html {
+    font-size: 16px;
+  }
+
+  body {
+    background-color: var(--color-surface);
+    color: var(--color-on-surface);
+    font-family: var(--font-family-sans);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  /* Typography defaults */
+  h1 {
+    font-size: 2rem;
+    font-weight: 700;
+    line-height: 1.25;
+  }
+
+  h2 {
+    font-size: 1.5rem;
+    font-weight: 600;
+    line-height: 1.375;
+  }
+
+  h3 {
+    font-size: 1.25rem;
+    font-weight: 500;
+    line-height: 1.4;
+  }
+
+  p {
+    font-size: 0.875rem;
+    line-height: 1.5;
+  }
+
+  code, pre {
+    font-family: var(--font-family-mono);
+    font-size: 0.6875rem;
+  }
+
+  /* Focus styles */
+  *:focus-visible {
+    outline: 2px solid var(--color-primary);
+    outline-offset: 2px;
+  }
+
+  /* Scrollbar */
+  ::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+
+  ::-webkit-scrollbar-track {
+    background-color: var(--color-surface-container-low);
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background-color: var(--color-outline-variant);
+    border-radius: var(--radius-sm);
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    background-color: var(--color-on-surface-variant);
+  }
+}
+
+/* ===== Utility Classes ===== */
+@layer utilities {
+  /* Background colors */
+  .bg-surface {
+    background-color: var(--color-surface);
+  }
+
+  .bg-surface-container-low {
+    background-color: var(--color-surface-container-low);
+  }
+
+  .bg-surface-container-lowest {
+    background-color: var(--color-surface-container-lowest);
+  }
+
+  .bg-surface-container-high {
+    background-color: var(--color-surface-container-high);
+  }
+
+  .bg-primary {
+    background-color: var(--color-primary);
+  }
+
+  .bg-repair {
+    background-color: var(--color-repair);
+  }
+
+  .bg-success {
+    background-color: var(--color-success);
+  }
+
+  /* Text colors */
+  .text-on-surface {
+    color: var(--color-on-surface);
+  }
+
+  .text-on-surface-variant {
+    color: var(--color-on-surface-variant);
+  }
+
+  .text-primary {
+    color: var(--color-primary);
+  }
+
+  .text-repair {
+    color: var(--color-repair);
+  }
+
+  .text-success {
+    color: var(--color-success);
+  }
+
+  /* Border colors */
+  .border-outline-variant {
+    border-color: var(--color-outline-variant);
+  }
+
+  .border-primary {
+    border-color: var(--color-primary);
+  }
+
+  .border-repair {
+    border-color: var(--color-repair);
+  }
+
+  .border-success {
+    border-color: var(--color-success);
+  }
+
+  /* Fonts */
+  .font-mono {
+    font-family: var(--font-family-mono);
+  }
+
+  /* Typography sizes */
+  .text-display-lg {
+    font-size: 3.5rem;
+    line-height: 1.2;
+    font-weight: 700;
+  }
+
+  .text-display-md {
+    font-size: 2.75rem;
+    line-height: 1.2;
+    font-weight: 700;
+  }
+
+  .text-display-sm {
+    font-size: 2.25rem;
+    line-height: 1.3;
+    font-weight: 700;
+  }
+
+  .text-heading-lg {
+    font-size: 2rem;
+    line-height: 1.3;
+    font-weight: 600;
+  }
+
+  .text-heading-md {
+    font-size: 1.5rem;
+    line-height: 1.4;
+    font-weight: 600;
+  }
+
+  .text-heading-sm {
+    font-size: 1.25rem;
+    line-height: 1.4;
+    font-weight: 500;
+  }
+
+  .text-body-lg {
+    font-size: 1rem;
+    line-height: 1.5;
+  }
+
+  .text-body-md {
+    font-size: 0.875rem;
+    line-height: 1.5;
+  }
+
+  .text-body-sm {
+    font-size: 0.75rem;
+    line-height: 1.5;
+  }
+
+  .text-label-lg {
+    font-size: 0.875rem;
+    line-height: 1.4;
+    font-weight: 500;
+  }
+
+  .text-label-md {
+    font-size: 0.75rem;
+    line-height: 1.4;
+    font-weight: 500;
+  }
+
+  .text-label-sm {
+    font-size: 0.6875rem;
+    line-height: 1.4;
+    font-weight: 500;
+  }
+
+  /* Border radius */
+  .rounded-xs {
+    border-radius: var(--radius-xs);
+  }
+
+  .rounded-sm {
+    border-radius: var(--radius-sm);
+  }
+
+  .rounded-md {
+    border-radius: var(--radius-md);
+  }
+
+  /* Design system specific */
+  .ghost-border {
+    box-shadow: 0 0 0 1px rgba(229, 231, 235, 0.2);
+  }
+
+  .glass-surface {
+    backdrop-filter: blur(12px);
+    background-color: rgba(255, 255, 255, 0.9);
+  }
+
+  .focus-clinical {
+    transition: border-color 150ms;
+  }
+
+  .focus-clinical:focus {
+    border-color: var(--color-primary);
+  }
+
+  .data-grid {
+    font-size: 0.6875rem;
+    font-family: var(--font-family-mono);
+  }
+
+  .tonal-lift-1 {
+    background-color: var(--color-surface-container-low);
+  }
+
+  .tonal-lift-2 {
+    background-color: var(--color-surface-container-lowest);
+  }
+
+  .active-needle {
+    position: relative;
+  }
+
+  .active-needle::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 2px;
+    background-color: var(--color-primary);
+  }
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
 }

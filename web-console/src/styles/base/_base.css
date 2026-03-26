@@ -1,0 +1,283 @@
+/**
+ * Base Element Styles
+ * Sensible defaults for HTML elements following the design system
+ */
+
+@layer invari.base {
+  /* ===== Typography Elements ===== */
+
+  h1 {
+    font-size: var(--type-heading-lg-size);
+    line-height: var(--type-heading-lg-line);
+    font-weight: var(--type-heading-lg-weight);
+    letter-spacing: var(--type-heading-lg-tracking);
+  }
+
+  h2 {
+    font-size: var(--type-heading-md-size);
+    line-height: var(--type-heading-md-line);
+    font-weight: var(--type-heading-md-weight);
+    letter-spacing: var(--type-heading-md-tracking);
+  }
+
+  h3 {
+    font-size: var(--type-heading-sm-size);
+    line-height: var(--type-heading-sm-line);
+    font-weight: var(--type-heading-sm-weight);
+    letter-spacing: var(--type-heading-sm-tracking);
+  }
+
+  h4, h5, h6 {
+    font-size: var(--type-body-lg-size);
+    line-height: var(--type-body-lg-line);
+    font-weight: var(--font-weight-semibold);
+  }
+
+  p {
+    font-size: var(--type-body-md-size);
+    line-height: var(--type-body-md-line);
+    font-weight: var(--type-body-md-weight);
+  }
+
+  small {
+    font-size: var(--type-body-sm-size);
+  }
+
+  strong, b {
+    font-weight: var(--font-weight-semibold);
+  }
+
+  em, i {
+    font-style: italic;
+  }
+
+  /* Code & Technical Elements */
+  code, kbd, samp, pre {
+    font-family: var(--font-family-mono);
+    font-size: var(--type-code-sm-size);
+  }
+
+  code {
+    background-color: var(--color-code-bg);
+    color: var(--color-code-text);
+    padding: var(--spacing-0-5) var(--spacing-1);
+    border-radius: var(--radius-xs);
+    border: 1px solid var(--color-code-border);
+  }
+
+  pre {
+    background-color: var(--color-code-bg);
+    color: var(--color-code-text);
+    padding: var(--spacing-4);
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--color-code-border);
+    overflow-x: auto;
+    line-height: var(--line-height-normal);
+  }
+
+  pre code {
+    background: none;
+    padding: 0;
+    border: none;
+    border-radius: 0;
+  }
+
+  kbd {
+    background-color: var(--color-gray-100);
+    color: var(--color-gray-900);
+    padding: var(--spacing-0-5) var(--spacing-1);
+    border-radius: var(--radius-xs);
+    border: 1px solid var(--color-border-default);
+    box-shadow: 0 1px 0 var(--color-border-strong);
+    font-size: var(--font-size-xs);
+  }
+
+  /* ===== Links ===== */
+
+  a {
+    color: var(--color-primary);
+    text-decoration: none;
+    transition: var(--transition-colors);
+  }
+
+  a:hover {
+    color: var(--color-primary-dark);
+    text-decoration: underline;
+  }
+
+  a:focus-visible {
+    outline: 2px solid var(--color-focus-ring);
+    outline-offset: 2px;
+    border-radius: var(--radius-xs);
+  }
+
+  /* ===== Lists ===== */
+
+  ul[class], ol[class] {
+    list-style: none;
+  }
+
+  /* Only style lists without classes (content lists) */
+  :where(ul:not([class])) {
+    list-style: disc;
+    padding-left: var(--spacing-6);
+  }
+
+  :where(ol:not([class])) {
+    list-style: decimal;
+    padding-left: var(--spacing-6);
+  }
+
+  :where(li:not([class])) {
+    margin-bottom: var(--spacing-1);
+  }
+
+  /* ===== Horizontal Rule ===== */
+
+  hr {
+    height: 0;
+    border: 0;
+    border-top: 1px solid var(--color-border-subtle);
+    margin: var(--spacing-6) 0;
+  }
+
+  /* ===== Blockquote ===== */
+
+  blockquote {
+    border-left: 4px solid var(--color-primary);
+    padding-left: var(--spacing-4);
+    font-style: italic;
+    color: var(--color-text-secondary);
+    margin: var(--spacing-4) 0;
+  }
+
+  /* ===== Form Elements ===== */
+
+  fieldset {
+    border: 1px solid var(--color-border-default);
+    border-radius: var(--radius-sm);
+    padding: var(--spacing-4);
+    margin-bottom: var(--spacing-4);
+  }
+
+  legend {
+    font-weight: var(--font-weight-medium);
+    padding: 0 var(--spacing-2);
+  }
+
+  label {
+    font-size: var(--type-label-md-size);
+    font-weight: var(--type-label-md-weight);
+    color: var(--color-text-primary);
+    display: inline-block;
+    margin-bottom: var(--spacing-1);
+  }
+
+  /* ===== Media Elements ===== */
+
+  img {
+    vertical-align: middle;
+  }
+
+  figure {
+    margin: var(--spacing-4) 0;
+  }
+
+  figcaption {
+    font-size: var(--type-body-sm-size);
+    color: var(--color-text-secondary);
+    margin-top: var(--spacing-2);
+  }
+
+  /* ===== Table Elements ===== */
+
+  table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+  }
+
+  thead {
+    background-color: var(--color-table-header);
+  }
+
+  th {
+    font-weight: var(--font-weight-medium);
+    text-align: left;
+    padding: var(--spacing-3);
+    border-bottom: 1px solid var(--color-table-border);
+  }
+
+  td {
+    padding: var(--spacing-3);
+    border-bottom: 1px solid var(--color-table-border);
+  }
+
+  tbody tr:hover {
+    background-color: var(--color-table-row-hover);
+  }
+
+  /* ===== Selection ===== */
+
+  ::selection {
+    background-color: rgba(0, 82, 255, 0.2);
+    color: var(--color-text-primary);
+  }
+
+  /* ===== Scrollbars (Industrial Feel) ===== */
+
+  ::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+
+  ::-webkit-scrollbar-track {
+    background-color: var(--color-scrollbar-track);
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background-color: var(--color-scrollbar-thumb);
+    border-radius: var(--radius-sm);
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    background-color: var(--color-scrollbar-thumb-hover);
+  }
+
+  /* Firefox scrollbar */
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: var(--color-scrollbar-thumb) var(--color-scrollbar-track);
+  }
+
+  /* ===== Utility Classes ===== */
+
+  /* Container */
+  .container {
+    width: 100%;
+    margin-left: auto;
+    margin-right: auto;
+    padding-left: var(--spacing-4);
+    padding-right: var(--spacing-4);
+  }
+
+  @media (min-width: 640px) {
+    .container { max-width: var(--container-sm); }
+  }
+
+  @media (min-width: 768px) {
+    .container { max-width: var(--container-md); }
+  }
+
+  @media (min-width: 1024px) {
+    .container { max-width: var(--container-lg); }
+  }
+
+  @media (min-width: 1280px) {
+    .container { max-width: var(--container-xl); }
+  }
+
+  @media (min-width: 1536px) {
+    .container { max-width: var(--container-2xl); }
+  }
+}

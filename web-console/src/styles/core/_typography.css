@@ -1,0 +1,112 @@
+/**
+ * Typography System
+ * Type scale, font tokens, and semantic text styles
+ */
+
+@layer invari.typography {
+  :root {
+    /* ===== Semantic Typography Tokens ===== */
+
+    /* Display - For large editorial impact */
+    --type-display-lg-size: var(--font-size-6xl);
+    --type-display-lg-line: var(--line-height-tight);
+    --type-display-lg-weight: var(--font-weight-bold);
+    --type-display-lg-tracking: var(--letter-spacing-tight);
+
+    --type-display-md-size: var(--font-size-5xl);
+    --type-display-md-line: var(--line-height-tight);
+    --type-display-md-weight: var(--font-weight-bold);
+    --type-display-md-tracking: var(--letter-spacing-tight);
+
+    --type-display-sm-size: var(--font-size-4xl);
+    --type-display-sm-line: var(--line-height-snug);
+    --type-display-sm-weight: var(--font-weight-bold);
+    --type-display-sm-tracking: var(--letter-spacing-normal);
+
+    /* Heading - For section titles */
+    --type-heading-lg-size: var(--font-size-2xl);
+    --type-heading-lg-line: var(--line-height-snug);
+    --type-heading-lg-weight: var(--font-weight-semibold);
+    --type-heading-lg-tracking: var(--letter-spacing-normal);
+
+    --type-heading-md-size: var(--font-size-xl);
+    --type-heading-md-line: var(--line-height-snug);
+    --type-heading-md-weight: var(--font-weight-semibold);
+    --type-heading-md-tracking: var(--letter-spacing-normal);
+
+    --type-heading-sm-size: var(--font-size-lg);
+    --type-heading-sm-line: var(--line-height-normal);
+    --type-heading-sm-weight: var(--font-weight-semibold);
+    --type-heading-sm-tracking: var(--letter-spacing-normal);
+
+    /* Body - For readable content */
+    --type-body-lg-size: var(--font-size-md);
+    --type-body-lg-line: var(--line-height-normal);
+    --type-body-lg-weight: var(--font-weight-normal);
+    --type-body-lg-tracking: var(--letter-spacing-normal);
+
+    --type-body-md-size: var(--font-size-base);
+    --type-body-md-line: var(--line-height-normal);
+    --type-body-md-weight: var(--font-weight-normal);
+    --type-body-md-tracking: var(--letter-spacing-normal);
+
+    --type-body-sm-size: var(--font-size-sm);
+    --type-body-sm-line: var(--line-height-normal);
+    --type-body-sm-weight: var(--font-weight-normal);
+    --type-body-sm-tracking: var(--letter-spacing-normal);
+
+    /* Label - For UI labels and captions */
+    --type-label-lg-size: var(--font-size-base);
+    --type-label-lg-line: var(--line-height-snug);
+    --type-label-lg-weight: var(--font-weight-medium);
+    --type-label-lg-tracking: var(--letter-spacing-normal);
+
+    --type-label-md-size: var(--font-size-sm);
+    --type-label-md-line: var(--line-height-snug);
+    --type-label-md-weight: var(--font-weight-medium);
+    --type-label-md-tracking: var(--letter-spacing-normal);
+
+    --type-label-sm-size: var(--font-size-xs);
+    --type-label-sm-line: var(--line-height-snug);
+    --type-label-sm-weight: var(--font-weight-medium);
+    --type-label-sm-tracking: var(--letter-spacing-wide);
+
+    /* Code - For technical data (JetBrains Mono) */
+    --type-code-lg-size: var(--font-size-base);
+    --type-code-lg-line: var(--line-height-normal);
+    --type-code-lg-weight: var(--font-weight-normal);
+
+    --type-code-md-size: var(--font-size-sm);
+    --type-code-md-line: var(--line-height-normal);
+    --type-code-md-weight: var(--font-weight-normal);
+
+    --type-code-sm-size: var(--font-size-xs);
+    --type-code-sm-line: var(--line-height-snug);
+    --type-code-sm-weight: var(--font-weight-normal);
+  }
+
+  /* Responsive Typography Scale */
+  @media (min-width: 768px) {
+    :root {
+      --type-display-lg-size: 4rem;   /* 64px */
+      --type-display-md-size: 3rem;   /* 48px */
+      --type-display-sm-size: 2.5rem; /* 40px */
+    }
+  }
+
+  @media (min-width: 1024px) {
+    :root {
+      --type-display-lg-size: 4.5rem; /* 72px */
+      --type-display-md-size: 3.5rem; /* 56px */
+    }
+  }
+
+  /* Fluid Typography (Clamp for smooth scaling) */
+  @supports (font-size: clamp(1rem, 2vw, 2rem)) {
+    :root {
+      --type-display-lg-size: clamp(3rem, 5vw, 4.5rem);
+      --type-display-md-size: clamp(2.5rem, 4vw, 3.5rem);
+      --type-display-sm-size: clamp(2rem, 3vw, 2.5rem);
+    }
+  }
+}

@@ -11,6 +11,7 @@ const envSchema = z.object({
   JWT_EXPIRES_IN: z.string().default('7d'),
   CORS_ORIGIN: z.string(),
   ENABLE_CRON: z.enum(['true', 'false']).default('false'),
+  GOOGLE_CLIENT_ID: z.string(),
 });
 
 export const env = envSchema.parse(process.env);

@@ -1,0 +1,232 @@
+/**
+ * Invari.ai Design System
+ * Production-grade CSS Architecture
+ * "The Observational Blueprint"
+ *
+ * @version 1.0.0
+ * @author Invari Team
+ * @license PolyForm-Noncommercial-1.0.0
+ */
+
+/* ===== Tailwind CSS Base ===== */
+@import "tailwindcss";
+
+/* ===== External Fonts ===== */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&display=swap');
+
+/* ===== Core Design Tokens ===== */
+/* Primitive and semantic tokens - foundation of the system */
+@import "./core/_variables.css";
+@import "./core/_colors.css";
+@import "./core/_typography.css";
+@import "./core/_animations.css";
+
+/* ===== Base Styles ===== */
+/* Resets and base element styling */
+@import "./base/_reset.css";
+@import "./base/_base.css";
+
+/* ===== Tailwind v4 Design Tokens ===== */
+/* Custom utilities and theme configuration for Tailwind */
+@theme {
+  /* Extend Tailwind with our design system tokens */
+
+  /* Colors */
+  --color-primary: #0052FF;
+  --color-repair: #D97706;
+  --color-success: #059669;
+
+  /* Surface hierarchy */
+  --color-surface: #F9F9FF;
+  --color-surface-container-low: #F0F3FF;
+  --color-surface-container-lowest: #FFFFFF;
+  --color-surface-container-high: #E8ECFF;
+
+  /* Text */
+  --color-on-surface: #1E293B;
+  --color-on-surface-variant: #64748B;
+  --color-outline-variant: #E5E7EB;
+  --color-outline: #CBD5E1;
+
+  /* Font families */
+  --font-family-sans: Inter, system-ui, sans-serif;
+  --font-family-mono: 'JetBrains Mono', monospace;
+
+  /* Spacing (4px grid) */
+  --spacing-1: 0.25rem;   /* 4px */
+  --spacing-2: 0.5rem;    /* 8px */
+  --spacing-3: 0.75rem;   /* 12px */
+  --spacing-4: 1rem;      /* 16px */
+  --spacing-5: 1.25rem;   /* 20px */
+  --spacing-6: 1.5rem;    /* 24px */
+  --spacing-8: 2rem;      /* 32px */
+  --spacing-10: 2.5rem;   /* 40px */
+  --spacing-12: 3rem;     /* 48px */
+  --spacing-16: 4rem;     /* 64px */
+  --spacing-20: 5rem;     /* 80px */
+  --spacing-24: 6rem;     /* 96px */
+  --spacing-60: 15rem;    /* 240px */
+
+  /* Border radius */
+  --radius-xs: 0.125rem;  /* 2px */
+  --radius-sm: 0.25rem;   /* 4px */
+  --radius-md: 0.5rem;    /* 8px */
+}
+
+/* ===== Custom Tailwind Utilities ===== */
+
+/* Background utilities */
+@utility bg-surface { background-color: var(--color-surface); }
+@utility bg-surface-container-low { background-color: var(--color-surface-container-low); }
+@utility bg-surface-container-lowest { background-color: var(--color-surface-container-lowest); }
+@utility bg-surface-container-high { background-color: var(--color-surface-container-high); }
+@utility bg-primary { background-color: var(--color-primary); }
+@utility bg-repair { background-color: var(--color-repair); }
+@utility bg-success { background-color: var(--color-success); }
+
+/* Text color utilities */
+@utility text-on-surface { color: var(--color-on-surface); }
+@utility text-on-surface-variant { color: var(--color-on-surface-variant); }
+@utility text-primary { color: var(--color-primary); }
+@utility text-repair { color: var(--color-repair); }
+@utility text-success { color: var(--color-success); }
+
+/* Border color utilities */
+@utility border-outline-variant { border-color: var(--color-outline-variant); }
+@utility border-outline { border-color: var(--color-outline); }
+@utility border-primary { border-color: var(--color-primary); }
+@utility border-repair { border-color: var(--color-repair); }
+@utility border-success { border-color: var(--color-success); }
+
+/* Font utilities */
+@utility font-mono { font-family: var(--font-family-mono); }
+
+/* Typography scale utilities */
+@utility text-display-lg {
+  font-size: var(--type-display-lg-size);
+  line-height: var(--type-display-lg-line);
+  font-weight: var(--type-display-lg-weight);
+  letter-spacing: var(--type-display-lg-tracking);
+}
+
+@utility text-display-md {
+  font-size: var(--type-display-md-size);
+  line-height: var(--type-display-md-line);
+  font-weight: var(--type-display-md-weight);
+  letter-spacing: var(--type-display-md-tracking);
+}
+
+@utility text-display-sm {
+  font-size: var(--type-display-sm-size);
+  line-height: var(--type-display-sm-line);
+  font-weight: var(--type-display-sm-weight);
+  letter-spacing: var(--type-display-sm-tracking);
+}
+
+@utility text-heading-lg {
+  font-size: var(--type-heading-lg-size);
+  line-height: var(--type-heading-lg-line);
+  font-weight: var(--type-heading-lg-weight);
+}
+
+@utility text-heading-md {
+  font-size: var(--type-heading-md-size);
+  line-height: var(--type-heading-md-line);
+  font-weight: var(--type-heading-md-weight);
+}
+
+@utility text-heading-sm {
+  font-size: var(--type-heading-sm-size);
+  line-height: var(--type-heading-sm-line);
+  font-weight: var(--type-heading-sm-weight);
+}
+
+@utility text-body-lg {
+  font-size: var(--type-body-lg-size);
+  line-height: var(--type-body-lg-line);
+}
+
+@utility text-body-md {
+  font-size: var(--type-body-md-size);
+  line-height: var(--type-body-md-line);
+}
+
+@utility text-body-sm {
+  font-size: var(--type-body-sm-size);
+  line-height: var(--type-body-sm-line);
+}
+
+@utility text-label-lg {
+  font-size: var(--type-label-lg-size);
+  line-height: var(--type-label-lg-line);
+  font-weight: var(--type-label-lg-weight);
+}
+
+@utility text-label-md {
+  font-size: var(--type-label-md-size);
+  line-height: var(--type-label-md-line);
+  font-weight: var(--type-label-md-weight);
+}
+
+@utility text-label-sm {
+  font-size: var(--type-label-sm-size);
+  line-height: var(--type-label-sm-line);
+  font-weight: var(--type-label-sm-weight);
+}
+
+/* Border radius utilities */
+@utility rounded-xs { border-radius: var(--radius-xs); }
+@utility rounded-sm { border-radius: var(--radius-sm); }
+@utility rounded-md { border-radius: var(--radius-md); }
+
+/* Design system specific utilities */
+@utility ghost-border {
+  box-shadow: 0 0 0 1px rgba(229, 231, 235, 0.2);
+}
+
+@utility glass-surface {
+  backdrop-filter: blur(12px);
+  background-color: rgba(255, 255, 255, 0.9);
+}
+
+/* Focus clinical - handled as regular class due to pseudo-selector */
+.focus-clinical {
+  transition: border-color 150ms;
+}
+
+.focus-clinical:focus {
+  border-color: var(--color-primary);
+}
+
+@utility data-grid {
+  font-size: 0.6875rem;
+  font-family: var(--font-family-mono);
+}
+
+/* ===== Performance Optimizations ===== */
+
+/* Enable GPU acceleration for transforms */
+.gpu-accelerate {
+  transform: translateZ(0);
+  backface-visibility: hidden;
+  perspective: 1000px;
+}
+
+/* Contain paint for performance */
+.contain-paint {
+  contain: paint;
+}
+
+.contain-layout {
+  contain: layout;
+}
+
+.contain-strict {
+  contain: strict;
+}
+
+/* Content visibility for lazy rendering */
+.auto-render {
+  content-visibility: auto;
+}

@@ -1,0 +1,210 @@
+/**
+ * Semantic Color System
+ * Maps primitive colors to semantic meanings
+ * Enables runtime theming and consistent color usage
+ */
+
+@layer invari.colors {
+  :root {
+    /* ===== Semantic Color Tokens ===== */
+
+    /* Primary Brand Colors */
+    --color-primary-lighter: var(--color-blue-100);
+    --color-primary-light: var(--color-blue-300);
+    --color-primary: var(--color-blue-600);
+    --color-primary-dark: var(--color-blue-700);
+    --color-primary-darker: var(--color-blue-800);
+    --color-primary-contrast: var(--color-gray-0);
+
+    /* Secondary/Repair Colors */
+    --color-secondary-lighter: var(--color-orange-100);
+    --color-secondary-light: var(--color-orange-300);
+    --color-secondary: var(--color-orange-600);
+    --color-secondary-dark: var(--color-orange-700);
+    --color-secondary-darker: var(--color-orange-800);
+    --color-secondary-contrast: var(--color-gray-0);
+
+    /* Success Colors */
+    --color-success-lighter: var(--color-green-100);
+    --color-success-light: var(--color-green-300);
+    --color-success: var(--color-green-600);
+    --color-success-dark: var(--color-green-700);
+    --color-success-darker: var(--color-green-800);
+    --color-success-contrast: var(--color-gray-0);
+
+    /* Warning Colors */
+    --color-warning-lighter: var(--color-orange-100);
+    --color-warning-light: var(--color-orange-300);
+    --color-warning: var(--color-orange-500);
+    --color-warning-dark: var(--color-orange-600);
+    --color-warning-darker: var(--color-orange-700);
+    --color-warning-contrast: var(--color-gray-0);
+
+    /* Error/Danger Colors */
+    --color-error-lighter: var(--color-red-100);
+    --color-error-light: var(--color-red-300);
+    --color-error: var(--color-red-600);
+    --color-error-dark: var(--color-red-700);
+    --color-error-darker: var(--color-red-800);
+    --color-error-contrast: var(--color-gray-0);
+
+    /* Info Colors */
+    --color-info-lighter: var(--color-blue-100);
+    --color-info-light: var(--color-blue-300);
+    --color-info: var(--color-blue-500);
+    --color-info-dark: var(--color-blue-600);
+    --color-info-darker: var(--color-blue-700);
+    --color-info-contrast: var(--color-gray-0);
+
+    /* Surface Hierarchy */
+    --color-surface: var(--color-surface-base);
+    --color-surface-container-low: var(--color-surface-low);
+    --color-surface-container-lowest: var(--color-surface-default);
+    --color-surface-container-high: var(--color-surface-high);
+    --color-surface-overlay: var(--color-surface-overlay);
+
+    /* Background Colors */
+    --color-bg-base: var(--color-surface-base);
+    --color-bg-subtle: var(--color-gray-50);
+    --color-bg-canvas: var(--color-gray-0);
+    --color-bg-surface: var(--color-gray-0);
+    --color-bg-elevated: var(--color-gray-0);
+    --color-bg-overlay: rgba(0, 0, 0, 0.5);
+
+    /* Text Colors */
+    --color-text-primary: var(--color-gray-900);
+    --color-text-secondary: var(--color-gray-600);
+    --color-text-tertiary: var(--color-gray-500);
+    --color-text-disabled: var(--color-gray-400);
+    --color-text-inverse: var(--color-gray-0);
+    --color-text-brand: var(--color-primary);
+    --color-text-success: var(--color-success);
+    --color-text-warning: var(--color-warning);
+    --color-text-error: var(--color-error);
+    --color-text-info: var(--color-info);
+
+    /* Border Colors */
+    --color-border-default: var(--color-gray-200);
+    --color-border-subtle: var(--color-gray-100);
+    --color-border-strong: var(--color-gray-300);
+    --color-border-brand: var(--color-primary);
+    --color-border-success: var(--color-success);
+    --color-border-warning: var(--color-warning);
+    --color-border-error: var(--color-error);
+
+    /* Interactive State Colors */
+    --color-state-hover: rgba(0, 82, 255, 0.04);
+    --color-state-active: rgba(0, 82, 255, 0.08);
+    --color-state-selected: rgba(0, 82, 255, 0.12);
+    --color-state-focus: var(--color-primary);
+    --color-state-disabled: var(--color-gray-100);
+
+    /* Component-specific Colors */
+
+    /* Buttons */
+    --color-btn-primary-bg: var(--color-primary);
+    --color-btn-primary-hover: var(--color-primary-dark);
+    --color-btn-primary-active: var(--color-primary-darker);
+    --color-btn-primary-text: var(--color-gray-0);
+
+    --color-btn-secondary-bg: var(--color-gray-100);
+    --color-btn-secondary-hover: var(--color-gray-200);
+    --color-btn-secondary-active: var(--color-gray-300);
+    --color-btn-secondary-text: var(--color-gray-700);
+
+    --color-btn-ghost-bg: transparent;
+    --color-btn-ghost-hover: var(--color-state-hover);
+    --color-btn-ghost-active: var(--color-state-active);
+    --color-btn-ghost-text: var(--color-text-primary);
+
+    /* Forms */
+    --color-input-bg: var(--color-gray-0);
+    --color-input-border: var(--color-border-default);
+    --color-input-hover: var(--color-border-strong);
+    --color-input-focus: var(--color-primary);
+    --color-input-error: var(--color-error);
+    --color-input-disabled: var(--color-gray-50);
+    --color-input-placeholder: var(--color-gray-400);
+
+    /* Cards */
+    --color-card-bg: var(--color-surface-container-lowest);
+    --color-card-border: var(--color-border-subtle);
+    --color-card-hover: var(--color-surface-container-high);
+
+    /* Navigation */
+    --color-nav-bg: var(--color-surface-container-low);
+    --color-nav-item-hover: var(--color-state-hover);
+    --color-nav-item-active: var(--color-primary);
+    --color-nav-text: var(--color-text-primary);
+    --color-nav-text-active: var(--color-primary);
+
+    /* Data Grid */
+    --color-table-header: var(--color-gray-50);
+    --color-table-row: var(--color-gray-0);
+    --color-table-row-hover: var(--color-gray-50);
+    --color-table-row-striped: var(--color-gray-50);
+    --color-table-border: var(--color-border-default);
+
+    /* Badges & Tags */
+    --color-badge-default-bg: var(--color-gray-100);
+    --color-badge-default-text: var(--color-gray-700);
+    --color-badge-primary-bg: rgba(0, 82, 255, 0.1);
+    --color-badge-primary-text: var(--color-primary);
+    --color-badge-success-bg: rgba(5, 150, 105, 0.1);
+    --color-badge-success-text: var(--color-success);
+    --color-badge-warning-bg: rgba(217, 119, 6, 0.1);
+    --color-badge-warning-text: var(--color-warning);
+    --color-badge-error-bg: rgba(220, 38, 38, 0.1);
+    --color-badge-error-text: var(--color-error);
+
+    /* Code & Technical */
+    --color-code-bg: var(--color-gray-100);
+    --color-code-text: var(--color-gray-900);
+    --color-code-border: var(--color-gray-200);
+    --color-code-selection: rgba(0, 82, 255, 0.2);
+
+    /* Scrollbar */
+    --color-scrollbar-track: var(--color-surface-container-low);
+    --color-scrollbar-thumb: var(--color-gray-300);
+    --color-scrollbar-thumb-hover: var(--color-gray-400);
+
+    /* Focus Ring */
+    --color-focus-ring: var(--color-primary);
+    --color-focus-ring-offset: var(--color-gray-0);
+  }
+
+  /* Dark Mode Support (Future) */
+  [data-theme="dark"] {
+    --color-surface-base: #0A0B0F;
+    --color-surface-low: #12131A;
+    --color-surface-default: #1A1B24;
+    --color-surface-high: #22232E;
+
+    --color-text-primary: var(--color-gray-100);
+    --color-text-secondary: var(--color-gray-400);
+    --color-text-tertiary: var(--color-gray-500);
+
+    --color-border-default: var(--color-gray-800);
+    --color-border-subtle: var(--color-gray-900);
+    --color-border-strong: var(--color-gray-700);
+  }
+
+  /* High Contrast Mode */
+  @media (prefers-contrast: high) {
+    :root {
+      --color-text-primary: var(--color-gray-950);
+      --color-border-default: var(--color-gray-900);
+      --color-primary: #0040CC;
+    }
+  }
+
+  /* Reduced Transparency for Better Performance */
+  @media (prefers-reduced-transparency) {
+    :root {
+      --color-surface-overlay: var(--color-surface-base);
+      --color-state-hover: var(--color-gray-50);
+      --color-state-active: var(--color-gray-100);
+      --color-bg-overlay: var(--color-gray-900);
+    }
+  }
+}

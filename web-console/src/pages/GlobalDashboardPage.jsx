@@ -5,14 +5,14 @@ import {
 import {
   LineChart as RechartsLine, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer
 } from 'recharts';
-import Card from '../components/Card';
+import { Card, Button } from '../components/design-system';
 import Sidebar from '../components/Sidebar';
 import { useGlobalDashboardStats, useGlobalDashboardTimeline } from '../hooks/useGlobalDashboard';
 
 const AGENT_COLORS = [
-  '#3b82f6', // blue
-  '#10b981', // emerald
-  '#f59e0b', // amber
+  '#0052FF', // primary
+  '#059669', // success
+  '#D97706', // repair
   '#ef4444', // red
   '#8b5cf6', // violet
   '#06b6d4', // cyan
@@ -20,7 +20,7 @@ const AGENT_COLORS = [
   '#ec4899', // pink
 ];
 
-const TOTAL_COLOR = '#0f172a';
+const TOTAL_COLOR = '#1E293B';
 
 const GlobalDashboardPage = ({ onNavigate, onLogout }) => {
   const [timelinePeriod, setTimelinePeriod] = useState('hourly');
@@ -46,20 +46,13 @@ const GlobalDashboardPage = ({ onNavigate, onLogout }) => {
     if (!active || !payload || !payload.length) return null;
     const fullDate = payload[0]?.payload?.fullDate || label;
     return (
-      <div style={{
-        backgroundColor: '#ffffff',
-        border: '1px solid #cbd5e1',
-        borderRadius: '8px',
-        padding: '8px 12px',
-        fontSize: '12px',
-        color: '#0f172a',
-      }}>
-        <p style={{ color: '#64748b', fontWeight: 'bold', marginBottom: '6px' }}>{fullDate}</p>
+      <div className="bg-surface-container-lowest border border-outline-variant rounded-sm p-3 text-label-sm">
+        <p className="text-on-surface-variant font-semibold mb-2">{fullDate}</p>
         {payload.map((entry) => (
-          <div key={entry.dataKey} style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '2px' }}>
-            <div style={{ width: 8, height: 8, borderRadius: '50%', backgroundColor: entry.color }} />
-            <span style={{ color: '#475569' }}>{entry.name}:</span>
-            <span style={{ fontWeight: 600 }}>{entry.value.toLocaleString()}</span>
+          <div key={entry.dataKey} className="flex items-center gap-2 mb-1">
+            <div className="w-2 h-2 rounded-full" style={{ backgroundColor: entry.color }} />
+            <span className="text-on-surface-variant">{entry.name}:</span>
+            <span className="font-semibold text-on-surface">{entry.value.toLocaleString()}</span>
           </div>
         ))}
       </div>
@@ -67,24 +60,24 @@ const GlobalDashboardPage = ({ onNavigate, onLogout }) => {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 text-slate-700 font-sans flex">
+    <div className="min-h-screen bg-surface text-on-surface font-sans flex">
       <Sidebar activeView="dashboard" onNavigate={onNavigate} onLogout={onLogout} />
 
-      <div className="flex-1 ml-64 p-6">
+      <div className="flex-1 ml-60 p-6">
         {/* Header */}
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-slate-900 mb-1">Dashboard</h1>
-          <p className="text-slate-500 text-sm">Aggregated view across all your agents</p>
+          <h1 className="text-display-sm font-bold text-on-surface mb-1">Dashboard</h1>
+          <p className="text-on-surface-variant text-body-sm">Aggregated view across all your agents</p>
         </div>
 
         {/* Stats Cards */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
-          <Card className="p-5 shadow-sm">
+          <Card variant="outlined" className="p-5">
             <div className="flex items-start justify-between mb-3">
-              <div className="text-xs font-semibold text-slate-600">Total Requests</div>
-              <Activity className="w-5 h-5 text-blue-400" />
+              <div className="text-label-md font-semibold text-on-surface-variant uppercase tracking-wide">Total Requests</div>
+              <Activity className="w-5 h-5 text-primary" />
             </div>
-            <div className="text-2xl font-bold text-slate-900">
+            <div className="text-display-sm font-bold text-on-surface">
               {statsLoading ? '—' : s.totalRequests >= 1000000
                 ? `${(Math.floor(s.totalRequests / 100000) / 10).toFixed(1)}M`
                 : s.totalRequests >= 1000
@@ -93,80 +86,74 @@ const GlobalDashboardPage = ({ onNavigate, onLogout }) => {
             </div>
           </Card>
 
-          <Card className="p-5 shadow-sm">
+          <Card variant="outlined" className="p-5">
             <div className="flex items-start justify-between mb-3">
-              <div className="text-xs font-semibold text-slate-600">Requests Blocked</div>
-              <Shield className="w-5 h-5 text-red-500" />
+              <div className="text-label-md font-semibold text-on-surface-variant uppercase tracking-wide">Requests Blocked</div>
+              <Shield className="w-5 h-5 text-red-600" />
             </div>
-            <div className="text-2xl font-bold text-slate-900">
+            <div className="text-display-sm font-bold text-on-surface">
               {statsLoading ? '—' : s.blockedCount.toLocaleString()}
             </div>
           </Card>
 
-          <Card className="p-5 shadow-sm">
+          <Card variant="outlined" className="p-5">
             <div className="flex items-start justify-between mb-3">
-              <div className="text-xs font-semibold text-slate-600">Avg Overhead</div>
-              <Zap className="w-5 h-5 text-cyan-400" />
+              <div className="text-label-md font-semibold text-on-surface-variant uppercase tracking-wide">Avg Overhead</div>
+              <Zap className="w-5 h-5 text-primary" />
             </div>
-            <div className="text-2xl font-bold text-slate-900">
+            <div className="text-display-sm font-bold text-on-surface">
               {statsLoading ? '—' : `${s.avgOverhead}ms`}
             </div>
           </Card>
 
-          <Card className="p-5 shadow-sm">
+          <Card variant="outlined" className="p-5">
             <div className="flex items-start justify-between mb-3">
-              <div className="text-xs font-semibold text-slate-600">Auto-Repaired</div>
-              <CheckCircle className="w-5 h-5 text-amber-400" />
+              <div className="text-label-md font-semibold text-on-surface-variant uppercase tracking-wide">Auto-Repaired</div>
+              <CheckCircle className="w-5 h-5 text-repair" />
             </div>
-            <div className="text-2xl font-bold text-slate-900">
+            <div className="text-display-sm font-bold text-on-surface">
               {statsLoading ? '—' : s.repairedCount.toLocaleString()}
             </div>
           </Card>
         </div>
 
         {/* Timeline Graph */}
-        <Card className="p-6 shadow-sm">
+        <Card variant="outlined" className="p-6">
           <div className="flex items-center justify-between mb-6">
             <div>
-              <h3 className="text-sm font-semibold text-slate-900 mb-1">Request Timeline</h3>
-              <p className="text-xs text-slate-500">
+              <h3 className="text-heading-sm font-semibold text-on-surface mb-1">Request Timeline</h3>
+              <p className="text-label-md text-on-surface-variant">
                 {timelinePeriod === 'hourly' ? 'Last 24 hours — all agents' : 'Last 30 days — all agents'}
               </p>
             </div>
             <div className="flex items-center gap-2">
-              <button
+              <Button
+                variant={timelinePeriod === 'hourly' ? 'primary' : 'secondary'}
+                size="sm"
                 onClick={() => setTimelinePeriod('hourly')}
-                className={`px-3 py-1 text-xs font-medium rounded transition-all ${
-                  timelinePeriod === 'hourly'
-                    ? 'bg-slate-900 text-white'
-                    : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
-                }`}
               >
                 Hourly
-              </button>
-              <button
+              </Button>
+              <Button
+                variant={timelinePeriod === 'daily' ? 'primary' : 'secondary'}
+                size="sm"
                 onClick={() => setTimelinePeriod('daily')}
-                className={`px-3 py-1 text-xs font-medium rounded transition-all ${
-                  timelinePeriod === 'daily'
-                    ? 'bg-slate-900 text-white'
-                    : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
-                }`}
               >
                 Daily
-              </button>
+              </Button>
             </div>
           </div>
 
           {timelineLoading ? (
             <div className="h-80 flex items-center justify-center">
-              <div className="text-slate-500 text-sm">Loading timeline...</div>
+              <div className="text-on-surface-variant text-body-sm">Loading timeline...</div>
             </div>
           ) : !hasData ? (
             <div className="h-80 flex items-center justify-center">
               <div className="text-center">
-                <BarChart3 className="w-12 h-12 text-slate-300 mx-auto mb-3" />
-                <p className="text-slate-500 text-sm">No data yet</p>
-                <p className="text-xs text-slate-400 mt-1">Data will appear once requests are logged</p>
+                <BarChart3 className="w-12 h-12 text-on-surface-variant/30 mx-auto mb-3" />
+                <p className="text-on-surface-variant text-body-sm">No data yet</p>
+                <p className="text-label-sm text-on-surface-variant mt-1">Data will appear once requests are logged</p>
               </div>
             </div>
           ) : (
@@ -177,16 +164,16 @@ const GlobalDashboardPage = ({ onNavigate, onLogout }) => {
               >
                 <ResponsiveContainer width="100%" height="100%">
                   <RechartsLine data={timelineData}>
-                    <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
+                    <CartesianGrid strokeDasharray="3 3" stroke="#E5E7EB" />
                     <XAxis
                       dataKey="date"
-                      stroke="#94a3b8"
-                      style={{ fontSize: '11px' }}
+                      stroke="#64748B"
+                      style={{ fontSize: '11px', fontFamily: 'JetBrains Mono' }}
                       angle={-45}
                       textAnchor="end"
                       height={80}
                     />
-                    <YAxis stroke="#94a3b8" style={{ fontSize: '11px' }} />
+                    <YAxis stroke="#64748B" style={{ fontSize: '11px', fontFamily: 'JetBrains Mono' }} />
                     <Tooltip content={<CustomTooltip />} />
 
                     {/* Overall line */}
@@ -226,7 +213,7 @@ const GlobalDashboardPage = ({ onNavigate, onLogout }) => {
               </div>
 
               {/* Legend */}
-              <div className="flex flex-wrap items-center gap-x-5 gap-y-2 mt-4 pt-4 border-t border-slate-100 justify-center">
+              <div className="flex flex-wrap items-center gap-x-5 gap-y-2 mt-4 pt-4 border-t border-outline-variant justify-center">
                 {/* Overall legend item */}
                 <button
                   className="flex items-center gap-1.5 transition-opacity"
@@ -237,8 +224,8 @@ const GlobalDashboardPage = ({ onNavigate, onLogout }) => {
                 >
                   <div style={{ width: 20, height: 2, backgroundColor: TOTAL_COLOR }} />
                   <span
-                    className="text-xs font-semibold"
-                    style={{ color: lockedAgent === 'total' ? TOTAL_COLOR : '#475569' }}
+                    className="text-label-sm font-semibold font-mono"
+                    style={{ color: lockedAgent === 'total' ? TOTAL_COLOR : '#64748B' }}
                   >
                     Overall
                   </span>
@@ -265,8 +252,8 @@ const GlobalDashboardPage = ({ onNavigate, onLogout }) => {
                         }}
                       />
                       <span
-                        className="text-xs"
-                        style={{ color: isLocked ? color : '#475569', fontWeight: isLocked ? 600 : 400 }}
+                        className="text-label-sm font-mono"
+                        style={{ color: isLocked ? color : '#64748B', fontWeight: isLocked ? 600 : 400 }}
                       >
                         {agent.name}
                       </span>

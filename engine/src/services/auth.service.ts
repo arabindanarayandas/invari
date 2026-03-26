@@ -1,5 +1,6 @@
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
+import { OAuth2Client } from 'google-auth-library';
 import { userRepository } from '../repositories/user.repository.js';
 import { env } from '../config/env.js';
 
@@ -61,6 +62,81 @@ export class AuthService {
       user: {
         id: user.id,
         email: user.email,
+        createdAt: user.createdAt,
+      },
+      token,
+    };
+  }
+
+  /**
+   * Login or register user with Google OAuth
+   */
+  async googleLogin(credential: string) {
+    // Verify Google ID token
+    const client = new OAuth2Client(env.GOOGLE_CLIENT_ID);
+
+    let ticket;
+    try {
+      ticket = await client.verifyIdToken({
+        idToken: credential,
+        audience: env.GOOGLE_CLIENT_ID,
+      });
+    } catch (error) {
+      throw new Error('Invalid Google credential');
+    }
+
+    const payload = ticket.getPayload();
+    if (!payload || !payload.sub || !payload.email) {
+      throw new Error('Invalid Google token payload');
+    }
+
+    const googleId = payload.sub;
+    const email = payload.email;
+    const name = payload.name;
+
+    // Check if user exists by Google ID
+    let user = await userRepository.findByGoogleId(googleId);
+
+    if (user) {
+      // User exists, log them in
+      const token = this.generateToken(user.id);
+      return {
+        user: {
+          id: user.id,
+          email: user.email,
+          name: user.name,
+          createdAt: user.createdAt,
+        },
+        token,
+      };
+    }
+
+    // Check if user exists by email (email/password account)
+    user = await userRepository.findByEmail(email);
+
+    if (user) {
+      // User has email/password account but trying to login with Google
+      // This is not allowed for security reasons
+      throw new Error('An account with this email already exists. Please login with email and password.');
+    }
+
+    // Create new Google user
+    user = await userRepository.create(
+      email,
+      null, // no password for Google users
+      name,
+      googleId,
+      'google'
+    );
+
+    // Generate JWT token
+    const token = this.generateToken(user.id);
+
+    return {
+      user: {
+        id: user.id,
+        email: user.email,
+        name: user.name,
         createdAt: user.createdAt,
       },
       token,

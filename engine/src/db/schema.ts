@@ -5,7 +5,10 @@ import { relations, sql } from 'drizzle-orm';
 export const users = pgTable('users', {
   id: uuid('id').primaryKey().defaultRandom(),
   email: varchar('email', { length: 255 }).notNull().unique(),
-  passwordHash: text('password_hash').notNull(),
+  passwordHash: text('password_hash'), // Nullable for Google OAuth users
+  name: varchar('name', { length: 255 }), // User's full name from Google
+  googleId: varchar('google_id', { length: 255 }).unique(), // Google account identifier
+  authProvider: varchar('auth_provider', { length: 20 }).notNull().default('email'), // 'email' or 'google'
   createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
 });
 

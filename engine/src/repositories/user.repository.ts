@@ -22,12 +22,31 @@ export class UserRepository {
     return user;
   }
 
-  async create(email: string, passwordHash: string) {
+  async findByGoogleId(googleId: string) {
+    const [user] = await db
+      .select()
+      .from(users)
+      .where(eq(users.googleId, googleId))
+      .limit(1);
+
+    return user;
+  }
+
+  async create(
+    email: string,
+    passwordHash?: string | null,
+    name?: string | null,
+    googleId?: string | null,
+    authProvider: 'email' | 'google' = 'email'
+  ) {
     const [user] = await db
       .insert(users)
       .values({
         email,
-        passwordHash,
+        passwordHash: passwordHash || null,
+        name: name || null,
+        googleId: googleId || null,
+        authProvider,
       })
       .returning();
 
