@@ -8,12 +8,12 @@
   :root {
     /* ===== Semantic Color Tokens ===== */
 
-    /* Primary Brand Colors */
-    --color-primary-lighter: var(--color-blue-100);
-    --color-primary-light: var(--color-blue-300);
-    --color-primary: var(--color-blue-600);
-    --color-primary-dark: var(--color-blue-700);
-    --color-primary-darker: var(--color-blue-800);
+    /* Primary Brand Colors - Emerald Green (Technical Editorial) */
+    --color-primary-lighter: var(--color-emerald-100);
+    --color-primary-light: var(--color-emerald-300);
+    --color-primary: var(--color-emerald-600); /* #1D9E75 */
+    --color-primary-dark: var(--color-emerald-700); /* #00694C */
+    --color-primary-darker: var(--color-emerald-800); /* #008560 */
     --color-primary-contrast: var(--color-gray-0);
 
     /* Secondary/Repair Colors */
@@ -56,11 +56,13 @@
     --color-info-darker: var(--color-blue-700);
     --color-info-contrast: var(--color-gray-0);
 
-    /* Surface Hierarchy */
-    --color-surface: var(--color-surface-base);
-    --color-surface-container-low: var(--color-surface-low);
-    --color-surface-container-lowest: var(--color-surface-default);
-    --color-surface-container-high: var(--color-surface-high);
+    /* Surface Hierarchy - Technical Editorial */
+    --color-surface: var(--color-surface-base); /* #FAF9F6 */
+    --color-surface-container-low: var(--color-surface-low); /* #F4F3F0 */
+    --color-surface-container-lowest: var(--color-surface-default); /* #FFFFFF */
+    --color-surface-container: var(--color-surface-container); /* #EFEEEB */
+    --color-surface-container-high: var(--color-surface-high); /* #E3E2DF */
+    --color-surface-container-highest: var(--color-surface-high); /* #E3E2DF */
     --color-surface-overlay: var(--color-surface-overlay);
 
     /* Background Colors */
@@ -83,7 +85,7 @@
     --color-text-error: var(--color-error);
     --color-text-info: var(--color-info);
 
-    /* Border Colors */
+    /* Border Colors - Only for Ghost Borders */
     --color-border-default: var(--color-gray-200);
     --color-border-subtle: var(--color-gray-100);
     --color-border-strong: var(--color-gray-300);
@@ -92,10 +94,17 @@
     --color-border-warning: var(--color-warning);
     --color-border-error: var(--color-error);
 
+    /* Design System Specific Mappings */
+    --color-repair: var(--color-orange-600); /* #D97706 */
+    --color-on-surface: var(--color-on-surface); /* #1B1C1A */
+    --color-on-surface-variant: var(--color-on-surface-variant); /* #45483D */
+    --color-outline: var(--color-outline); /* #75786B */
+    --color-outline-variant: var(--color-outline-variant); /* #BCCAC1 */
+
     /* Interactive State Colors */
-    --color-state-hover: rgba(0, 82, 255, 0.04);
-    --color-state-active: rgba(0, 82, 255, 0.08);
-    --color-state-selected: rgba(0, 82, 255, 0.12);
+    --color-state-hover: rgba(29, 158, 117, 0.04); /* Emerald primary with opacity */
+    --color-state-active: rgba(29, 158, 117, 0.08);
+    --color-state-selected: rgba(29, 158, 117, 0.12);
     --color-state-focus: var(--color-primary);
     --color-state-disabled: var(--color-gray-100);
 
@@ -148,7 +157,7 @@
     /* Badges & Tags */
     --color-badge-default-bg: var(--color-gray-100);
     --color-badge-default-text: var(--color-gray-700);
-    --color-badge-primary-bg: rgba(0, 82, 255, 0.1);
+    --color-badge-primary-bg: rgba(29, 158, 117, 0.1); /* Emerald primary */
     --color-badge-primary-text: var(--color-primary);
     --color-badge-success-bg: rgba(5, 150, 105, 0.1);
     --color-badge-success-text: var(--color-success);
@@ -156,6 +165,8 @@
     --color-badge-warning-text: var(--color-warning);
     --color-badge-error-bg: rgba(220, 38, 38, 0.1);
     --color-badge-error-text: var(--color-error);
+    --color-badge-repair-bg: rgba(217, 119, 6, 0.1);
+    --color-badge-repair-text: var(--color-repair);
 
     /* Code & Technical */
     --color-code-bg: var(--color-gray-100);

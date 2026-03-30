@@ -98,6 +98,7 @@
     color: var(--color-primary);
     text-decoration: none;
     transition: var(--transition-colors);
+    cursor: pointer;
   }
 
   a:hover {
@@ -109,6 +110,16 @@
     outline: 2px solid var(--color-focus-ring);
     outline-offset: 2px;
     border-radius: var(--radius-xs);
+  }
+
+  /* ===== Buttons ===== */
+
+  button:not(:disabled) {
+    cursor: pointer;
+  }
+
+  button:disabled {
+    cursor: not-allowed;
   }
 
   /* ===== Lists ===== */

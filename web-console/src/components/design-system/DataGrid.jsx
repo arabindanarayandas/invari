@@ -21,14 +21,13 @@ export const DataGrid = ({
     <div className={`overflow-x-auto ${className}`}>
       <table className="w-full">
         <thead>
-          <tr className="border-b border-outline-variant bg-surface-container-low">
+          <tr className="bg-surface-container-low"> {/* No border - use background for separation */}
             {columns.map((column, index) => (
               <th
                 key={column.key || index}
                 className={`
                   text-left font-sans font-medium text-label-sm text-on-surface-variant
-                  px-3 py-2
-                  ${index > 0 ? 'border-l border-outline-variant' : ''}
+                  px-4 py-4
                   ${column.width ? column.width : ''}
                 `}
                 style={column.minWidth ? { minWidth: column.minWidth } : {}}
@@ -54,8 +53,7 @@ export const DataGrid = ({
                 <td
                   key={`${rowIndex}-${column.key || colIndex}`}
                   className={`
-                    px-3 text-label-sm font-mono text-on-surface
-                    ${colIndex > 0 ? 'border-l border-outline-variant' : ''}
+                    px-4 py-3 text-label-sm font-mono text-on-surface
                     ${column.className || ''}
                   `}
                 >

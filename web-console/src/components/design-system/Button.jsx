@@ -21,12 +21,12 @@ export const Button = React.forwardRef(({
   const baseClasses = 'inline-flex items-center justify-center font-medium transition-colors duration-150 focus:ring-2 focus:ring-primary focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed rounded-sm';
 
   const variantClasses = {
-    primary: 'bg-primary text-white hover:bg-blue-600 active:bg-blue-700',
-    secondary: 'bg-surface-container-high text-on-surface hover:bg-gray-100 active:bg-gray-200 border border-outline-variant',
+    primary: 'bg-primary text-white hover:bg-primary-dark active:bg-primary-darker', /* Emerald green */
+    secondary: 'bg-surface-container-high text-on-surface hover:bg-surface-container-highest active:bg-surface-container', /* No border - tonal layering */
     ghost: 'text-on-surface hover:bg-surface-container-low active:bg-surface-container-high',
     danger: 'bg-red-600 text-white hover:bg-red-700 active:bg-red-800',
-    repair: 'bg-repair text-white hover:bg-amber-700 active:bg-amber-800',
-    success: 'bg-success text-white hover:bg-emerald-700 active:bg-emerald-800',
+    repair: 'bg-repair text-white hover:bg-orange-700 active:bg-orange-800',
+    success: 'bg-success text-white hover:bg-green-700 active:bg-green-800',
   };
 
   const sizeClasses = {

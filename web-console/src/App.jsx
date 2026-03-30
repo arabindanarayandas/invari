@@ -1,7 +1,6 @@
-import { BrowserRouter, Routes, Route, Navigate, useNavigate, useParams, useSearchParams } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, Navigate, useNavigate, useParams } from 'react-router-dom';
 import { GoogleOAuthProvider } from '@react-oauth/google';
 import { AuthProvider, useAuth } from './context/AuthContext';
-import LoginPage from './pages/LoginPage';
 import ApplicationsPage from './pages/ApplicationsPage';
 import DashboardPage from './pages/DashboardPage';
 import GlobalDashboardPage from './pages/GlobalDashboardPage';
@@ -14,25 +13,6 @@ import PricingPage from './pages/PricingPage';
 import ContactPage from './pages/ContactPage';
 import { useState, useEffect } from 'react';
 import apiClient from './api/client';
-
-// Login Route wrapper - handles returnTo redirect for authenticated users
-function LoginRouteWrapper() {
-  const { isAuthenticated } = useAuth();
-  const [searchParams] = useSearchParams();
-
-  if (isAuthenticated) {
-    const returnTo = searchParams.get('returnTo');
-    const action = searchParams.get('action');
-
-    if (returnTo) {
-      const redirectUrl = action ? `${returnTo}?action=${action}` : returnTo;
-      return <Navigate to={redirectUrl} replace />;
-    }
-    return <Navigate to="/dashboard" replace />;
-  }
-
-  return <LoginPage />;
-}
 
 // Protected Route wrapper
 function ProtectedRoute({ children }) {
@@ -47,7 +27,7 @@ function ProtectedRoute({ children }) {
   }
 
   if (!isAuthenticated) {
-    return <Navigate to="/login" replace />;
+    return <Navigate to="/" replace />;
   }
 
   return children;
@@ -65,7 +45,7 @@ function GlobalDashboardPageWrapper() {
 
   const handleLogout = () => {
     logout();
-    navigate('/login');
+    navigate('/');
   };
 
   return (
@@ -89,7 +69,7 @@ function ApplicationsPageWrapper() {
 
   const handleLogout = () => {
     logout();
-    navigate('/login');
+    navigate('/');
   };
 
   return (
@@ -137,7 +117,7 @@ function DashboardPageWrapper() {
 
   const handleLogout = () => {
     logout();
-    navigate('/login');
+    navigate('/');
   };
 
   if (loading) {
@@ -178,7 +158,6 @@ function AppContent() {
       <Route path="/how-it-works" element={<HowItWorksPage />} />
       <Route path="/pricing" element={<PricingPage />} />
       <Route path="/contact" element={<ContactPage />} />
-      <Route path="/login" element={<LoginRouteWrapper />} />
       <Route path="/dashboard" element={<ProtectedRoute><GlobalDashboardPageWrapper /></ProtectedRoute>} />
       <Route path="/agents" element={<ProtectedRoute><ApplicationsPageWrapper /></ProtectedRoute>} />
       <Route path="/agents/:id" element={<ProtectedRoute><DashboardPageWrapper /></ProtectedRoute>} />

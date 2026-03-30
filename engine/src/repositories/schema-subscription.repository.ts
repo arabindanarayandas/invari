@@ -1,6 +1,6 @@
 import { eq, and, lte, sql } from 'drizzle-orm';
 import { db, apiSchemaSubscriptions } from '../db/index.js';
-import type { CreateSchemaSubscriptionDTO, UpdateSchemaSubscriptionDTO, SyncInterval } from '../types/schema-subscription.types.js';
+import type { CreateSchemaSubscriptionDTO, UpdateSchemaSubscriptionDTO, SyncInterval, SchemaSubscription } from '../types/schema-subscription.types.js';
 import { calculateNextRunAt, normalizeTimestamp } from '../types/schema-subscription.types.js';
 
 export class SchemaSubscriptionRepository {
@@ -8,10 +8,10 @@ export class SchemaSubscriptionRepository {
    * Find subscriptions that are due for syncing
    * Uses SELECT FOR UPDATE SKIP LOCKED for concurrent processing
    */
-  async findPendingSubscriptions() {
+  async findPendingSubscriptions(): Promise<SchemaSubscription[]> {
     const now = new Date();
 
-    return await db
+    const results = await db
       .select()
       .from(apiSchemaSubscriptions)
       .where(
@@ -21,32 +21,34 @@ export class SchemaSubscriptionRepository {
         )
       )
       .for('update', { skipLocked: true });
+
+    return results as SchemaSubscription[];
   }
 
   /**
    * Find subscription by agent ID
    */
-  async findByAgentId(agentId: string) {
+  async findByAgentId(agentId: string): Promise<SchemaSubscription | undefined> {
     const [subscription] = await db
       .select()
       .from(apiSchemaSubscriptions)
       .where(eq(apiSchemaSubscriptions.agentId, agentId))
       .limit(1);
 
-    return subscription;
+    return subscription as SchemaSubscription | undefined;
   }
 
   /**
    * Find subscription by ID
    */
-  async findById(id: string) {
+  async findById(id: string): Promise<SchemaSubscription | undefined> {
     const [subscription] = await db
       .select()
       .from(apiSchemaSubscriptions)
       .where(eq(apiSchemaSubscriptions.id, id))
       .limit(1);
 
-    return subscription;
+    return subscription as SchemaSubscription | undefined;
   }
 
   /**

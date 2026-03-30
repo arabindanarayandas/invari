@@ -1,5 +1,8 @@
 import { useState, useEffect, useRef } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
+import { GoogleLogin } from '@react-oauth/google';
+import { Mail, Lock, X } from 'lucide-react';
+import { useAuth } from '../context/AuthContext';
 
 /**
  * Landing Page with Interactive Demo
@@ -27,6 +30,13 @@ const LandingPage = () => {
   const [creatingAgent, setCreatingAgent] = useState(false);
   const fileInputRef = useRef(null);
   const trafficIntervalRef = useRef(null);
+
+  // Login modal state (showLoginModal already declared above)
+  const [loginEmail, setLoginEmail] = useState('');
+  const [loginPassword, setLoginPassword] = useState('');
+  const [loginError, setLoginError] = useState('');
+  const [isLoggingIn, setIsLoggingIn] = useState(false);
+  const { login, googleLogin, isAuthenticated } = useAuth();
 
   // Sample data
   const SAMPLES = {
@@ -544,6 +554,50 @@ const LandingPage = () => {
     setDashboardStats({ total: 0, repaired: 0, blocked: 0, passed: 0 });
   };
 
+  // Login handlers
+  const handleEmailLogin = async (e) => {
+    e.preventDefault();
+    setLoginError('');
+    setIsLoggingIn(true);
+
+    try {
+      const result = await login(loginEmail, loginPassword);
+      if (result.success) {
+        setShowLoginModal(false);
+        navigate('/dashboard');
+      } else {
+        setLoginError(result.error || 'Login failed. Please check your credentials.');
+      }
+    } catch (err) {
+      setLoginError('An error occurred. Please try again.');
+    } finally {
+      setIsLoggingIn(false);
+    }
+  };
+
+  const handleGoogleSuccess = async (credentialResponse) => {
+    setLoginError('');
+    setIsLoggingIn(true);
+
+    try {
+      const result = await googleLogin(credentialResponse.credential);
+      if (result.success) {
+        setShowLoginModal(false);
+        navigate('/dashboard');
+      } else {
+        setLoginError(result.error || 'Google login failed. Please try again.');
+      }
+    } catch (err) {
+      setLoginError('An error occurred during Google login. Please try again.');
+    } finally {
+      setIsLoggingIn(false);
+    }
+  };
+
+  const handleGoogleError = () => {
+    setLoginError('Google login failed. Please try again.');
+  };
+
   return (
     <div style={{ fontFamily: "'Manrope', sans-serif", background: '#faf9f6', color: '#1b1c1a', minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
       {/* Google Fonts */}
@@ -571,9 +625,15 @@ const LandingPage = () => {
             <a href="https://github.com/arabindanarayandas/invari" target="_blank" rel="noopener noreferrer" style={{ fontSize: '14px', color: '#3d4943', textDecoration: 'none', transition: 'color 0.2s' }}>GitHub</a>
             <Link to="/contact" style={{ fontSize: '14px', color: '#3d4943', textDecoration: 'none', transition: 'color 0.2s' }}>Contact</Link>
           </div>
-          <a href="https://lab.invari.ai" target="_blank" rel="noopener noreferrer" style={{ background: '#1b1c1a', color: 'white', fontFamily: "'JetBrains Mono', monospace", fontSize: '12px', fontWeight: 600, padding: '8px 16px', borderRadius: '6px', textDecoration: 'none', transition: 'opacity 0.2s' }}>
-            Try it free →
-          </a>
+          {isAuthenticated ? (
+            <Link to="/dashboard" style={{ background: '#1b1c1a', color: 'white', fontFamily: "'JetBrains Mono', monospace", fontSize: '12px', fontWeight: 600, padding: '8px 16px', borderRadius: '6px', textDecoration: 'none', transition: 'opacity 0.2s' }}>
+              Dashboard →
+            </Link>
+          ) : (
+            <button onClick={() => setShowLoginModal(true)} style={{ background: '#1b1c1a', color: 'white', fontFamily: "'JetBrains Mono', monospace", fontSize: '12px', fontWeight: 600, padding: '8px 16px', borderRadius: '6px', border: 'none', cursor: 'pointer', transition: 'opacity 0.2s' }}>
+              Sign In
+            </button>
+          )}
         </div>
       </nav>
 
@@ -1090,6 +1150,102 @@ const LandingPage = () => {
                 )}
                 {creatingAgent ? 'Creating...' : 'Create Agent →'}
               </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Login Modal */}
+      {showLoginModal && (
+        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000 }} onClick={() => setShowLoginModal(false)}>
+          <div style={{ background: '#ffffff', borderRadius: '16px', padding: '32px', maxWidth: '460px', width: '90%', boxShadow: '0 8px 32px rgba(0,0,0,0.12)' }} onClick={(e) => e.stopPropagation()}>
+            {/* Header */}
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '12px' }}>
+              <h2 style={{ fontFamily: "'Instrument Serif', serif", fontSize: '28px', fontWeight: 400, color: '#1a1916' }}>
+                Sign In
+              </h2>
+              <button onClick={() => setShowLoginModal(false)} style={{ background: 'transparent', border: 'none', cursor: 'pointer', padding: '4px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <X style={{ width: '20px', height: '20px', color: '#6b6860' }} />
+              </button>
+            </div>
+            <p style={{ fontSize: '14px', color: '#6b6860', marginBottom: '24px', lineHeight: 1.6 }}>
+              Access your account to manage and protect your APIs
+            </p>
+
+            {/* Error Message */}
+            {loginError && (
+              <div style={{ marginBottom: '16px', padding: '12px 16px', background: '#fde8e8', border: '1px solid #E24B4A', borderRadius: '8px' }}>
+                <p style={{ color: '#E24B4A', fontSize: '14px' }}>{loginError}</p>
+              </div>
+            )}
+
+            {/* Email/Password Form */}
+            <form onSubmit={handleEmailLogin} style={{ marginBottom: '20px' }}>
+              <div style={{ marginBottom: '16px' }}>
+                <label style={{ display: 'block', fontSize: '12px', fontWeight: 600, color: '#1a1916', fontFamily: "'JetBrains Mono', monospace", letterSpacing: '0.04em', marginBottom: '8px' }}>
+                  EMAIL
+                </label>
+                <div style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
+                  <Mail style={{ position: 'absolute', left: '12px', width: '16px', height: '16px', color: '#6b6860' }} />
+                  <input
+                    type="email"
+                    value={loginEmail}
+                    onChange={(e) => setLoginEmail(e.target.value)}
+                    placeholder="Enter your email"
+                    required
+                    disabled={isLoggingIn}
+                    style={{ width: '100%', padding: '12px 14px 12px 40px', border: '1px solid #e2e0d8', borderRadius: '10px', fontSize: '14px', fontFamily: "'DM Sans', sans-serif", background: '#ffffff', color: '#1a1916', outline: 'none', transition: 'border-color 0.15s' }}
+                  />
+                </div>
+              </div>
+
+              <div style={{ marginBottom: '20px' }}>
+                <label style={{ display: 'block', fontSize: '12px', fontWeight: 600, color: '#1a1916', fontFamily: "'JetBrains Mono', monospace", letterSpacing: '0.04em', marginBottom: '8px' }}>
+                  PASSWORD
+                </label>
+                <div style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
+                  <Lock style={{ position: 'absolute', left: '12px', width: '16px', height: '16px', color: '#6b6860' }} />
+                  <input
+                    type="password"
+                    value={loginPassword}
+                    onChange={(e) => setLoginPassword(e.target.value)}
+                    placeholder="Enter your password"
+                    required
+                    disabled={isLoggingIn}
+                    style={{ width: '100%', padding: '12px 14px 12px 40px', border: '1px solid #e2e0d8', borderRadius: '10px', fontSize: '14px', fontFamily: "'DM Sans', sans-serif", background: '#ffffff', color: '#1a1916', outline: 'none', transition: 'border-color 0.15s' }}
+                  />
+                </div>
+              </div>
+
+              <button type="submit" disabled={isLoggingIn} style={{ width: '100%', padding: '12px 20px', background: isLoggingIn ? '#e2e0d8' : '#1D9E75', color: isLoggingIn ? '#6b6860' : 'white', border: 'none', borderRadius: '8px', fontSize: '14px', fontWeight: 600, cursor: isLoggingIn ? 'not-allowed' : 'pointer', transition: 'background 0.15s', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}>
+                {isLoggingIn && (
+                  <div style={{ width: '14px', height: '14px', border: '2px solid rgba(255,255,255,0.3)', borderTopColor: '#fff', borderRadius: '50%', animation: 'spin 0.8s linear infinite' }}></div>
+                )}
+                {isLoggingIn ? 'Signing in...' : 'Sign In'}
+              </button>
+            </form>
+
+            {/* Divider */}
+            <div style={{ position: 'relative', marginBottom: '20px' }}>
+              <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center' }}>
+                <div style={{ width: '100%', borderTop: '1px solid #e2e0d8' }}></div>
+              </div>
+              <div style={{ position: 'relative', display: 'flex', justifyContent: 'center' }}>
+                <span style={{ padding: '0 16px', background: '#ffffff', fontSize: '14px', color: '#6b6860' }}>OR</span>
+              </div>
+            </div>
+
+            {/* Google Login */}
+            <div style={{ display: 'flex', justifyContent: 'center' }}>
+              <GoogleLogin
+                onSuccess={handleGoogleSuccess}
+                onError={handleGoogleError}
+                theme="outline"
+                size="large"
+                text="continue_with"
+                shape="rectangular"
+                width="100%"
+              />
             </div>
           </div>
         </div>

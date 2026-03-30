@@ -46,7 +46,7 @@ const GlobalDashboardPage = ({ onNavigate, onLogout }) => {
     if (!active || !payload || !payload.length) return null;
     const fullDate = payload[0]?.payload?.fullDate || label;
     return (
-      <div className="bg-surface-container-lowest border border-outline-variant rounded-sm p-3 text-label-sm">
+      <div className="bg-surface-container-lowest/95 backdrop-blur-md rounded-sm p-4 text-label-sm shadow-lg"> {/* Glass effect, no border */}
         <p className="text-on-surface-variant font-semibold mb-2">{fullDate}</p>
         {payload.map((entry) => (
           <div key={entry.dataKey} className="flex items-center gap-2 mb-1">
@@ -213,7 +213,7 @@ const GlobalDashboardPage = ({ onNavigate, onLogout }) => {
               </div>
 
               {/* Legend */}
-              <div className="flex flex-wrap items-center gap-x-5 gap-y-2 mt-4 pt-4 border-t border-outline-variant justify-center">
+              <div className="flex flex-wrap items-center gap-x-6 gap-y-3 mt-6 pt-6 bg-surface-container-low -mx-6 px-6 -mb-6 pb-6 rounded-b-md justify-center"> {/* Tonal layering instead of border */}
                 {/* Overall legend item */}
                 <button
                   className="flex items-center gap-1.5 transition-opacity"

@@ -8,17 +8,17 @@
   :root {
     /* ===== Primitive Tokens ===== */
 
-    /* Brand Colors - Clinical Blue Palette */
-    --color-blue-50: #EFF6FF;
-    --color-blue-100: #DBEAFE;
-    --color-blue-200: #BFDBFE;
-    --color-blue-300: #93C5FD;
-    --color-blue-400: #60A5FA;
-    --color-blue-500: #3B82F6;
-    --color-blue-600: #0052FF; /* Primary brand */
-    --color-blue-700: #0040CC;
-    --color-blue-800: #003099;
-    --color-blue-900: #002066;
+    /* Brand Colors - Emerald Green Palette (Technical Editorial) */
+    --color-emerald-50: #ECFDF5;
+    --color-emerald-100: #D1FAE5;
+    --color-emerald-200: #A7F3D0;
+    --color-emerald-300: #6EE7B7;
+    --color-emerald-400: #34D399;
+    --color-emerald-500: #10B981;
+    --color-emerald-600: #1D9E75; /* Primary brand - from invari-design.md */
+    --color-emerald-700: #00694C; /* Primary dark - from invari-design.md */
+    --color-emerald-800: #008560; /* Primary container - from invari-design.md */
+    --color-emerald-900: #064E3B;
 
     /* Industrial Orange - Warning/Repair */
     --color-orange-50: #FFF7ED;
@@ -30,6 +30,16 @@
     --color-orange-600: #D97706; /* Repair */
     --color-orange-700: #C2410C;
     --color-orange-800: #9A3412;
+
+    /* Blue - for backward compatibility and info states */
+    --color-blue-50: #EFF6FF;
+    --color-blue-100: #DBEAFE;
+    --color-blue-200: #BFDBFE;
+    --color-blue-300: #93C5FD;
+    --color-blue-400: #60A5FA;
+    --color-blue-500: #3B82F6;
+    --color-blue-600: #2563EB;
+    --color-blue-700: #1D4ED8;
 
     /* Success Green - Validation */
     --color-green-50: #F0FDF4;
@@ -66,18 +76,26 @@
     --color-red-600: #DC2626;
     --color-red-700: #B91C1C;
 
-    /* Surface Colors - Technical Plates */
-    --color-surface-base: #F9F9FF; /* Level 0 - Blueprint desk */
-    --color-surface-low: #F0F3FF; /* Level 1 - Global sections */
-    --color-surface-default: #FFFFFF; /* Level 2 - Active work area */
-    --color-surface-high: #E8ECFF; /* Hover states */
-    --color-surface-overlay: rgba(249, 249, 255, 0.95);
+    /* Design System Specific Colors */
+    --color-on-surface: #1B1C1A; /* Text on surfaces */
+    --color-on-surface-variant: #45483D; /* Secondary text */
+    --color-outline: #75786B; /* Dividers and borders (when absolutely needed) */
+    --color-outline-variant: #BCCAC1; /* Ghost borders at 15% opacity */
+
+    /* Surface Colors - Technical Editorial (from invari-design.md) */
+    --color-surface-base: #FAF9F6; /* Level 0 - Widest layout areas */
+    --color-surface-low: #F4F3F0; /* Level 1 - Grouping large blocks (warm workshop) */
+    --color-surface-default: #FFFFFF; /* Level 2 - Cards and active areas */
+    --color-surface-container: #EFEEEB; /* Level 2 - Tables/secondary nav */
+    --color-surface-high: #E3E2DF; /* Level 3 - Active states/nested panels */
+    --color-surface-overlay: rgba(255, 255, 255, 0.95); /* Glass effect base */
 
     /* ===== Typography Tokens ===== */
 
-    /* Font Families */
-    --font-family-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-    --font-family-mono: 'JetBrains Mono', 'SF Mono', Monaco, Consolas, monospace;
+    /* Font Families - Technical Editorial (from invari-design.md) */
+    --font-family-serif: 'Noto Serif', Georgia, serif; /* Headlines - Editorial voice */
+    --font-family-sans: 'Manrope', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; /* Body - Functional voice */
+    --font-family-mono: 'JetBrains Mono', 'IBM Plex Mono', 'SF Mono', Monaco, Consolas, monospace; /* Technical - Precise voice */
 
     /* Font Sizes - Type Scale (1.25 ratio) */
     --font-size-2xs: 0.625rem;   /* 10px */

@@ -5,32 +5,40 @@
 
 @import "tailwindcss";
 
-/* Font imports */
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
+/* Font imports - Technical Editorial design system */
+@import url('https://fonts.googleapis.com/css2?family=Noto+Serif:wght@300;400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Manrope:wght@300;400;500;600;700;800&display=swap');
 @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&display=swap');
 
 /* ===== CSS Custom Properties (Design Tokens) ===== */
 @layer base {
   :root {
-    /* Colors */
-    --color-primary: #0052FF;
+    /* Colors - Technical Editorial */
+    --color-primary: #1D9E75; /* Emerald green from invari-design.md */
+    --color-primary-dark: #00694C;
+    --color-primary-darker: #008560;
     --color-repair: #D97706;
     --color-success: #059669;
 
-    /* Surface hierarchy */
-    --color-surface: #F9F9FF;
-    --color-surface-container-low: #F0F3FF;
+    /* Surface hierarchy - Technical Editorial */
+    --color-surface: #FAF9F6; /* Warm workshop background */
+    --color-surface-container-low: #F4F3F0;
     --color-surface-container-lowest: #FFFFFF;
-    --color-surface-container-high: #E8ECFF;
+    --color-surface-container: #EFEEEB;
+    --color-surface-container-high: #E3E2DF;
+    --color-surface-container-highest: #E3E2DF;
 
     /* Text */
-    --color-on-surface: #1E293B;
-    --color-on-surface-variant: #64748B;
-    --color-outline-variant: #E5E7EB;
+    --color-on-surface: #1B1C1A;
+    --color-on-surface-variant: #45483D;
+    --color-outline: #75786B;
+    --color-outline-variant: #BCCAC1;
 
-    /* Typography */
-    --font-family-sans: Inter, system-ui, sans-serif;
-    --font-family-mono: 'JetBrains Mono', monospace;
+    /* Typography - Technical Editorial */
+    --font-family-serif: 'Noto Serif', Georgia, serif; /* Headlines */
+    --font-family-sans: 'Manrope', system-ui, sans-serif; /* Body text */
+    --font-family-mono: 'JetBrains Mono', 'IBM Plex Mono', monospace; /* Technical data */
 
     /* Spacing (4px grid) */
     --spacing-4: 1rem;
@@ -57,22 +65,25 @@
     -moz-osx-font-smoothing: grayscale;
   }
 
-  /* Typography defaults */
+  /* Typography defaults - Technical Editorial */
   h1 {
+    font-family: var(--font-family-serif);
     font-size: 2rem;
-    font-weight: 700;
+    font-weight: 400; /* Noto Serif uses lighter weights */
     line-height: 1.25;
   }
 
   h2 {
+    font-family: var(--font-family-serif);
     font-size: 1.5rem;
-    font-weight: 600;
+    font-weight: 400;
     line-height: 1.375;
   }
 
   h3 {
+    font-family: var(--font-family-serif);
     font-size: 1.25rem;
-    font-weight: 500;
+    font-weight: 400;
     line-height: 1.4;
   }
 
@@ -133,6 +144,22 @@
 
   .bg-primary {
     background-color: var(--color-primary);
+  }
+
+  .bg-primary-dark {
+    background-color: var(--color-primary-dark);
+  }
+
+  .bg-primary-darker {
+    background-color: var(--color-primary-darker);
+  }
+
+  .bg-surface-container {
+    background-color: var(--color-surface-container);
+  }
+
+  .bg-surface-container-highest {
+    background-color: var(--color-surface-container-highest);
   }
 
   .bg-repair {
@@ -254,6 +281,19 @@
     font-size: 0.6875rem;
     line-height: 1.4;
     font-weight: 500;
+  }
+
+  /* Hover states */
+  .hover\:bg-primary-dark:hover {
+    background-color: var(--color-primary-dark);
+  }
+
+  .hover\:bg-primary-darker:hover {
+    background-color: var(--color-primary-darker);
+  }
+
+  .hover\:bg-surface-container-highest:hover {
+    background-color: var(--color-surface-container-highest);
   }
 
   /* Border radius */

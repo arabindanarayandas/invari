@@ -24,6 +24,9 @@ const CreateApplicationModal = ({ onClose, onCreate, initialSpec = null }) => {
   const [validationResult, setValidationResult] = useState(null);
   const [validationError, setValidationError] = useState(null);
 
+  // Create agent state
+  const [isCreating, setIsCreating] = useState(false);
+
   const sampleSpecs = [
     { name: 'Vapi Booking API', file: 'yaml/vapi_booking_api.yaml' }
   ];
@@ -234,16 +237,23 @@ const CreateApplicationModal = ({ onClose, onCreate, initialSpec = null }) => {
         return;
       }
 
-      await onCreate({
-        mode: 'upload',
-        name: name.trim(),
-        description: description.trim(),
-        spec: parsedSpec.spec,
-        endpoints: parsedSpec.endpoints,
-        endpointsCount: parsedSpec.endpoints.length,
-        version: parsedSpec.version,
-        createdAt: new Date().toISOString()
-      });
+      setIsCreating(true);
+      try {
+        await onCreate({
+          mode: 'upload',
+          name: name.trim(),
+          description: description.trim(),
+          spec: parsedSpec.spec,
+          endpoints: parsedSpec.endpoints,
+          endpointsCount: parsedSpec.endpoints.length,
+          version: parsedSpec.version,
+          createdAt: new Date().toISOString()
+        });
+      } catch (err) {
+        setError(err.message || 'Failed to create agent');
+      } finally {
+        setIsCreating(false);
+      }
     } else {
       // Auto-sync mode
       if (!schemaSourceUrl.trim()) {
@@ -259,27 +269,34 @@ const CreateApplicationModal = ({ onClose, onCreate, initialSpec = null }) => {
         return;
       }
 
-      await onCreate({
-        mode: 'auto-sync',
-        name: name.trim(),
-        description: description.trim(),
-        schemaSourceUrl: schemaSourceUrl.trim(),
-        schemaSyncInterval,
-        createdAt: new Date().toISOString()
-      });
+      setIsCreating(true);
+      try {
+        await onCreate({
+          mode: 'auto-sync',
+          name: name.trim(),
+          description: description.trim(),
+          schemaSourceUrl: schemaSourceUrl.trim(),
+          schemaSyncInterval,
+          createdAt: new Date().toISOString()
+        });
+      } catch (err) {
+        setError(err.message || 'Failed to create agent');
+      } finally {
+        setIsCreating(false);
+      }
     }
   };
 
   return (
     <>
-      {/* Backdrop */}
+      {/* Backdrop with blur */}
       <div
-        className="fixed inset-0 bg-black/20 z-40"
+        className="fixed inset-0 bg-black/20 backdrop-blur-sm z-40"
         onClick={onClose}
       />
 
-      {/* Modal */}
-      <div className="fixed top-0 right-0 h-full w-full max-w-2xl bg-surface border-l border-outline-variant z-50 overflow-y-auto">
+      {/* Modal with glass effect */}
+      <div className="fixed top-0 right-0 h-full w-full max-w-2xl bg-surface/95 backdrop-blur-xl shadow-2xl z-50 overflow-y-auto"> {/* Glass effect, no border */}
         <div className="p-6">
           {/* Header */}
           <div className="flex items-center justify-between mb-6">
@@ -304,7 +321,7 @@ const CreateApplicationModal = ({ onClose, onCreate, initialSpec = null }) => {
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 placeholder="My AI Agent"
-                className="w-full px-4 py-2 bg-surface-container-lowest border border-outline-variant rounded-sm text-body-md text-on-surface placeholder-on-surface-variant focus:outline-none focus:border-primary"
+                className="w-full px-4 py-3 bg-surface-container-low rounded-sm text-body-md text-on-surface placeholder-on-surface-variant focus:outline-none focus:bg-surface-container-lowest transition-colors"
               />
             </div>
 
@@ -318,7 +335,7 @@ const CreateApplicationModal = ({ onClose, onCreate, initialSpec = null }) => {
                 onChange={(e) => setDescription(e.target.value)}
                 placeholder="Brief description of your API"
                 rows={3}
-                className="w-full px-4 py-2 bg-surface-container-lowest border border-outline-variant rounded-sm text-body-md text-on-surface placeholder-on-surface-variant focus:outline-none focus:border-primary resize-none"
+                className="w-full px-4 py-3 bg-surface-container-low rounded-sm text-body-md text-on-surface placeholder-on-surface-variant focus:outline-none focus:bg-surface-container-lowest transition-colors resize-none"
               />
             </div>
 
@@ -331,10 +348,10 @@ const CreateApplicationModal = ({ onClose, onCreate, initialSpec = null }) => {
                 <button
                   type="button"
                   onClick={() => setSchemaMode('upload')}
-                  className={`flex-1 px-4 py-3 border-2 rounded-sm font-medium transition-all flex items-center justify-center gap-2 ${
+                  className={`flex-1 px-4 py-3 rounded-sm font-medium transition-all flex items-center justify-center gap-2 ${
                     schemaMode === 'upload'
-                      ? 'border-primary bg-primary/10 text-primary'
-                      : 'border-outline-variant bg-surface-container-lowest text-on-surface hover:border-outline'
+                      ? 'bg-primary text-white'
+                      : 'bg-surface-container-low text-on-surface hover:bg-surface-container-high'
                   }`}
                 >
                   <Upload className="w-4 h-4" />
@@ -343,10 +360,10 @@ const CreateApplicationModal = ({ onClose, onCreate, initialSpec = null }) => {
                 <button
                   type="button"
                   onClick={() => setSchemaMode('auto-sync')}
-                  className={`flex-1 px-4 py-3 border-2 rounded-sm font-medium transition-all flex items-center justify-center gap-2 ${
+                  className={`flex-1 px-4 py-3 rounded-sm font-medium transition-all flex items-center justify-center gap-2 ${
                     schemaMode === 'auto-sync'
-                      ? 'border-primary bg-primary/10 text-primary'
-                      : 'border-outline-variant bg-surface-container-lowest text-on-surface hover:border-outline'
+                      ? 'bg-primary text-white'
+                      : 'bg-surface-container-low text-on-surface hover:bg-surface-container-high'
                   }`}
                 >
                   <Link className="w-4 h-4" />
@@ -367,7 +384,7 @@ const CreateApplicationModal = ({ onClose, onCreate, initialSpec = null }) => {
                       <button
                         key={sample.file}
                         onClick={() => handleLoadSample(sample.file)}
-                        className="px-4 py-2 bg-surface-container-lowest hover:bg-surface-container-low border border-outline-variant hover:border-primary text-on-surface text-body-sm rounded-sm transition-all"
+                        className="px-4 py-2 bg-surface-container-low hover:bg-surface-container-high text-on-surface text-body-sm rounded-sm transition-all"
                       >
                         {sample.name}
                       </button>
@@ -384,10 +401,10 @@ const CreateApplicationModal = ({ onClose, onCreate, initialSpec = null }) => {
                 onDragOver={handleDragOver}
                 onDragLeave={handleDragLeave}
                 onDrop={handleDrop}
-                className={`border-2 border-dashed rounded-sm p-8 text-center transition-all ${
+                className={`rounded-sm p-8 text-center transition-all ${
                   isDragging
-                    ? 'border-primary bg-primary/5'
-                    : 'border-outline-variant hover:border-outline'
+                    ? 'bg-primary/10'
+                    : 'bg-surface-container-low hover:bg-surface-container-high'
                 }`}
               >
                 <input
@@ -417,7 +434,7 @@ const CreateApplicationModal = ({ onClose, onCreate, initialSpec = null }) => {
                     </p>
                     <button
                       onClick={() => fileInputRef.current.click()}
-                      className="px-4 py-2 bg-surface-container-low hover:bg-surface-container-high border border-outline-variant text-on-surface text-body-sm rounded-sm transition-all"
+                      className="px-4 py-2 bg-surface-container-high hover:bg-surface-container-highest text-on-surface text-body-sm rounded-sm transition-all"
                     >
                       Browse Files
                     </button>
@@ -434,7 +451,7 @@ const CreateApplicationModal = ({ onClose, onCreate, initialSpec = null }) => {
               <button
                 onClick={handleValidateUpload}
                 disabled={isValidating}
-                className="w-full px-4 py-2 bg-primary hover:bg-blue-700 disabled:bg-surface-container-high disabled:text-on-surface-variant text-white rounded-sm font-medium transition-all disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                className="w-full px-4 py-3 bg-primary hover:bg-primary-dark disabled:bg-surface-container-high disabled:text-on-surface-variant text-white rounded-sm font-medium transition-all disabled:cursor-not-allowed flex items-center justify-center gap-2"
               >
                 {isValidating ? (
                   <>
@@ -452,7 +469,7 @@ const CreateApplicationModal = ({ onClose, onCreate, initialSpec = null }) => {
 
             {/* Validation Result for Upload Mode */}
             {validationResult && (
-              <div className="p-4 bg-success/10 border border-success/20 rounded-sm">
+              <div className="p-4 bg-success/10 rounded-sm">
                 <div className="flex items-center gap-2">
                   <CheckCircle className="w-5 h-5 text-success" />
                   <div className="flex-1">
@@ -467,7 +484,7 @@ const CreateApplicationModal = ({ onClose, onCreate, initialSpec = null }) => {
 
             {/* Validation Error for Upload Mode */}
             {validationError && (
-              <div className="p-4 bg-red-50 border border-red-200 rounded-sm">
+              <div className="p-4 bg-red-50 rounded-sm">
                 <div className="flex items-center gap-2">
                   <AlertCircle className="w-5 h-5 text-red-600" />
                   <div className="flex-1">
@@ -480,7 +497,7 @@ const CreateApplicationModal = ({ onClose, onCreate, initialSpec = null }) => {
 
             {/* Error Message */}
             {error && (
-              <div className="flex items-start gap-2 p-3 bg-red-50 border border-red-200 rounded-sm">
+              <div className="flex items-start gap-2 p-3 bg-red-50 rounded-sm">
                 <AlertCircle className="w-5 h-5 text-red-600 flex-shrink-0 mt-0.5" />
                 <p className="text-body-sm text-red-600">{error}</p>
               </div>
@@ -488,7 +505,7 @@ const CreateApplicationModal = ({ onClose, onCreate, initialSpec = null }) => {
 
             {/* Success Message with Endpoints Preview */}
             {parsedSpec && (
-              <div className="p-4 bg-success/10 border border-success/20 rounded-sm">
+              <div className="p-4 bg-success/10 rounded-sm">
                 <div className="flex items-center gap-2 mb-3">
                   <CheckCircle className="w-5 h-5 text-success" />
                   <p className="text-body-sm font-medium text-success">
@@ -533,7 +550,7 @@ const CreateApplicationModal = ({ onClose, onCreate, initialSpec = null }) => {
                     value={schemaSourceUrl}
                     onChange={(e) => setSchemaSourceUrl(e.target.value)}
                     placeholder="https://api.example.com/openapi.json"
-                    className="w-full px-4 py-2 bg-surface-container-lowest border border-outline-variant rounded-sm text-on-surface placeholder-on-surface-variant focus:outline-none focus:border-primary"
+                    className="w-full px-4 py-3 bg-surface-container-low rounded-sm text-on-surface placeholder-on-surface-variant focus:outline-none focus:bg-surface-container-lowest transition-colors"
                   />
                   <p className="text-label-sm text-on-surface-variant mt-1">
                     URL to your OpenAPI specification (JSON or YAML)
@@ -547,7 +564,7 @@ const CreateApplicationModal = ({ onClose, onCreate, initialSpec = null }) => {
                   <select
                     value={schemaSyncInterval}
                     onChange={(e) => setSchemaSyncInterval(e.target.value)}
-                    className="w-full px-4 py-2 bg-surface-container-lowest border border-outline-variant rounded-sm text-on-surface focus:outline-none focus:border-primary"
+                    className="w-full px-4 py-3 bg-surface-container-low rounded-sm text-on-surface focus:outline-none focus:bg-surface-container-lowest transition-colors"
                   >
                     {SYNC_INTERVALS.map((interval) => (
                       <option key={interval.value} value={interval.value}>
@@ -565,7 +582,7 @@ const CreateApplicationModal = ({ onClose, onCreate, initialSpec = null }) => {
                   <button
                     onClick={handleValidateUrl}
                     disabled={isValidating}
-                    className="w-full px-4 py-2 bg-primary hover:bg-blue-700 disabled:bg-surface-container-high disabled:text-on-surface-variant text-white rounded-sm font-medium transition-all disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                    className="w-full px-4 py-3 bg-primary hover:bg-primary-dark disabled:bg-surface-container-high disabled:text-on-surface-variant text-white rounded-sm font-medium transition-all disabled:cursor-not-allowed flex items-center justify-center gap-2"
                   >
                     {isValidating ? (
                       <>
@@ -583,7 +600,7 @@ const CreateApplicationModal = ({ onClose, onCreate, initialSpec = null }) => {
 
                 {/* Validation Result for Auto-Sync Mode */}
                 {validationResult && (
-                  <div className="p-4 bg-success/10 border border-success/20 rounded-sm">
+                  <div className="p-4 bg-success/10 rounded-sm">
                     <div className="flex items-center gap-2">
                       <CheckCircle className="w-5 h-5 text-success" />
                       <div className="flex-1">
@@ -598,7 +615,7 @@ const CreateApplicationModal = ({ onClose, onCreate, initialSpec = null }) => {
 
                 {/* Validation Error for Auto-Sync Mode */}
                 {validationError && (
-                  <div className="p-4 bg-red-50 border border-red-200 rounded-sm">
+                  <div className="p-4 bg-red-50 rounded-sm">
                     <div className="flex items-center gap-2">
                       <AlertCircle className="w-5 h-5 text-red-600" />
                       <div className="flex-1">
@@ -609,7 +626,7 @@ const CreateApplicationModal = ({ onClose, onCreate, initialSpec = null }) => {
                   </div>
                 )}
 
-                <div className="p-4 bg-primary/5 border border-primary/20 rounded-sm">
+                <div className="p-4 bg-primary/10 rounded-sm">
                   <p className="text-body-sm text-primary">
                     <strong>Auto-Sync Mode:</strong> Invari will automatically fetch and validate your OpenAPI spec at the selected interval. You'll be notified if the spec changes or if there are any sync errors.
                   </p>
@@ -621,16 +638,24 @@ const CreateApplicationModal = ({ onClose, onCreate, initialSpec = null }) => {
             <div className="flex gap-3 pt-4">
               <button
                 onClick={onClose}
-                className="flex-1 px-4 py-2 bg-surface-container-low hover:bg-surface-container-high border border-outline-variant text-on-surface rounded-sm font-medium transition-all"
+                disabled={isCreating}
+                className="flex-1 px-4 py-3 bg-surface-container-low hover:bg-surface-container-high text-on-surface rounded-sm font-medium transition-all disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 Cancel
               </button>
               <button
                 onClick={handleSubmit}
-                disabled={!name.trim() || (schemaMode === 'upload' && !parsedSpec) || (schemaMode === 'auto-sync' && !schemaSourceUrl.trim())}
-                className="flex-1 px-4 py-2 bg-primary hover:bg-blue-700 disabled:bg-surface-container-high disabled:text-on-surface-variant text-white rounded-sm font-medium transition-all disabled:cursor-not-allowed"
+                disabled={!name.trim() || (schemaMode === 'upload' && !parsedSpec) || (schemaMode === 'auto-sync' && !schemaSourceUrl.trim()) || isCreating}
+                className="flex-1 px-4 py-3 bg-primary hover:bg-primary-dark disabled:bg-surface-container-high disabled:text-on-surface-variant text-white rounded-sm font-medium transition-all disabled:cursor-not-allowed flex items-center justify-center gap-2"
               >
-                Create Agent
+                {isCreating ? (
+                  <>
+                    <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                    Creating...
+                  </>
+                ) : (
+                  'Create Agent'
+                )}
               </button>
             </div>
           </div>

@@ -58,7 +58,7 @@ const DashboardPage = ({ application, onBack, onLogout }) => {
       {/* Main Content */}
       <div className="flex-1 ml-60 p-6">
         {/* Header */}
-        <nav className="flex items-center justify-between mb-6 pb-4 border-b border-outline-variant">
+        <nav className="flex items-center justify-between mb-8 pb-6 bg-surface-container-low -mx-6 px-6 -mt-6 pt-6"> {/* Use background for separation */}
           <div className="flex items-center gap-3">
             <button
               onClick={onBack}
@@ -67,7 +67,7 @@ const DashboardPage = ({ application, onBack, onLogout }) => {
             >
               <ArrowLeft className="w-5 h-5 text-on-surface-variant" />
             </button>
-            <div className="w-7 h-7 bg-surface-container-low border border-outline-variant rounded-sm flex items-center justify-center">
+            <div className="w-7 h-7 bg-surface-container rounded-sm flex items-center justify-center"> {/* No border, use different surface level */}
               <Shield className="w-4 h-4 text-on-surface" />
             </div>
             <div>
@@ -79,7 +79,7 @@ const DashboardPage = ({ application, onBack, onLogout }) => {
         </nav>
 
       {/* Tab Navigation */}
-      <div className="mb-6 border-b border-outline-variant">
+      <div className="mb-8 bg-surface-container-low -mx-6 px-6 pb-1"> {/* Use background for separation */}
         <div className="flex gap-6">
           <button
             onClick={() => setActiveTab('details')}
@@ -248,16 +248,16 @@ const DashboardPage = ({ application, onBack, onLogout }) => {
                 Total: <span className="font-semibold text-on-surface">{application?.endpoints?.length || 0}</span> endpoints
               </div>
             </div>
-            <div className="space-y-2 max-h-[600px] overflow-y-auto">
+            <div className="space-y-3 max-h-[600px] overflow-y-auto"> {/* Added more spacing */}
               {application?.endpoints?.map((endpoint, idx) => (
-                <div key={idx} className="p-3 bg-surface-container-low border border-outline-variant rounded-sm hover:bg-surface-container-high transition-colors">
+                <div key={idx} className="p-4 bg-surface-container-low rounded-sm hover:bg-surface-container-high transition-colors"> {/* No border, more padding */}
                   <div className="flex items-center gap-3 mb-1">
                     <span className={`px-2 py-0.5 text-[10px] font-bold rounded-xs font-mono ${
-                      endpoint.method === 'GET' ? 'bg-primary/10 text-primary border border-primary/20' :
-                      endpoint.method === 'POST' ? 'bg-success/10 text-success border border-success/20' :
-                      endpoint.method === 'PUT' || endpoint.method === 'PATCH' ? 'bg-repair/10 text-repair border border-repair/20' :
-                      endpoint.method === 'DELETE' ? 'bg-red-500/10 text-red-600 border border-red-500/20' :
-                      'bg-surface-container-high text-on-surface-variant border border-outline-variant'
+                      endpoint.method === 'GET' ? 'bg-primary/10 text-primary' :
+                      endpoint.method === 'POST' ? 'bg-success/10 text-success' :
+                      endpoint.method === 'PUT' || endpoint.method === 'PATCH' ? 'bg-repair/10 text-repair' :
+                      endpoint.method === 'DELETE' ? 'bg-red-500/10 text-red-600' :
+                      'bg-surface-container-high text-on-surface-variant'
                     }`}>
                       {endpoint.method}
                     </span>
@@ -385,11 +385,13 @@ const DashboardPage = ({ application, onBack, onLogout }) => {
                 />
                 <Tooltip
                   contentStyle={{
-                    backgroundColor: '#FFFFFF',
-                    border: '1px solid #E5E7EB',
+                    backgroundColor: 'rgba(255, 255, 255, 0.95)',
+                    backdropFilter: 'blur(12px)',
+                    WebkitBackdropFilter: 'blur(12px)',
                     borderRadius: '4px',
                     color: '#1E293B',
                     fontSize: '12px',
+                    boxShadow: '0 8px 32px rgba(27, 28, 26, 0.04), 0 1px 2px rgba(27, 28, 26, 0.02)',
                   }}
                   labelStyle={{ color: '#64748B', fontWeight: 'bold' }}
                   itemStyle={{ color: '#1E293B' }}
@@ -401,9 +403,9 @@ const DashboardPage = ({ application, onBack, onLogout }) => {
                 <Line
                   type="monotone"
                   dataKey="requests"
-                  stroke="#0052FF"
+                  stroke="#1D9E75"
                   strokeWidth={2}
-                  dot={{ fill: '#0052FF', r: 3 }}
+                  dot={{ fill: '#1D9E75', r: 3 }}
                   activeDot={{ r: 5 }}
                 />
               </RechartsLine>
@@ -497,13 +499,13 @@ const DashboardPage = ({ application, onBack, onLogout }) => {
                     type="text"
                     value={`${import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000'}/proxy/${application?.id}`}
                     readOnly
-                    className="flex-1 px-3 py-2 bg-surface-container-low border border-outline-variant rounded-sm text-body-sm text-on-surface font-mono focus:outline-none"
+                    className="flex-1 px-4 py-3 bg-surface-container-low rounded-sm text-body-sm text-on-surface font-mono focus:outline-none"
                   />
                   <button
                     onClick={() => {
                       navigator.clipboard.writeText(`${import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000'}/proxy/${application?.id}`);
                     }}
-                    className="p-2 bg-surface-container-low hover:bg-surface-container-high border border-outline-variant text-on-surface rounded-sm transition-all"
+                    className="p-3 bg-surface-container-low hover:bg-surface-container-high text-on-surface rounded-sm transition-all"
                     title="Copy to clipboard"
                   >
                     <Copy className="w-4 h-4" />
@@ -522,7 +524,7 @@ const DashboardPage = ({ application, onBack, onLogout }) => {
                     type="text"
                     value={application?.id || 'N/A'}
                     readOnly
-                    className="flex-1 px-3 py-2 bg-surface-container-low border border-outline-variant rounded-sm text-body-sm text-on-surface font-mono focus:outline-none"
+                    className="flex-1 px-4 py-3 bg-surface-container-low rounded-sm text-body-sm text-on-surface font-mono focus:outline-none"
                   />
                   <button
                     onClick={() => {
@@ -530,7 +532,7 @@ const DashboardPage = ({ application, onBack, onLogout }) => {
                         navigator.clipboard.writeText(application.id);
                       }
                     }}
-                    className="p-2 bg-surface-container-low hover:bg-surface-container-high border border-outline-variant text-on-surface rounded-sm transition-all"
+                    className="p-3 bg-surface-container-low hover:bg-surface-container-high text-on-surface rounded-sm transition-all"
                     title="Copy to clipboard"
                   >
                     <Copy className="w-4 h-4" />
@@ -549,7 +551,7 @@ const DashboardPage = ({ application, onBack, onLogout }) => {
                     type="text"
                     value={application?.invariApiKey || 'N/A'}
                     readOnly
-                    className="flex-1 px-3 py-2 bg-surface-container-low border border-outline-variant rounded-sm text-body-sm text-on-surface font-mono focus:outline-none"
+                    className="flex-1 px-4 py-3 bg-surface-container-low rounded-sm text-body-sm text-on-surface font-mono focus:outline-none"
                   />
                   <button
                     onClick={() => {
@@ -557,7 +559,7 @@ const DashboardPage = ({ application, onBack, onLogout }) => {
                         navigator.clipboard.writeText(application.invariApiKey);
                       }
                     }}
-                    className="p-2 bg-surface-container-low hover:bg-surface-container-high border border-outline-variant text-on-surface rounded-sm transition-all"
+                    className="p-3 bg-surface-container-low hover:bg-surface-container-high text-on-surface rounded-sm transition-all"
                     title="Copy to clipboard"
                   >
                     <Copy className="w-4 h-4" />
