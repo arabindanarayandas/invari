@@ -9,6 +9,7 @@ import dashboardRoutes from './routes/dashboard.routes.js';
 import proxyRoutes from './routes/proxy.routes.js';
 import fakeServerRoutes from './routes/fake-server.routes.js';
 import publicRoutes from './routes/public.routes.js';
+import demoRoutes from './routes/demo.routes.js';
 import { env } from './config/env.js';
 import { apiAnalyticsMiddleware } from './middleware/api-analytics.middleware.js';
 
@@ -58,6 +59,7 @@ app.use('/api/auth', authRoutes);
 app.use('/api/agents', agentRoutes);
 app.use('/api/dashboard', dashboardRoutes);
 app.use('/api/public', publicRoutes); // Unauthenticated public demo routes
+app.use('/api/demo', demoRoutes); // Demo specs and AI risk analysis (public)
 app.use('/api/fake-server', fakeServerRoutes); // Fake server for testing (MUST be before proxy)
 app.use('/proxy', proxyRoutes); // Main proxy endpoint
 

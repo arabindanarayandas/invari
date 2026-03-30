@@ -3,6 +3,7 @@ import { useNavigate, Link } from 'react-router-dom';
 import { GoogleLogin } from '@react-oauth/google';
 import { Mail, Lock, X } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
+import apiClient from '../api/client';
 
 /**
  * Landing Page with Interactive Demo
@@ -38,151 +39,34 @@ const LandingPage = () => {
   const [isLoggingIn, setIsLoggingIn] = useState(false);
   const { login, googleLogin, isAuthenticated } = useAuth();
 
-  // Sample data
-  const SAMPLES = {
-    booking: {
-      url: 'api.tastebistro.com',
-      agentName: 'tastebistro',
-      headline: '15 places where AI-generated requests will break',
-      domain: 'api.tastebistro.com — 12 endpoints scanned',
-      pills: [
-        { label: '1 High AI risk', cls: 'high' },
-        { label: '3 Med AI risk', cls: 'med' },
-        { label: '3 Low AI risk', cls: 'low' },
-        { label: '5 AI-safe', cls: 'safe' },
-      ],
-      endpoints: [
-        {
-          method: 'POST', path: '/api/check_availability', risk: 'high', count: 3,
-          repairs: [
-            { type: 'Field name',   from: 'user_email',    to: 'userEmail' },
-            { type: 'Wrong type',   from: '"3" (string)',   to: '3 (integer)' },
-            { type: 'Fuzzy date',   from: '"next friday"',  to: '2026-03-20' },
-          ]
-        },
-        {
-          method: 'POST', path: '/api/bookings', risk: 'high', count: 5,
-          repairs: [
-            { type: 'Field name',     from: 'location_id',     to: 'venue_id' },
-            { type: 'Missing field',  from: '(omitted)',        to: 'bookingSource: "api"' },
-            { type: 'Wrong type',     from: '"true" (string)',  to: 'true (bool)' },
-            { type: 'Fuzzy date',     from: '"tomorrow at 4"', to: '2026-03-18T16:00:00Z' },
-            { type: 'Natural lang',   from: '"party of Five"',  to: 'guest_count: 5' },
-          ]
-        },
-        {
-          method: 'POST', path: '/api/payments/charge', risk: 'med', count: 2,
-          repairs: [
-            { type: 'Wrong type',  from: '"99.99" (string)', to: '99.99 (float)' },
-            { type: 'Field name',  from: 'card_num',         to: 'card_number' },
-          ]
-        },
-        { method: 'GET', path: '/api/users/{id}',  risk: 'safe', count: 0, repairs: [] },
-        { method: 'GET', path: '/api/menu',        risk: 'safe', count: 0, repairs: [] },
-      ],
-      traffic: [
-        { time: '2:26:55', method: 'POST', endpoint: '/api/check_avail..', status: 'blocked',
-          detail: [{ from: 'SQL injection attempt', to: 'Blocked — threat detected' }] },
-        { time: '2:26:50', method: 'POST', endpoint: '/api/check_avail..', status: 'blocked',
-          detail: [{ from: 'Malformed auth header', to: 'Blocked — invalid token' }] },
-        { time: '2:26:46', method: 'POST', endpoint: '/api/check_avail..', status: 'repaired',
-          detail: [{ from: '"next friday"', to: '2026-03-20T00:00:00Z' }] },
-        { time: '2:26:35', method: 'POST', endpoint: '/api/bookings', status: 'repaired',
-          detail: [{ from: '"party of Five"', to: 'guest_count: 5' }, { from: '"true" (string)', to: 'true (bool)' }] },
-        { time: '2:25:04', method: 'POST', endpoint: '/api/payments/ch..', status: 'blocked',
-          detail: [{ from: 'Rate limit exceeded', to: 'Blocked — too many requests' }] },
-        { time: '2:24:52', method: 'GET', endpoint: '/api/users/482', status: 'passed', detail: [] },
-      ]
-    },
-    payments: {
-      url: 'api.acmepay.io',
-      agentName: 'acmepay',
-      headline: '11 places where AI-generated requests will break',
-      domain: 'api.acmepay.io — 9 endpoints scanned',
-      pills: [
-        { label: '2 High AI risk', cls: 'high' },
-        { label: '2 Med AI risk', cls: 'med' },
-        { label: '1 Low AI risk', cls: 'low' },
-        { label: '4 AI-safe', cls: 'safe' },
-      ],
-      endpoints: [
-        {
-          method: 'POST', path: '/v1/charges', risk: 'high', count: 4,
-          repairs: [
-            { type: 'Wrong type',  from: '"99.99" (string)',  to: '9999 (cents int)' },
-            { type: 'Field name',  from: 'card_num',          to: 'card_number' },
-            { type: 'Missing field', from: '(omitted)',       to: 'currency: "usd"' },
-            { type: 'Wrong type',  from: '"false" (string)',   to: 'false (bool)' },
-          ]
-        },
-        {
-          method: 'POST', path: '/v1/refunds', risk: 'high', count: 3,
-          repairs: [
-            { type: 'Wrong type',   from: '"50.00" (string)', to: '5000 (cents int)' },
-            { type: 'Field name',   from: 'charge',           to: 'charge_id' },
-            { type: 'Natural lang', from: '"half the amount"', to: '5000' },
-          ]
-        },
-        { method: 'GET',  path: '/v1/balance',        risk: 'safe', count: 0, repairs: [] },
-        { method: 'GET',  path: '/v1/customers/{id}', risk: 'med',  count: 2,
-          repairs: [{ type: 'Field name', from: 'customer', to: 'customer_id' }, { type: 'Wrong type', from: '"cus_123"', to: 'cus_123' }] },
-        { method: 'POST', path: '/v1/customers',      risk: 'safe', count: 0, repairs: [] },
-      ],
-      traffic: [
-        { time: '3:11:02', method: 'POST', endpoint: '/v1/charges', status: 'repaired',
-          detail: [{ from: '"99.99" (string)', to: '9999 (cents int)' }] },
-        { time: '3:10:55', method: 'POST', endpoint: '/v1/refunds', status: 'repaired',
-          detail: [{ from: '"half the amount"', to: '5000 (cents)' }] },
-        { time: '3:10:44', method: 'GET',  endpoint: '/v1/balance', status: 'passed', detail: [] },
-        { time: '3:10:30', method: 'POST', endpoint: '/v1/charges', status: 'blocked',
-          detail: [{ from: 'Missing required field: card_number', to: 'Blocked — incomplete payload' }] },
-      ]
-    },
-    data: {
-      url: 'api.dataflow.dev',
-      agentName: 'dataflow',
-      headline: '9 places where AI-generated requests will break',
-      domain: 'api.dataflow.dev — 10 endpoints scanned',
-      pills: [
-        { label: '1 High AI risk', cls: 'high' },
-        { label: '2 Med AI risk', cls: 'med' },
-        { label: '3 Low AI risk', cls: 'low' },
-        { label: '4 AI-safe', cls: 'safe' },
-      ],
-      endpoints: [
-        {
-          method: 'POST', path: '/query', risk: 'high', count: 4,
-          repairs: [
-            { type: 'Wrong type',   from: '"100" (string)',   to: '100 (integer)' },
-            { type: 'Field name',   from: 'start',            to: 'start_date' },
-            { type: 'Fuzzy date',   from: '"last week"',      to: '2026-03-17' },
-            { type: 'Natural lang', from: '"top ten results"', to: 'limit: 10' },
-          ]
-        },
-        {
-          method: 'POST', path: '/ingest', risk: 'med', count: 3,
-          repairs: [
-            { type: 'Wrong type',    from: '"[1,2,3]" (string)', to: '[1,2,3] (array)' },
-            { type: 'Missing field', from: '(omitted)',          to: 'schema_version: 1' },
-            { type: 'Field name',    from: 'ts',                 to: 'timestamp' },
-          ]
-        },
-        { method: 'GET', path: '/datasets',     risk: 'safe', count: 0, repairs: [] },
-        { method: 'GET', path: '/schema/{id}',  risk: 'safe', count: 0, repairs: [] },
-        { method: 'DELETE', path: '/datasets/{id}', risk: 'med', count: 2,
-          repairs: [{ type: 'Field name', from: 'id', to: 'dataset_id' }, { type: 'Wrong type', from: '"42"', to: '42 (int)' }] },
-      ],
-      traffic: [
-        { time: '4:02:18', method: 'POST', endpoint: '/query', status: 'repaired',
-          detail: [{ from: '"last week"', to: '2026-03-17' }] },
-        { time: '4:02:10', method: 'POST', endpoint: '/ingest', status: 'repaired',
-          detail: [{ from: '"[1,2,3]" (string)', to: '[1,2,3] (array)' }] },
-        { time: '4:02:05', method: 'GET',  endpoint: '/datasets', status: 'passed', detail: [] },
-        { time: '4:01:52', method: 'POST', endpoint: '/query', status: 'blocked',
-          detail: [{ from: 'SQL injection in query field', to: 'Blocked — threat detected' }] },
-      ]
-    }
-  };
+  // Sample spec names (fetched from server)
+  const [demoSpecs, setDemoSpecs] = useState([]);
+  const [loadingSpecs, setLoadingSpecs] = useState(true);
+
+  // Fetch demo specs on mount
+  useEffect(() => {
+    const fetchDemoSpecs = async () => {
+      try {
+        const response = await apiClient.getDemoSpecs();
+        if (response.success && response.data) {
+          setDemoSpecs(response.data);
+        }
+      } catch (error) {
+        console.error('Failed to fetch demo specs:', error);
+        // Fallback to hardcoded specs if API fails
+        setDemoSpecs([
+          { name: 'booking', displayName: 'Booking API', domain: 'hospitality' },
+          { name: 'banking', displayName: 'Banking API', domain: 'financial' },
+          { name: 'medical', displayName: 'Medical API', domain: 'healthcare' },
+          { name: 'insurance', displayName: 'Insurance API', domain: 'insurance' },
+        ]);
+      } finally {
+        setLoadingSpecs(false);
+      }
+    };
+
+    fetchDemoSpecs();
+  }, []);
 
   // Clear localStorage on mount (when coming to home page)
   useEffect(() => {
@@ -201,30 +85,29 @@ const LandingPage = () => {
     };
   }, []);
 
-  // Real API URLs for samples
-  const REAL_API_URLS = {
-    petstore: 'https://petstore3.swagger.io/api/v3/openapi.json',
-    httpbin: 'https://httpbin.org/spec.json'
-  };
-
-  // Load sample - fetch real API specs
-  const loadSample = async (key) => {
-    const url = REAL_API_URLS[key];
-
-    if (!url) return;
+  // Load sample - fetch AI analysis from server
+  const loadSample = async (specName) => {
+    if (!specName || loadingSample) return;
 
     setLoadingSample(true);
     try {
-      const response = await fetch(url);
-      if (!response.ok) throw new Error('Failed to fetch spec');
+      // Call server API to analyze the spec by name
+      const response = await apiClient.analyzeSpec(specName);
 
-      const specJson = await response.json();
-      const specText = JSON.stringify(specJson);
+      if (!response.success) {
+        throw new Error(response.error || 'Failed to analyze spec');
+      }
 
-      // Store the full fetched spec for later use
-      setFetchedSpec(specText);
+      const specData = response.data;
 
-      const specData = parseSpec(specText, '.json', url);
+      // Fetch the full spec content
+      const fullSpecResponse = await apiClient.getDemoSpec(specName);
+      if (!fullSpecResponse.success) {
+        throw new Error(fullSpecResponse.error || 'Failed to fetch full spec');
+      }
+
+      // Store the full spec content (stringified) for later use
+      setFetchedSpec(JSON.stringify(fullSpecResponse.data.spec));
 
       // Store upload mode as demo
       localStorage.setItem('uploadMode', 'demo');
@@ -254,50 +137,36 @@ const LandingPage = () => {
     }
   };
 
-  // Start scan
-  const startScan = async (sampleKey) => {
+  // Start scan (from URL input)
+  const startScan = async () => {
     const urlVal = urlInput.trim();
-    if (!urlVal && !sampleKey) return;
+    if (!urlVal) return;
 
-    // If sampleKey is provided, use hardcoded sample data (should not happen in URL scan flow)
-    if (sampleKey) {
-      const data = SAMPLES[sampleKey];
-      setCurrentData(data);
-      setCurrentScreen('scan');
-      setEndpointsVisible([]);
-
-      // Animate endpoints appearing
-      data.endpoints.forEach((_, i) => {
-        setTimeout(() => {
-          setEndpointsVisible(prev => [...prev, i]);
-        }, 400 + i * 500);
-      });
-
-      // Go to results after all endpoints shown
-      const delay = 400 + data.endpoints.length * 500 + 200;
-      setTimeout(() => {
-        setCurrentScreen('results');
-      }, delay);
-      return;
-    }
-
-    // Fetch real spec from URL
     setLoadingSample(true);
     try {
+      // Fetch spec from URL
       const response = await fetch(urlVal);
       if (!response.ok) throw new Error('Failed to fetch spec');
 
       const specJson = await response.json();
       const specText = JSON.stringify(specJson);
 
-      // Store the full fetched spec for later use
-      setFetchedSpec(specText);
+      // Send to server for analysis
+      const analysisResponse = await apiClient.analyzeSpec(specText);
 
-      const specData = parseSpec(specText, '.json', urlVal);
+      if (!analysisResponse.success) {
+        throw new Error(analysisResponse.error || 'Failed to analyze spec');
+      }
+
+      const specData = analysisResponse.data;
+
+      // Store the spec content for later use
+      setFetchedSpec(specText);
 
       // Store upload mode as manual
       localStorage.setItem('uploadMode', 'manual');
 
+      setUrlInput('https://' + specData.url);
       setCurrentData(specData);
       setCurrentScreen('scan');
       setEndpointsVisible([]);
@@ -315,8 +184,8 @@ const LandingPage = () => {
         setCurrentScreen('results');
       }, delay);
     } catch (error) {
-      console.error('Failed to fetch spec from URL:', error);
-      alert('Failed to fetch OpenAPI spec from URL. Please check the URL and try again.');
+      console.error('Failed to fetch and analyze spec:', error);
+      alert('Failed to fetch and analyze OpenAPI spec. Please check the URL and try again.');
     } finally {
       setLoadingSample(false);
     }
@@ -371,7 +240,7 @@ const LandingPage = () => {
     }
   };
 
-  const processFile = (file) => {
+  const processFile = async (file) => {
     const validExts = ['.json', '.yaml', '.yml'];
     const ext = '.' + file.name.split('.').pop().toLowerCase();
     if (!validExts.includes(ext)) {
@@ -380,102 +249,29 @@ const LandingPage = () => {
     }
 
     const reader = new FileReader();
-    reader.onload = (e) => {
+    reader.onload = async (e) => {
       try {
         const text = e.target.result;
-        const specData = parseSpec(text, ext, file.name);
+
+        // Send to server for analysis
+        const analysisResponse = await apiClient.analyzeSpec(text);
+
+        if (!analysisResponse.success) {
+          throw new Error(analysisResponse.error || 'Failed to analyze spec');
+        }
+
+        const specData = analysisResponse.data;
+
+        // Store the spec content for later use
+        setFetchedSpec(text);
         setUploadedSpecData(specData);
         setUploadedFile(file.name);
       } catch (err) {
-        alert('Could not parse spec: ' + err.message);
+        console.error('Failed to analyze spec:', err);
+        alert('Could not parse or analyze spec: ' + err.message);
       }
     };
     reader.readAsText(file);
-  };
-
-  // Parse OpenAPI spec
-  const parseSpec = (text, ext, filename) => {
-    let spec;
-    if (ext === '.json') {
-      spec = JSON.parse(text);
-    } else {
-      // Fallback for YAML - use booking sample
-      return SAMPLES.booking;
-    }
-
-    const title = spec.info?.title || filename.replace(/\.[^.]+$/, '');
-    const host = spec.host || spec.servers?.[0]?.url?.replace(/https?:\/\//, '').split('/')[0] || title.toLowerCase().replace(/\s+/g, '-') + '.api';
-    const agentName = host.split('.')[0].replace(/[^a-z0-9]/gi, '').toLowerCase();
-
-    const paths = spec.paths || {};
-    const endpoints = [];
-    let highCount = 0, medCount = 0, lowCount = 0, safeCount = 0, totalBreaks = 0;
-
-    Object.entries(paths).slice(0, 8).forEach(([path, methods]) => {
-      Object.entries(methods).forEach(([method, op]) => {
-        if (['get','post','put','patch','delete'].includes(method)) {
-          const params = op.parameters || [];
-          const bodyProps = op.requestBody?.content?.['application/json']?.schema?.properties || {};
-          const allFields = [...params.map(p => p.name), ...Object.keys(bodyProps)];
-
-          let risk, repairs = [];
-          if (method === 'post' || method === 'put') {
-            if (allFields.length >= 3) {
-              risk = 'high';
-              highCount++;
-              repairs = [
-                { type: 'Field name', from: 'user_id', to: 'userId' },
-                { type: 'Wrong type', from: '"123" (string)', to: '123 (integer)' },
-                { type: 'Fuzzy date', from: '"next week"', to: '2026-03-25' },
-              ];
-            } else {
-              risk = 'med';
-              medCount++;
-              repairs = [{ type: 'Wrong type', from: '"value" (string)', to: 'value (integer)' }];
-            }
-          } else if (method === 'patch') {
-            risk = 'med';
-            medCount++;
-            repairs = [{ type: 'Field name', from: 'ids', to: 'id' }];
-          } else {
-            risk = 'safe';
-            safeCount++;
-          }
-
-          totalBreaks += repairs.length;
-          endpoints.push({ method: method.toUpperCase(), path, risk, count: repairs.length, repairs });
-        }
-      });
-    });
-
-    if (endpoints.length === 0) throw new Error('No paths found in spec.');
-
-    const pills = [];
-    if (highCount) pills.push({ label: `${highCount} High AI risk`, cls: 'high' });
-    if (medCount)  pills.push({ label: `${medCount} Med AI risk`,  cls: 'med' });
-    if (lowCount)  pills.push({ label: `${lowCount} Low AI risk`,  cls: 'low' });
-    if (safeCount) pills.push({ label: `${safeCount} AI-safe`,     cls: 'safe' });
-
-    const traffic = endpoints.filter(ep => ep.repairs.length > 0).slice(0, 4).map((ep, i) => {
-      const statuses = ['repaired', 'repaired', 'blocked', 'passed'];
-      const st = statuses[i % statuses.length];
-      const now = new Date();
-      now.setMinutes(now.getMinutes() - i * 2);
-      const t = `${now.getHours()}:${String(now.getMinutes()).padStart(2,'0')}:${String(now.getSeconds()).padStart(2,'0')}`;
-      return {
-        time: t, method: ep.method,
-        endpoint: ep.path.length > 20 ? ep.path.substring(0,20) + '..' : ep.path,
-        status: st,
-        detail: st === 'repaired' && ep.repairs[0] ? [{ from: ep.repairs[0].from, to: ep.repairs[0].to }] : []
-      };
-    });
-
-    return {
-      url: host, agentName,
-      headline: `${totalBreaks} places where AI-generated requests will break`,
-      domain: `${host} — ${endpoints.length} endpoints scanned`,
-      pills, endpoints, traffic
-    };
   };
 
   // Show agent creation modal
@@ -522,7 +318,8 @@ const LandingPage = () => {
       spec: fullSpec,
       url: currentData.url,
       agentId: agent.id,
-      agentName: agent.name
+      agentName: agent.name,
+      serverAnalysis: currentData // Pass the entire server analysis
     };
 
     // Save agent and spec data to localStorage
@@ -699,12 +496,38 @@ const LandingPage = () => {
                 <div style={{ marginTop: '16px' }}>
                   <div style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: '10px', color: '#3d4943', textTransform: 'uppercase', letterSpacing: '0.15em', marginBottom: '12px' }}>Try a sample</div>
                   <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
-                    <button onClick={() => !loadingSample && loadSample('petstore')} disabled={loadingSample} style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: '11px', border: '1px solid rgba(188, 202, 193, 0.6)', color: '#3d4943', padding: '6px 12px', borderRadius: '999px', background: '#f4f3f0', cursor: loadingSample ? 'not-allowed' : 'pointer', transition: 'all 0.15s', opacity: loadingSample ? 0.5 : 1, display: 'flex', alignItems: 'center', gap: '6px' }}>
-                      {loadingSample ? '⏳' : '📅'} Booking API + AI agent
-                    </button>
-                    <button onClick={() => !loadingSample && loadSample('httpbin')} disabled={loadingSample} style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: '11px', border: '1px solid rgba(188, 202, 193, 0.6)', color: '#3d4943', padding: '6px 12px', borderRadius: '999px', background: '#f4f3f0', cursor: loadingSample ? 'not-allowed' : 'pointer', transition: 'all 0.15s', opacity: loadingSample ? 0.5 : 1, display: 'flex', alignItems: 'center', gap: '6px' }}>
-                      {loadingSample ? '⏳' : '💳'} Payments API + tool use
-                    </button>
+                    {loadingSpecs ? (
+                      <div style={{ width: '100%', textAlign: 'center', padding: '12px', color: '#6b6860', fontSize: '12px' }}>
+                        Loading samples...
+                      </div>
+                    ) : demoSpecs.length > 0 ? (
+                      demoSpecs.map((spec) => {
+                        const emojiMap = {
+                          'booking': '📅',
+                          'banking': '💳',
+                          'medical': '⚕️',
+                          'insurance': '🛡️',
+                          'hospitality': '📅',
+                          'financial': '💳',
+                          'healthcare': '⚕️',
+                        };
+                        const emoji = emojiMap[spec.name] || emojiMap[spec.domain] || '📄';
+
+                        return (
+                          <button
+                            key={spec.name}
+                            onClick={() => !loadingSample && loadSample(spec.name)}
+                            disabled={loadingSample}
+                            style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: '11px', border: '1px solid rgba(188, 202, 193, 0.6)', color: '#3d4943', padding: '6px 12px', borderRadius: '999px', background: '#f4f3f0', cursor: loadingSample ? 'not-allowed' : 'pointer', transition: 'all 0.15s', opacity: loadingSample ? 0.5 : 1, display: 'flex', alignItems: 'center', gap: '6px' }}>
+                            {loadingSample ? '⏳' : emoji} {spec.displayName}
+                          </button>
+                        );
+                      })
+                    ) : (
+                      <div style={{ width: '100%', textAlign: 'center', padding: '12px', color: '#6b6860', fontSize: '12px' }}>
+                        No demo specs available
+                      </div>
+                    )}
                   </div>
                 </div>
               </div>

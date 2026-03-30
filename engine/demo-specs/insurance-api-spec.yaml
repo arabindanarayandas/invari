@@ -1,0 +1,1539 @@
+openapi: 3.0.3
+info:
+  title: ProtectCore Underwriting API
+  description: >
+    Core insurance and underwriting API for life, health, property, and commercial insurers.
+    Covers policy applications, risk assessment, underwriting decisions, claims management,
+    premium calculations, and compliance. Built for integration with AI underwriting agents,
+    copilots, and automated triage systems. All monetary values in GBP pence unless specified.
+    All dates in ISO 8601. All coverage limits as integers in pence.
+  version: 5.0.1
+  contact:
+    email: api@protectcore.com
+
+servers:
+  - url: https://api.protectcore.com/v5
+    description: Production
+
+tags:
+  - name: Applications
+  - name: Underwriting
+  - name: Policies
+  - name: Claims
+  - name: Premiums
+  - name: Compliance
+  - name: Renewals
+
+paths:
+
+  /applications/life:
+    post:
+      tags: [Applications]
+      summary: Submit a life insurance application
+      operationId: applyLifeInsurance
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LifeInsuranceApplicationRequest'
+      responses:
+        '202':
+          description: Application submitted for underwriting
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApplicationResult'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '422':
+          $ref: '#/components/responses/ValidationError'
+
+  /applications/health:
+    post:
+      tags: [Applications]
+      summary: Submit a health insurance application
+      operationId: applyHealthInsurance
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/HealthInsuranceApplicationRequest'
+      responses:
+        '202':
+          description: Application submitted
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApplicationResult'
+
+  /applications/property:
+    post:
+      tags: [Applications]
+      summary: Submit a property insurance application
+      operationId: applyPropertyInsurance
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PropertyInsuranceApplicationRequest'
+      responses:
+        '202':
+          description: Application submitted
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApplicationResult'
+
+  /applications/commercial:
+    post:
+      tags: [Applications]
+      summary: Submit a commercial/business insurance application
+      operationId: applyCommercialInsurance
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CommercialInsuranceApplicationRequest'
+      responses:
+        '202':
+          description: Application submitted
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApplicationResult'
+
+  /underwriting/assess:
+    post:
+      tags: [Underwriting]
+      summary: Submit risk assessment data for underwriting decision
+      operationId: assessRisk
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RiskAssessmentRequest'
+      responses:
+        '200':
+          description: Underwriting decision
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UnderwritingDecision'
+
+  /underwriting/medical-evidence:
+    post:
+      tags: [Underwriting]
+      summary: Submit medical evidence for life or health underwriting
+      operationId: submitMedicalEvidence
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MedicalEvidenceRequest'
+      responses:
+        '202':
+          description: Medical evidence received
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MedicalEvidenceResult'
+
+  /premiums/calculate:
+    post:
+      tags: [Premiums]
+      summary: Calculate premium for a risk profile
+      operationId: calculatePremium
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PremiumCalculationRequest'
+      responses:
+        '200':
+          description: Premium calculated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PremiumCalculationResult'
+
+  /policies:
+    post:
+      tags: [Policies]
+      summary: Issue a new policy
+      operationId: issuePolicy
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/IssuePolicyRequest'
+      responses:
+        '201':
+          description: Policy issued
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Policy'
+
+  /policies/{policyId}/amend:
+    post:
+      tags: [Policies]
+      summary: Mid-term amendment to an existing policy
+      operationId: amendPolicy
+      parameters:
+        - name: policyId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PolicyAmendmentRequest'
+      responses:
+        '200':
+          description: Policy amended
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Policy'
+
+  /claims:
+    post:
+      tags: [Claims]
+      summary: Register a new insurance claim
+      operationId: registerClaim
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RegisterClaimRequest'
+      responses:
+        '201':
+          description: Claim registered
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Claim'
+
+  /claims/{claimId}/assess:
+    post:
+      tags: [Claims]
+      summary: Submit claim assessment
+      operationId: assessClaim
+      parameters:
+        - name: claimId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ClaimAssessmentRequest'
+      responses:
+        '200':
+          description: Claim assessed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ClaimAssessmentResult'
+
+  /renewals/invite:
+    post:
+      tags: [Renewals]
+      summary: Trigger a renewal invitation
+      operationId: inviteRenewal
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RenewalInviteRequest'
+      responses:
+        '200':
+          description: Renewal invitation sent
+
+  /compliance/sanctions-check:
+    post:
+      tags: [Compliance]
+      summary: Run sanctions and PEP screening
+      operationId: sanctionsCheck
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SanctionsCheckRequest'
+      responses:
+        '200':
+          description: Screening result
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SanctionsCheckResult'
+
+components:
+
+  responses:
+    BadRequest:
+      description: Malformed request
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    ValidationError:
+      description: Validation error
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+
+  schemas:
+
+    LifeInsuranceApplicationRequest:
+      type: object
+      required:
+        - applicantId
+        - productCode
+        - coverageAmountPence
+        - coverageTermYears
+        - premiumFrequency
+        - applicationDate
+        - dateOfBirth
+        - biologicalSex
+        - smokingStatus
+        - occupationCode
+        - countryOfResidence
+        - nationality
+        - sumAssuredPence
+      properties:
+        applicantId:
+          type: string
+          format: uuid
+          example: "m8n9o0p1-2345-6789-0abc-def123456789"
+        productCode:
+          type: string
+          enum: [LEVEL_TERM, DECREASING_TERM, WHOLE_OF_LIFE, CRITICAL_ILLNESS, INCOME_PROTECTION, JOINT_LIFE]
+          example: "LEVEL_TERM"
+        coverageAmountPence:
+          type: integer
+          minimum: 1000000
+          maximum: 1000000000000
+          description: "Coverage amount in pence. £100,000 = 10000000"
+          example: 25000000000
+        coverageTermYears:
+          type: integer
+          minimum: 1
+          maximum: 50
+          example: 25
+        premiumFrequency:
+          type: string
+          enum: [monthly, quarterly, annually]
+          example: "monthly"
+        applicationDate:
+          type: string
+          format: date
+          description: "YYYY-MM-DD"
+          example: "2026-04-01"
+        dateOfBirth:
+          type: string
+          format: date
+          description: "YYYY-MM-DD"
+          example: "1985-06-20"
+        biologicalSex:
+          type: string
+          enum: [male, female]
+          example: "male"
+        smokingStatus:
+          type: string
+          enum: [non_smoker, smoker, ex_smoker]
+          description: "Smoker = any tobacco in last 12 months"
+          example: "non_smoker"
+        occupationCode:
+          type: string
+          pattern: '^OCC\d{4}$'
+          description: "4-digit occupation code prefixed OCC e.g. OCC1234"
+          example: "OCC1205"
+        occupationClass:
+          type: string
+          enum: [class_1, class_2, class_3, class_4]
+          description: "Class 1=professional, Class 4=hazardous manual"
+          example: "class_1"
+        countryOfResidence:
+          type: string
+          pattern: '^[A-Z]{2}$'
+          description: "ISO 3166-1 alpha-2"
+          example: "GB"
+        nationality:
+          type: string
+          pattern: '^[A-Z]{2}$'
+          example: "GB"
+        sumAssuredPence:
+          type: integer
+          minimum: 1000000
+          description: "Sum assured in pence"
+          example: 25000000000
+        beneficiaryName:
+          type: string
+          maxLength: 200
+          example: "Jane Doe"
+        beneficiaryRelationship:
+          type: string
+          enum: [spouse, civil_partner, child, parent, sibling, other]
+          example: "spouse"
+        beneficiarySharePercent:
+          type: integer
+          minimum: 1
+          maximum: 100
+          default: 100
+          example: 100
+        existingConditionsDeclared:
+          type: boolean
+          default: false
+          example: false
+        familyHistoryOfConditions:
+          type: array
+          items:
+            type: string
+            enum: [heart_disease, cancer, stroke, diabetes, mental_health, none]
+          example: ["diabetes"]
+        heightCm:
+          type: integer
+          minimum: 50
+          maximum: 300
+          description: "Height in centimetres"
+          example: 178
+        weightKg:
+          type: number
+          format: float
+          minimum: 10
+          maximum: 400
+          description: "Weight in kilograms"
+          example: 82.5
+        annualIncomePence:
+          type: integer
+          minimum: 0
+          description: "Annual income in pence"
+          example: 5500000
+        outstangingMortgagePence:
+          type: integer
+          minimum: 0
+          example: 30000000000
+        paymentMethodId:
+          type: string
+          format: uuid
+          example: "n9o0p1q2-3456-7890-abcd-ef1234567890"
+        directDebitDay:
+          type: integer
+          minimum: 1
+          maximum: 28
+          example: 1
+        adviserId:
+          type: string
+          format: uuid
+          example: "o0p1q2r3-4567-8901-2345-6789abcdef01"
+        distributionChannel:
+          type: string
+          enum: [direct, adviser, aggregator, employer, bank, digital_broker]
+          example: "adviser"
+      example:
+        applicantId: "m8n9o0p1-2345-6789-0abc-def123456789"
+        productCode: "LEVEL_TERM"
+        coverageAmountPence: 25000000000
+        coverageTermYears: 25
+        premiumFrequency: "monthly"
+        applicationDate: "2026-04-01"
+        dateOfBirth: "1985-06-20"
+        biologicalSex: "male"
+        smokingStatus: "non_smoker"
+        occupationCode: "OCC1205"
+        occupationClass: "class_1"
+        countryOfResidence: "GB"
+        nationality: "GB"
+        sumAssuredPence: 25000000000
+        beneficiaryName: "Jane Doe"
+        beneficiaryRelationship: "spouse"
+        beneficiarySharePercent: 100
+        existingConditionsDeclared: false
+        familyHistoryOfConditions: ["diabetes"]
+        heightCm: 178
+        weightKg: 82.5
+        annualIncomePence: 5500000
+        outstangingMortgagePence: 30000000000
+        paymentMethodId: "n9o0p1q2-3456-7890-abcd-ef1234567890"
+        directDebitDay: 1
+        adviserId: "o0p1q2r3-4567-8901-2345-6789abcdef01"
+        distributionChannel: "adviser"
+
+    HealthInsuranceApplicationRequest:
+      type: object
+      required:
+        - applicantId
+        - planType
+        - coverageStartDate
+        - dateOfBirth
+        - biologicalSex
+        - postcode
+        - countryOfResidence
+        - annualExcessPence
+        - premiumFrequency
+      properties:
+        applicantId:
+          type: string
+          format: uuid
+        planType:
+          type: string
+          enum: [basic, standard, comprehensive, premium]
+        coverageStartDate:
+          type: string
+          format: date
+          description: "YYYY-MM-DD"
+        dateOfBirth:
+          type: string
+          format: date
+        biologicalSex:
+          type: string
+          enum: [male, female]
+        postcode:
+          type: string
+          pattern: '^[A-Z]{1,2}\d[A-Z\d]? ?\d[A-Z]{2}$'
+        countryOfResidence:
+          type: string
+          pattern: '^[A-Z]{2}$'
+          default: GB
+        annualExcessPence:
+          type: integer
+          minimum: 0
+          maximum: 1000000
+          description: "Annual excess in pence. £100 = 10000"
+        premiumFrequency:
+          type: string
+          enum: [monthly, annually]
+        coverageOptions:
+          type: array
+          items:
+            type: string
+            enum: [inpatient, outpatient, mental_health, dental, optical, physio, cancer, maternity, international]
+        gpReferralRequired:
+          type: boolean
+          default: true
+          description: "If true, GP referral needed before specialist access"
+        hospitalList:
+          type: string
+          enum: [standard, extended, full, london_only]
+          default: standard
+        twoYearMoratoriumApplied:
+          type: boolean
+          default: false
+        existingConditionsExcluded:
+          type: array
+          items:
+            type: string
+          description: "Named exclusions from pre-existing conditions"
+        numberOfDependants:
+          type: integer
+          minimum: 0
+          maximum: 20
+          default: 0
+        dependants:
+          type: array
+          items:
+            $ref: '#/components/schemas/Dependant'
+        employerContributionPercent:
+          type: integer
+          minimum: 0
+          maximum: 100
+          default: 0
+        smokingLoadingApplied:
+          type: boolean
+          default: false
+        ageAtEntryLoading:
+          type: boolean
+          default: true
+
+    Dependant:
+      type: object
+      required:
+        - relationship
+        - dateOfBirth
+      properties:
+        relationship:
+          type: string
+          enum: [spouse, civil_partner, child, domestic_partner]
+        dateOfBirth:
+          type: string
+          format: date
+        biologicalSex:
+          type: string
+          enum: [male, female]
+
+    PropertyInsuranceApplicationRequest:
+      type: object
+      required:
+        - applicantId
+        - propertyType
+        - propertyAddressLine1
+        - propertyCity
+        - propertyPostcode
+        - propertyCountryCode
+        - yearBuilt
+        - numberOfBedrooms
+        - rebuildCostPence
+        - contentsValuePence
+        - coverageStartDate
+        - ownershipType
+        - occupancyType
+      properties:
+        applicantId:
+          type: string
+          format: uuid
+          example: "p1q2r3s4-5678-9012-3456-789abcdef012"
+        propertyType:
+          type: string
+          enum: [detached, semi_detached, terraced, flat, maisonette, bungalow, cottage, listed_building]
+          example: "semi_detached"
+        propertyAddressLine1:
+          type: string
+          maxLength: 100
+          example: "15 Oak Tree Lane"
+        propertyAddressLine2:
+          type: string
+          maxLength: 100
+          example: "Hampstead"
+        propertyCity:
+          type: string
+          maxLength: 100
+          example: "London"
+        propertyPostcode:
+          type: string
+          pattern: '^[A-Z]{1,2}\d[A-Z\d]? ?\d[A-Z]{2}$'
+          example: "NW3 2YU"
+        propertyCountryCode:
+          type: string
+          pattern: '^[A-Z]{2}$'
+          default: GB
+          example: "GB"
+        yearBuilt:
+          type: integer
+          minimum: 1000
+          maximum: 2026
+          example: 1995
+        numberOfBedrooms:
+          type: integer
+          minimum: 0
+          maximum: 20
+          example: 3
+        numberOfBathrooms:
+          type: integer
+          minimum: 0
+          maximum: 20
+          example: 2
+        floorAreaSqm:
+          type: number
+          format: float
+          minimum: 1
+          example: 120.5
+        numberOfStoreys:
+          type: integer
+          minimum: 1
+          maximum: 20
+          example: 2
+        rebuildCostPence:
+          type: integer
+          minimum: 100000
+          description: "Full rebuild cost in pence"
+          example: 35000000
+        contentsValuePence:
+          type: integer
+          minimum: 0
+          description: "Total contents value in pence"
+          example: 5000000
+        coverageStartDate:
+          type: string
+          format: date
+          description: "YYYY-MM-DD"
+          example: "2026-05-01"
+        ownershipType:
+          type: string
+          enum: [owner_occupied, leasehold, freehold, shared_ownership]
+          example: "freehold"
+        occupancyType:
+          type: string
+          enum: [primary_residence, secondary_home, holiday_let, buy_to_let, unoccupied]
+          example: "primary_residence"
+        roofType:
+          type: string
+          enum: [tiles, slate, flat, thatched, metal, other]
+          default: tiles
+          example: "tiles"
+        constructionType:
+          type: string
+          enum: [standard, timber_frame, prefab, listed, non_standard]
+          default: standard
+          example: "standard"
+        securityAlarmFitted:
+          type: boolean
+          default: false
+          example: true
+        cctvFitted:
+          type: boolean
+          default: false
+          example: false
+        floodRiskZone:
+          type: string
+          enum: [zone_1, zone_2, zone_3a, zone_3b, unknown]
+          default: unknown
+          example: "zone_1"
+        previousClaimsCount:
+          type: integer
+          minimum: 0
+          maximum: 99
+          default: 0
+          example: 0
+        previousClaimsValuePence:
+          type: integer
+          minimum: 0
+          default: 0
+          example: 0
+        voluntaryExcessPence:
+          type: integer
+          minimum: 0
+          default: 0
+          example: 25000
+        accidentalDamageCover:
+          type: boolean
+          default: false
+          example: true
+        legalExpensesCover:
+          type: boolean
+          default: false
+          example: false
+        homeEmergencyCover:
+          type: boolean
+          default: false
+          example: true
+        valuablesValuePence:
+          type: integer
+          minimum: 0
+          default: 0
+          example: 1000000
+        bicycleValuePence:
+          type: integer
+          minimum: 0
+          default: 0
+          example: 80000
+      example:
+        applicantId: "p1q2r3s4-5678-9012-3456-789abcdef012"
+        propertyType: "semi_detached"
+        propertyAddressLine1: "15 Oak Tree Lane"
+        propertyAddressLine2: "Hampstead"
+        propertyCity: "London"
+        propertyPostcode: "NW3 2YU"
+        propertyCountryCode: "GB"
+        yearBuilt: 1995
+        numberOfBedrooms: 3
+        numberOfBathrooms: 2
+        floorAreaSqm: 120.5
+        numberOfStoreys: 2
+        rebuildCostPence: 35000000
+        contentsValuePence: 5000000
+        coverageStartDate: "2026-05-01"
+        ownershipType: "freehold"
+        occupancyType: "primary_residence"
+        roofType: "tiles"
+        constructionType: "standard"
+        securityAlarmFitted: true
+        cctvFitted: false
+        floodRiskZone: "zone_1"
+        previousClaimsCount: 0
+        previousClaimsValuePence: 0
+        voluntaryExcessPence: 25000
+        accidentalDamageCover: true
+        legalExpensesCover: false
+        homeEmergencyCover: true
+        valuablesValuePence: 1000000
+        bicycleValuePence: 80000
+
+    CommercialInsuranceApplicationRequest:
+      type: object
+      required:
+        - applicantId
+        - businessName
+        - companiesHouseNumber
+        - sicCode
+        - annualTurnoverPence
+        - numberOfEmployees
+        - businessStartDate
+        - coverageTypes
+        - coverageStartDate
+        - premiumFrequency
+      properties:
+        applicantId:
+          type: string
+          format: uuid
+        businessName:
+          type: string
+          maxLength: 200
+        companiesHouseNumber:
+          type: string
+          pattern: '^[A-Z0-9]{8}$'
+          description: "8-character Companies House number"
+        sicCode:
+          type: string
+          pattern: '^\d{5}$'
+          description: "5-digit Standard Industrial Classification code"
+        annualTurnoverPence:
+          type: integer
+          minimum: 0
+          description: "Annual turnover in pence"
+        numberOfEmployees:
+          type: integer
+          minimum: 0
+          maximum: 100000
+        businessStartDate:
+          type: string
+          format: date
+          description: "YYYY-MM-DD"
+        coverageTypes:
+          type: array
+          minItems: 1
+          items:
+            type: string
+            enum: [public_liability, employers_liability, professional_indemnity, product_liability, cyber, property, business_interruption, directors_officers, fleet, goods_in_transit]
+        coverageStartDate:
+          type: string
+          format: date
+        premiumFrequency:
+          type: string
+          enum: [monthly, quarterly, annually]
+        publicLiabilityLimitPence:
+          type: integer
+          minimum: 100000000
+          description: "Min £1M. In pence."
+        employersLiabilityLimitPence:
+          type: integer
+          minimum: 1000000000
+          description: "Min £10M as required by law. In pence."
+        professionalIndemnityLimitPence:
+          type: integer
+          minimum: 10000000
+          description: "Min £100k. In pence."
+        cyberLiabilityLimitPence:
+          type: integer
+          minimum: 10000000
+        previousInsurerId:
+          type: string
+          format: uuid
+        claimsFreeLimitYears:
+          type: integer
+          minimum: 0
+          maximum: 30
+          default: 0
+        premisesPostcode:
+          type: string
+          pattern: '^[A-Z]{1,2}\d[A-Z\d]? ?\d[A-Z]{2}$'
+        businessLegalStructure:
+          type: string
+          enum: [sole_trader, partnership, llp, limited_company, plc, charity, other]
+        dataProtectionRegistered:
+          type: boolean
+          default: false
+        gdprCompliant:
+          type: boolean
+          default: false
+
+    RiskAssessmentRequest:
+      type: object
+      required:
+        - applicationId
+        - applicantId
+        - productCode
+        - assessmentType
+        - assessmentDate
+      properties:
+        applicationId:
+          type: string
+          format: uuid
+        applicantId:
+          type: string
+          format: uuid
+        productCode:
+          type: string
+        assessmentType:
+          type: string
+          enum: [standard, non_standard, impaired_lives, preferred_lives, group, reinsurance_referral]
+        assessmentDate:
+          type: string
+          format: date
+          description: "YYYY-MM-DD"
+        bmiValue:
+          type: number
+          format: float
+          minimum: 10
+          maximum: 80
+          description: "Body Mass Index"
+        systolicBpMmHg:
+          type: integer
+          minimum: 50
+          maximum: 300
+        diastolicBpMmHg:
+          type: integer
+          minimum: 30
+          maximum: 200
+        cholesterolMmolL:
+          type: number
+          format: float
+          minimum: 0
+          maximum: 20
+        hba1cMmolMol:
+          type: integer
+          minimum: 0
+          maximum: 200
+          description: "HbA1c in mmol/mol for diabetes assessment"
+        hazardousActivities:
+          type: array
+          items:
+            type: string
+            enum: [skydiving, motor_racing, mountaineering, scuba_diving, aviation, military, none]
+        foreignTravelCountryCodes:
+          type: array
+          items:
+            type: string
+            pattern: '^[A-Z]{2}$'
+        annualTravelDaysAbroad:
+          type: integer
+          minimum: 0
+          maximum: 365
+        requestedLoadingPercent:
+          type: integer
+          minimum: 0
+          maximum: 500
+          description: "Proposed premium loading percentage"
+        exclusionsRequested:
+          type: array
+          items:
+            type: string
+        referralRequired:
+          type: boolean
+          default: false
+        chiefMedicalOfficerReview:
+          type: boolean
+          default: false
+
+    UnderwritingDecision:
+      type: object
+      properties:
+        decisionId:
+          type: string
+          format: uuid
+        applicationId:
+          type: string
+          format: uuid
+        decision:
+          type: string
+          enum: [accepted_standard, accepted_non_standard, postponed, declined, referred]
+        loadingPercent:
+          type: integer
+          minimum: 0
+        exclusions:
+          type: array
+          items:
+            type: string
+        decisionDate:
+          type: string
+          format: date
+        decisionExpiryDate:
+          type: string
+          format: date
+        underwriterId:
+          type: string
+          format: uuid
+        decisionRationale:
+          type: string
+
+    MedicalEvidenceRequest:
+      type: object
+      required:
+        - applicationId
+        - applicantId
+        - evidenceType
+        - submissionDate
+        - gpName
+        - gpPracticeCode
+      properties:
+        applicationId:
+          type: string
+          format: uuid
+        applicantId:
+          type: string
+          format: uuid
+        evidenceType:
+          type: string
+          enum: [gp_report, consultant_report, blood_test, ecg, lung_function, hiv_test, attending_physician_statement, medical_examination]
+        submissionDate:
+          type: string
+          format: date
+          description: "YYYY-MM-DD"
+        gpName:
+          type: string
+          maxLength: 200
+        gpPracticeCode:
+          type: string
+          pattern: '^[A-Z]\d{5}$'
+        reportDate:
+          type: string
+          format: date
+        reportPeriodStartDate:
+          type: string
+          format: date
+        reportPeriodEndDate:
+          type: string
+          format: date
+        diagnosisCodes:
+          type: array
+          items:
+            type: string
+            pattern: '^[A-Z]\d{2}(\.\d{1,4})?$'
+            description: "ICD-10"
+        currentMedications:
+          type: array
+          items:
+            type: string
+        lastConsultationDate:
+          type: string
+          format: date
+        urgentReferralMade:
+          type: boolean
+          default: false
+        attachedDocumentIds:
+          type: array
+          items:
+            type: string
+            format: uuid
+
+    MedicalEvidenceResult:
+      type: object
+      properties:
+        evidenceId:
+          type: string
+          format: uuid
+        status:
+          type: string
+          enum: [received, under_review, accepted, rejected, additional_required]
+        submittedAt:
+          type: string
+          format: date-time
+
+    PremiumCalculationRequest:
+      type: object
+      required:
+        - productCode
+        - dateOfBirth
+        - biologicalSex
+        - smokingStatus
+        - coverageAmountPence
+        - coverageTermYears
+        - premiumFrequency
+        - occupationClass
+        - countryOfResidence
+      properties:
+        productCode:
+          type: string
+          enum: [LEVEL_TERM, DECREASING_TERM, WHOLE_OF_LIFE, CRITICAL_ILLNESS, INCOME_PROTECTION]
+        dateOfBirth:
+          type: string
+          format: date
+        biologicalSex:
+          type: string
+          enum: [male, female]
+        smokingStatus:
+          type: string
+          enum: [non_smoker, smoker, ex_smoker]
+        coverageAmountPence:
+          type: integer
+          minimum: 1000000
+        coverageTermYears:
+          type: integer
+          minimum: 1
+          maximum: 50
+        premiumFrequency:
+          type: string
+          enum: [monthly, quarterly, annually]
+        occupationClass:
+          type: string
+          enum: [class_1, class_2, class_3, class_4]
+        countryOfResidence:
+          type: string
+          pattern: '^[A-Z]{2}$'
+        loadingPercent:
+          type: integer
+          minimum: 0
+          maximum: 500
+          default: 0
+        indexationApplied:
+          type: boolean
+          default: false
+        waiverOfPremiumIncluded:
+          type: boolean
+          default: false
+        criticalIllnessCoverPence:
+          type: integer
+          minimum: 0
+          default: 0
+
+    PremiumCalculationResult:
+      type: object
+      properties:
+        monthlyPremiumPence:
+          type: integer
+        annualPremiumPence:
+          type: integer
+        totalPayablePence:
+          type: integer
+        sumAssuredPence:
+          type: integer
+        riskBand:
+          type: string
+          enum: [preferred, standard, substandard, declined]
+        calculatedAt:
+          type: string
+          format: date-time
+        expiresAt:
+          type: string
+          format: date-time
+
+    IssuePolicyRequest:
+      type: object
+      required:
+        - applicationId
+        - applicantId
+        - productCode
+        - coverageStartDate
+        - coverageEndDate
+        - annualPremiumPence
+        - premiumFrequency
+        - paymentMethodId
+        - sumAssuredPence
+      properties:
+        applicationId:
+          type: string
+          format: uuid
+        applicantId:
+          type: string
+          format: uuid
+        productCode:
+          type: string
+        coverageStartDate:
+          type: string
+          format: date
+          description: "YYYY-MM-DD"
+        coverageEndDate:
+          type: string
+          format: date
+          description: "YYYY-MM-DD"
+        annualPremiumPence:
+          type: integer
+          minimum: 1
+        premiumFrequency:
+          type: string
+          enum: [monthly, quarterly, annually]
+        paymentMethodId:
+          type: string
+          format: uuid
+        sumAssuredPence:
+          type: integer
+          minimum: 1
+        directDebitDay:
+          type: integer
+          minimum: 1
+          maximum: 28
+        coolingOffPeriodDays:
+          type: integer
+          minimum: 0
+          maximum: 30
+          default: 14
+        policyDocumentChannel:
+          type: string
+          enum: [email, post, portal]
+          default: email
+        autoRenew:
+          type: boolean
+          default: true
+        adviserId:
+          type: string
+          format: uuid
+
+    Policy:
+      type: object
+      properties:
+        policyId:
+          type: string
+          format: uuid
+        policyNumber:
+          type: string
+          pattern: '^POL\d{10}$'
+        status:
+          type: string
+          enum: [active, lapsed, cancelled, expired, claimed, surrendered, cooling_off]
+        coverageStartDate:
+          type: string
+          format: date
+        coverageEndDate:
+          type: string
+          format: date
+        issuedAt:
+          type: string
+          format: date-time
+
+    PolicyAmendmentRequest:
+      type: object
+      required:
+        - amendmentType
+        - effectiveDate
+        - requestedBy
+      properties:
+        amendmentType:
+          type: string
+          enum: [increase_cover, decrease_cover, add_benefit, remove_benefit, change_payment_method, change_address, add_dependant, remove_dependant, change_beneficiary]
+        effectiveDate:
+          type: string
+          format: date
+          description: "YYYY-MM-DD"
+        requestedBy:
+          type: string
+          enum: [policyholder, adviser, system]
+        newCoverageAmountPence:
+          type: integer
+          minimum: 0
+        additionalBenefits:
+          type: array
+          items:
+            type: string
+        removedBenefits:
+          type: array
+          items:
+            type: string
+        newPaymentMethodId:
+          type: string
+          format: uuid
+        newDirectDebitDay:
+          type: integer
+          minimum: 1
+          maximum: 28
+        additionalPremiumPence:
+          type: integer
+          minimum: 0
+
+    RegisterClaimRequest:
+      type: object
+      required:
+        - policyId
+        - claimantId
+        - claimType
+        - incidentDate
+        - notificationDate
+        - claimedAmountPence
+        - claimDescription
+        - claimChannel
+      properties:
+        policyId:
+          type: string
+          format: uuid
+          example: "q2r3s4t5-6789-0123-4567-89abcdef0123"
+        claimantId:
+          type: string
+          format: uuid
+          example: "r3s4t5u6-7890-1234-5678-9abcdef01234"
+        claimType:
+          type: string
+          enum: [death, critical_illness, income_protection, total_permanent_disability, property_damage, theft, liability, health_treatment, dental, optical]
+          example: "property_damage"
+        incidentDate:
+          type: string
+          format: date
+          description: "YYYY-MM-DD — when the insured event occurred"
+          example: "2026-03-15"
+        notificationDate:
+          type: string
+          format: date
+          description: "YYYY-MM-DD — when the claim was reported"
+          example: "2026-03-17"
+        claimedAmountPence:
+          type: integer
+          minimum: 1
+          description: "Amount being claimed in pence"
+          example: 850000
+        claimDescription:
+          type: string
+          minLength: 20
+          maxLength: 5000
+          example: "Water leak from upstairs bathroom caused ceiling damage in living room and damaged furniture. Leak was caused by failed pipe joint. Emergency plumber attended and repaired the leak. Now require ceiling repair and replacement of damaged sofa and carpet."
+        claimChannel:
+          type: string
+          enum: [phone, online, post, adviser, app, third_party]
+          example: "online"
+        thirdPartyInvolved:
+          type: boolean
+          default: false
+          example: false
+        thirdPartyDetails:
+          type: string
+          maxLength: 1000
+          example: ""
+        policeReportNumber:
+          type: string
+          maxLength: 50
+          example: ""
+        hospitalAdmissionDate:
+          type: string
+          format: date
+          example: "2026-03-15"
+        hospitalDischargeDate:
+          type: string
+          format: date
+          example: "2026-03-16"
+        diagnosisCodes:
+          type: array
+          items:
+            type: string
+            pattern: '^[A-Z]\d{2}(\.\d{1,4})?$'
+          example: []
+        attachedDocumentIds:
+          type: array
+          items:
+            type: string
+            format: uuid
+          example: ["s4t5u6v7-8901-2345-6789-0abcdef12345", "t5u6v7w8-9012-3456-789a-bcdef0123456"]
+        urgentPaymentRequired:
+          type: boolean
+          default: false
+          example: false
+        bankAccountForPayment:
+          type: string
+          format: uuid
+          example: "u6v7w8x9-0123-4567-890a-bcdef1234567"
+      example:
+        policyId: "q2r3s4t5-6789-0123-4567-89abcdef0123"
+        claimantId: "r3s4t5u6-7890-1234-5678-9abcdef01234"
+        claimType: "property_damage"
+        incidentDate: "2026-03-15"
+        notificationDate: "2026-03-17"
+        claimedAmountPence: 850000
+        claimDescription: "Water leak from upstairs bathroom caused ceiling damage in living room and damaged furniture. Leak was caused by failed pipe joint. Emergency plumber attended and repaired the leak. Now require ceiling repair and replacement of damaged sofa and carpet."
+        claimChannel: "online"
+        thirdPartyInvolved: false
+        attachedDocumentIds: ["s4t5u6v7-8901-2345-6789-0abcdef12345", "t5u6v7w8-9012-3456-789a-bcdef0123456"]
+        urgentPaymentRequired: false
+        bankAccountForPayment: "u6v7w8x9-0123-4567-890a-bcdef1234567"
+
+    ClaimAssessmentRequest:
+      type: object
+      required:
+        - claimId
+        - assessorId
+        - assessmentDate
+        - recommendation
+        - settlementAmountPence
+      properties:
+        claimId:
+          type: string
+          format: uuid
+        assessorId:
+          type: string
+          format: uuid
+        assessmentDate:
+          type: string
+          format: date
+          description: "YYYY-MM-DD"
+        recommendation:
+          type: string
+          enum: [pay_in_full, pay_partial, reject, request_more_information, refer_to_fraud, refer_to_reinsurer]
+        settlementAmountPence:
+          type: integer
+          minimum: 0
+        excessDeductedPence:
+          type: integer
+          minimum: 0
+          default: 0
+        rejectionReason:
+          type: string
+          enum: [non_disclosure, excluded_condition, policy_lapsed, fraudulent_claim, outside_coverage_period, insufficient_evidence, other]
+        specialConditions:
+          type: string
+          maxLength: 2000
+        fraudIndicatorsPresent:
+          type: boolean
+          default: false
+        reinsuranceNotificationRequired:
+          type: boolean
+          default: false
+        exGratiaPaymentPence:
+          type: integer
+          minimum: 0
+          default: 0
+
+    ClaimAssessmentResult:
+      type: object
+      properties:
+        assessmentId:
+          type: string
+          format: uuid
+        claimId:
+          type: string
+          format: uuid
+        status:
+          type: string
+          enum: [approved, partially_approved, rejected, pending, fraud_investigation]
+        settlementAmountPence:
+          type: integer
+        assessedAt:
+          type: string
+          format: date-time
+        paymentEta:
+          type: string
+          format: date
+
+    RenewalInviteRequest:
+      type: object
+      required:
+        - policyId
+        - renewalDate
+        - channel
+        - renewalPremiumPence
+        - premiumFrequency
+      properties:
+        policyId:
+          type: string
+          format: uuid
+        renewalDate:
+          type: string
+          format: date
+          description: "YYYY-MM-DD"
+        channel:
+          type: string
+          enum: [email, post, sms, app_notification, adviser]
+        renewalPremiumPence:
+          type: integer
+          minimum: 1
+        premiumFrequency:
+          type: string
+          enum: [monthly, quarterly, annually]
+        premiumChangePercent:
+          type: number
+          format: float
+          minimum: -100
+          maximum: 1000
+        coverageChanges:
+          type: array
+          items:
+            type: string
+        inviteLeadDays:
+          type: integer
+          minimum: 14
+          maximum: 90
+          default: 30
+        autoRenewIfNoResponse:
+          type: boolean
+          default: false
+
+    SanctionsCheckRequest:
+      type: object
+      required:
+        - applicantId
+        - firstName
+        - lastName
+        - dateOfBirth
+        - nationality
+        - countryOfResidence
+        - checkType
+      properties:
+        applicantId:
+          type: string
+          format: uuid
+        firstName:
+          type: string
+          maxLength: 100
+        lastName:
+          type: string
+          maxLength: 100
+        dateOfBirth:
+          type: string
+          format: date
+          description: "YYYY-MM-DD"
+        nationality:
+          type: string
+          pattern: '^[A-Z]{2}$'
+        countryOfResidence:
+          type: string
+          pattern: '^[A-Z]{2}$'
+        checkType:
+          type: string
+          enum: [ofac, un, eu, hmt, fatf, pep, adverse_media, full]
+          description: "HMT = UK Treasury, OFAC = US sanctions, full = all lists"
+        passportNumber:
+          type: string
+          maxLength: 20
+        nationalIdNumber:
+          type: string
+          maxLength: 30
+        companyName:
+          type: string
+          maxLength: 200
+        companiesHouseNumber:
+          type: string
+          pattern: '^[A-Z0-9]{8}$'
+        checkPurpose:
+          type: string
+          enum: [new_application, renewal, claims, amendment, periodic_review]
+
+    SanctionsCheckResult:
+      type: object
+      properties:
+        checkId:
+          type: string
+          format: uuid
+        status:
+          type: string
+          enum: [clear, match_found, possible_match, error]
+        matchScore:
+          type: number
+          format: float
+          minimum: 0
+          maximum: 1
+        checkedAt:
+          type: string
+          format: date-time
+        listsChecked:
+          type: array
+          items:
+            type: string
+        manualReviewRequired:
+          type: boolean
+
+    Error:
+      type: object
+      properties:
+        code:
+          type: string
+        message:
+          type: string
+        field:
+          type: string
+        timestamp:
+          type: string
+          format: date-time

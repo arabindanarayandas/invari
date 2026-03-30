@@ -247,6 +247,40 @@ class ApiClient {
     const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
     return await this.request(`/api/dashboard/timeline?period=${period}&days=${days}&timezone=${encodeURIComponent(timezone)}`);
   }
+
+  // Demo endpoints (public - no auth required)
+  async getDemoSpecs() {
+    return await this.request('/api/demo/specs');
+  }
+
+  async analyzeSpec(specNameOrContent) {
+    const body = typeof specNameOrContent === 'string' &&
+                 ['booking', 'banking', 'medical', 'insurance'].includes(specNameOrContent)
+      ? { specName: specNameOrContent }
+      : { specContent: specNameOrContent };
+
+    return await this.request('/api/demo/analyze', {
+      method: 'POST',
+      body: JSON.stringify(body),
+    });
+  }
+
+  async getDemoSpec(name) {
+    return await this.request(`/api/demo/specs/${name}`);
+  }
+
+  async validateDemoRequest(spec, method, path, requestBody) {
+    // Client-side validation: only allow POST and PATCH
+    const normalizedMethod = method.toUpperCase();
+    if (normalizedMethod !== 'POST' && normalizedMethod !== 'PATCH') {
+      throw new Error('Only POST and PATCH methods are supported for validation');
+    }
+
+    return await this.request('/api/demo/validate', {
+      method: 'POST',
+      body: JSON.stringify({ spec, method: normalizedMethod, path, requestBody }),
+    });
+  }
 }
 
 export const apiClient = new ApiClient();

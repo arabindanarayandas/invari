@@ -1,0 +1,677 @@
+openapi: 3.0.3
+info:
+  title: Wellness Partners Booking API
+  description: >
+    Full reservation and scheduling API for a multi-location wellness and hospitality platform.
+    Handles table bookings, room reservations, appointment scheduling, and group events.
+  version: 2.4.1
+  contact:
+    email: api@wellnesspartners.com
+
+servers:
+  - url: https://api.wellnesspartners.com/v2
+    description: Production
+
+tags:
+  - name: Reservations
+  - name: Availability
+  - name: Guests
+  - name: Payments
+  - name: Cancellations
+
+paths:
+
+  /availability/check:
+    post:
+      tags: [Availability]
+      summary: Check availability for a booking
+      operationId: checkAvailability
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AvailabilityRequest'
+      responses:
+        '200':
+          description: Availability result
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AvailabilityResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '422':
+          $ref: '#/components/responses/ValidationError'
+
+  /reservations:
+    post:
+      tags: [Reservations]
+      summary: Create a new reservation
+      operationId: createReservation
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateReservationRequest'
+      responses:
+        '201':
+          description: Reservation created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Reservation'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '409':
+          description: Slot no longer available
+
+  /reservations/{reservationId}:
+    get:
+      tags: [Reservations]
+      summary: Get reservation details
+      operationId: getReservation
+      parameters:
+        - name: reservationId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Reservation details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Reservation'
+        '404':
+          description: Reservation not found
+
+    patch:
+      tags: [Reservations]
+      summary: Modify an existing reservation
+      operationId: updateReservation
+      parameters:
+        - name: reservationId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateReservationRequest'
+      responses:
+        '200':
+          description: Reservation updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Reservation'
+
+  /reservations/{reservationId}/cancel:
+    post:
+      tags: [Cancellations]
+      summary: Cancel a reservation
+      operationId: cancelReservation
+      parameters:
+        - name: reservationId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CancelRequest'
+      responses:
+        '200':
+          description: Cancellation confirmed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CancellationResult'
+
+  /guests:
+    post:
+      tags: [Guests]
+      summary: Register a new guest profile
+      operationId: createGuest
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateGuestRequest'
+      responses:
+        '201':
+          description: Guest created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Guest'
+
+  /payments/charge:
+    post:
+      tags: [Payments]
+      summary: Charge a reservation deposit or full amount
+      operationId: chargeReservation
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ChargeRequest'
+      responses:
+        '200':
+          description: Payment processed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaymentResult'
+        '402':
+          description: Payment failed
+
+components:
+
+  responses:
+    BadRequest:
+      description: Malformed request body
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    ValidationError:
+      description: Schema validation failed
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+
+  schemas:
+
+    AvailabilityRequest:
+      type: object
+      required:
+        - locationId
+        - serviceType
+        - requestedDate
+        - partySize
+      properties:
+        locationId:
+          type: string
+          format: uuid
+          description: Unique identifier for the venue location
+          example: "f47ac10b-58cc-4372-a567-0e02b2c3d479"
+        serviceType:
+          type: string
+          enum: [dining, spa, accommodation, event_space, meeting_room]
+          description: Type of service being booked
+          example: "spa"
+        requestedDate:
+          type: string
+          format: date
+          description: "Date of booking in YYYY-MM-DD format"
+          example: "2026-04-15"
+        requestedTime:
+          type: string
+          pattern: '^([01]\d|2[0-3]):([0-5]\d)$'
+          description: "Preferred time in HH:MM 24-hour format"
+          example: "14:30"
+        partySize:
+          type: integer
+          minimum: 1
+          maximum: 500
+          description: Number of guests
+          example: 2
+        durationMinutes:
+          type: integer
+          minimum: 15
+          maximum: 480
+          default: 60
+          description: Requested duration in minutes
+          example: 90
+        requiresAccessibility:
+          type: boolean
+          default: false
+          example: false
+        preferredFloor:
+          type: integer
+          minimum: 1
+          maximum: 50
+          example: 3
+      example:
+        locationId: "f47ac10b-58cc-4372-a567-0e02b2c3d479"
+        serviceType: "spa"
+        requestedDate: "2026-04-15"
+        requestedTime: "14:30"
+        partySize: 2
+        durationMinutes: 90
+        requiresAccessibility: false
+        preferredFloor: 3
+
+    AvailabilityResponse:
+      type: object
+      properties:
+        available:
+          type: boolean
+        availableSlots:
+          type: array
+          items:
+            $ref: '#/components/schemas/TimeSlot'
+        nextAvailableDate:
+          type: string
+          format: date
+
+    TimeSlot:
+      type: object
+      properties:
+        slotId:
+          type: string
+          format: uuid
+        startTime:
+          type: string
+          format: date-time
+        endTime:
+          type: string
+          format: date-time
+        capacity:
+          type: integer
+        pricePerPerson:
+          type: number
+          format: float
+
+    CreateReservationRequest:
+      type: object
+      required:
+        - locationId
+        - serviceType
+        - guestId
+        - reservationDate
+        - reservationTime
+        - partySize
+        - contactPhone
+        - contactEmail
+      properties:
+        locationId:
+          type: string
+          format: uuid
+          example: "a1b2c3d4-5678-90ab-cdef-1234567890ab"
+        serviceType:
+          type: string
+          enum: [dining, spa, accommodation, event_space, meeting_room]
+          example: "dining"
+        guestId:
+          type: string
+          format: uuid
+          example: "9e8d7c6b-5a4f-3e2d-1c0b-9a8b7c6d5e4f"
+        reservationDate:
+          type: string
+          format: date
+          description: "YYYY-MM-DD"
+          example: "2026-05-20"
+        reservationTime:
+          type: string
+          pattern: '^([01]\d|2[0-3]):([0-5]\d)$'
+          description: "HH:MM 24-hour"
+          example: "19:30"
+        partySize:
+          type: integer
+          minimum: 1
+          maximum: 500
+          example: 4
+        contactPhone:
+          type: string
+          pattern: '^\+[1-9]\d{7,14}$'
+          description: "E.164 international format e.g. +447700900123"
+          example: "+447700900123"
+        contactEmail:
+          type: string
+          format: email
+          example: "john.smith@example.com"
+        specialRequests:
+          type: string
+          maxLength: 1000
+          example: "Table near the window with a view please"
+        dietaryRequirements:
+          type: array
+          items:
+            type: string
+            enum: [vegan, vegetarian, halal, kosher, gluten_free, nut_allergy, dairy_free, none]
+          example: ["gluten_free", "nut_allergy"]
+        occasion:
+          type: string
+          enum: [birthday, anniversary, business, date_night, none]
+          default: none
+          example: "anniversary"
+        depositRequired:
+          type: boolean
+          default: false
+          example: true
+        depositAmountGBP:
+          type: number
+          format: float
+          minimum: 0
+          example: 25.00
+        confirmationChannel:
+          type: string
+          enum: [email, sms, both]
+          default: email
+          example: "both"
+        loyaltyMemberId:
+          type: string
+          maxLength: 20
+          example: "GOLD12345"
+        seatingPreference:
+          type: string
+          enum: [window, outdoor, private_room, bar, no_preference]
+          default: no_preference
+          example: "window"
+        accessibilityRequired:
+          type: boolean
+          default: false
+          example: false
+        highChairRequired:
+          type: integer
+          minimum: 0
+          maximum: 10
+          default: 0
+          description: Number of high chairs needed
+          example: 1
+      example:
+        locationId: "a1b2c3d4-5678-90ab-cdef-1234567890ab"
+        serviceType: "dining"
+        guestId: "9e8d7c6b-5a4f-3e2d-1c0b-9a8b7c6d5e4f"
+        reservationDate: "2026-05-20"
+        reservationTime: "19:30"
+        partySize: 4
+        contactPhone: "+447700900123"
+        contactEmail: "john.smith@example.com"
+        specialRequests: "Table near the window with a view please"
+        dietaryRequirements: ["gluten_free", "nut_allergy"]
+        occasion: "anniversary"
+        depositRequired: true
+        depositAmountGBP: 25.00
+        confirmationChannel: "both"
+        loyaltyMemberId: "GOLD12345"
+        seatingPreference: "window"
+        accessibilityRequired: false
+        highChairRequired: 1
+
+    UpdateReservationRequest:
+      type: object
+      properties:
+        reservationDate:
+          type: string
+          format: date
+          example: "2026-05-22"
+        reservationTime:
+          type: string
+          pattern: '^([01]\d|2[0-3]):([0-5]\d)$'
+          example: "20:00"
+        partySize:
+          type: integer
+          minimum: 1
+          maximum: 500
+          example: 6
+        specialRequests:
+          type: string
+          maxLength: 1000
+          example: "Please add 2 extra chairs, celebrating birthday"
+        contactPhone:
+          type: string
+          pattern: '^\+[1-9]\d{7,14}$'
+          example: "+447700900456"
+        contactEmail:
+          type: string
+          format: email
+          example: "john.smith@example.com"
+        seatingPreference:
+          type: string
+          enum: [window, outdoor, private_room, bar, no_preference]
+          example: "private_room"
+      example:
+        reservationDate: "2026-05-22"
+        reservationTime: "20:00"
+        partySize: 6
+        specialRequests: "Please add 2 extra chairs, celebrating birthday"
+        contactPhone: "+447700900456"
+        seatingPreference: "private_room"
+
+    CancelRequest:
+      type: object
+      required:
+        - reason
+        - cancelledBy
+      properties:
+        reason:
+          type: string
+          enum: [guest_request, no_show, force_majeure, venue_closure, duplicate_booking, other]
+          example: "guest_request"
+        cancelledBy:
+          type: string
+          enum: [guest, staff, system]
+          example: "guest"
+        notes:
+          type: string
+          maxLength: 500
+          example: "Customer had to cancel due to illness"
+        refundRequested:
+          type: boolean
+          default: true
+          example: true
+      example:
+        reason: "guest_request"
+        cancelledBy: "guest"
+        notes: "Customer had to cancel due to illness"
+        refundRequested: true
+
+    CancellationResult:
+      type: object
+      properties:
+        cancellationId:
+          type: string
+          format: uuid
+        reservationId:
+          type: string
+          format: uuid
+        refundAmountGBP:
+          type: number
+          format: float
+        refundEta:
+          type: string
+          format: date
+        cancellationFeeGBP:
+          type: number
+          format: float
+
+    CreateGuestRequest:
+      type: object
+      required:
+        - firstName
+        - lastName
+        - email
+        - phoneNumber
+        - dateOfBirth
+      properties:
+        firstName:
+          type: string
+          minLength: 1
+          maxLength: 100
+          example: "Sarah"
+        lastName:
+          type: string
+          minLength: 1
+          maxLength: 100
+          example: "Johnson"
+        email:
+          type: string
+          format: email
+          example: "sarah.johnson@example.com"
+        phoneNumber:
+          type: string
+          pattern: '^\+[1-9]\d{7,14}$'
+          description: "E.164 format"
+          example: "+447700900789"
+        dateOfBirth:
+          type: string
+          format: date
+          description: "YYYY-MM-DD"
+          example: "1985-03-15"
+        nationality:
+          type: string
+          pattern: '^[A-Z]{2}$'
+          description: "ISO 3166-1 alpha-2 country code"
+          example: "GB"
+        preferredLanguage:
+          type: string
+          enum: [en, fr, de, es, it, zh, ja, ar]
+          default: en
+          example: "en"
+        marketingConsent:
+          type: boolean
+          default: false
+          example: true
+        vipStatus:
+          type: boolean
+          default: false
+          example: false
+        notes:
+          type: string
+          maxLength: 500
+          example: "Prefers vegan options"
+      example:
+        firstName: "Sarah"
+        lastName: "Johnson"
+        email: "sarah.johnson@example.com"
+        phoneNumber: "+447700900789"
+        dateOfBirth: "1985-03-15"
+        nationality: "GB"
+        preferredLanguage: "en"
+        marketingConsent: true
+        vipStatus: false
+        notes: "Prefers vegan options"
+
+    Guest:
+      allOf:
+        - $ref: '#/components/schemas/CreateGuestRequest'
+        - type: object
+          properties:
+            guestId:
+              type: string
+              format: uuid
+            createdAt:
+              type: string
+              format: date-time
+            totalVisits:
+              type: integer
+            lifetimeSpendGBP:
+              type: number
+
+    ChargeRequest:
+      type: object
+      required:
+        - reservationId
+        - amountGBP
+        - chargeType
+        - paymentMethodId
+      properties:
+        reservationId:
+          type: string
+          format: uuid
+          example: "e5f6g7h8-9i0j-1k2l-3m4n-5o6p7q8r9s0t"
+        amountGBP:
+          type: number
+          format: float
+          minimum: 0.01
+          maximum: 100000
+          example: 50.00
+        chargeType:
+          type: string
+          enum: [deposit, full_payment, partial_payment, no_show_fee, cancellation_fee]
+          example: "deposit"
+        paymentMethodId:
+          type: string
+          example: "pm_card_visa_4242"
+        currency:
+          type: string
+          enum: [GBP, EUR, USD]
+          default: GBP
+          example: "GBP"
+        sendReceipt:
+          type: boolean
+          default: true
+          example: true
+      example:
+        reservationId: "e5f6g7h8-9i0j-1k2l-3m4n-5o6p7q8r9s0t"
+        amountGBP: 50.00
+        chargeType: "deposit"
+        paymentMethodId: "pm_card_visa_4242"
+        currency: "GBP"
+        sendReceipt: true
+
+    PaymentResult:
+      type: object
+      properties:
+        transactionId:
+          type: string
+          format: uuid
+        status:
+          type: string
+          enum: [success, failed, pending, refunded]
+        amountChargedGBP:
+          type: number
+        chargedAt:
+          type: string
+          format: date-time
+
+    Reservation:
+      type: object
+      properties:
+        reservationId:
+          type: string
+          format: uuid
+        status:
+          type: string
+          enum: [confirmed, pending, cancelled, completed, no_show]
+        locationId:
+          type: string
+          format: uuid
+        serviceType:
+          type: string
+        guestId:
+          type: string
+          format: uuid
+        reservationDate:
+          type: string
+          format: date
+        reservationTime:
+          type: string
+        partySize:
+          type: integer
+        createdAt:
+          type: string
+          format: date-time
+        confirmationCode:
+          type: string
+
+    Error:
+      type: object
+      properties:
+        code:
+          type: string
+        message:
+          type: string
+        field:
+          type: string
+        timestamp:
+          type: string
+          format: date-time

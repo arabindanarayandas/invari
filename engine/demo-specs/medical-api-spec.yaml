@@ -1,0 +1,1271 @@
+openapi: 3.0.3
+info:
+  title: MedCore Clinical API
+  description: >
+    Clinical and healthcare management API for hospitals, clinics, and telehealth platforms.
+    Covers patient management, appointments, prescriptions, lab results, clinical notes,
+    and insurance authorisation. Compliant with HL7 FHIR R4 naming conventions.
+    All datetime fields must use ISO 8601 format. All dosage in metric units only.
+  version: 4.2.0
+  contact:
+    email: api@medcore.health
+
+servers:
+  - url: https://api.medcore.health/v4
+    description: Production
+
+tags:
+  - name: Patients
+  - name: Appointments
+  - name: Prescriptions
+  - name: LabResults
+  - name: ClinicalNotes
+  - name: Insurance
+  - name: Triage
+
+paths:
+
+  /patients:
+    post:
+      tags: [Patients]
+      summary: Register a new patient
+      operationId: registerPatient
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RegisterPatientRequest'
+      responses:
+        '201':
+          description: Patient registered
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Patient'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '409':
+          description: Patient already registered
+
+  /patients/{patientId}:
+    patch:
+      tags: [Patients]
+      summary: Update patient demographics
+      operationId: updatePatient
+      parameters:
+        - name: patientId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdatePatientRequest'
+      responses:
+        '200':
+          description: Patient updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Patient'
+
+  /appointments:
+    post:
+      tags: [Appointments]
+      summary: Book a clinical appointment
+      operationId: bookAppointment
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BookAppointmentRequest'
+      responses:
+        '201':
+          description: Appointment booked
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Appointment'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '409':
+          description: Slot unavailable
+
+  /appointments/{appointmentId}:
+    patch:
+      tags: [Appointments]
+      summary: Update or reschedule appointment
+      operationId: updateAppointment
+      parameters:
+        - name: appointmentId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateAppointmentRequest'
+      responses:
+        '200':
+          description: Appointment updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Appointment'
+
+  /appointments/{appointmentId}/cancel:
+    post:
+      tags: [Appointments]
+      summary: Cancel an appointment
+      operationId: cancelAppointment
+      parameters:
+        - name: appointmentId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CancelAppointmentRequest'
+      responses:
+        '200':
+          description: Appointment cancelled
+
+  /prescriptions:
+    post:
+      tags: [Prescriptions]
+      summary: Issue a prescription
+      operationId: issuePrescription
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/IssuePrescriptionRequest'
+      responses:
+        '201':
+          description: Prescription issued
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Prescription'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '422':
+          description: Drug interaction detected
+
+  /prescriptions/{prescriptionId}/dispense:
+    post:
+      tags: [Prescriptions]
+      summary: Mark prescription as dispensed
+      operationId: dispensePrescription
+      parameters:
+        - name: prescriptionId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DispenseRequest'
+      responses:
+        '200':
+          description: Prescription dispensed
+
+  /lab-results:
+    post:
+      tags: [LabResults]
+      summary: Submit laboratory test results
+      operationId: submitLabResults
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SubmitLabResultsRequest'
+      responses:
+        '201':
+          description: Lab results recorded
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LabResult'
+
+  /clinical-notes:
+    post:
+      tags: [ClinicalNotes]
+      summary: Add a clinical note
+      operationId: addClinicalNote
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ClinicalNoteRequest'
+      responses:
+        '201':
+          description: Note recorded
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ClinicalNote'
+
+  /insurance/authorise:
+    post:
+      tags: [Insurance]
+      summary: Request insurance pre-authorisation
+      operationId: requestAuthorisation
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/InsuranceAuthorisationRequest'
+      responses:
+        '202':
+          description: Authorisation request submitted
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthorisationResult'
+
+  /triage/assess:
+    post:
+      tags: [Triage]
+      summary: Submit triage assessment
+      operationId: triageAssess
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TriageRequest'
+      responses:
+        '200':
+          description: Triage assessment complete
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TriageResult'
+
+components:
+
+  responses:
+    BadRequest:
+      description: Malformed request
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+
+  schemas:
+
+    RegisterPatientRequest:
+      type: object
+      required:
+        - firstName
+        - lastName
+        - dateOfBirth
+        - biologicalSex
+        - nhsNumber
+        - contactPhoneNumber
+        - contactEmail
+        - addressLine1
+        - city
+        - postcode
+        - countryCode
+        - gpPracticeCode
+      properties:
+        firstName:
+          type: string
+          minLength: 1
+          maxLength: 100
+          example: "Emily"
+        lastName:
+          type: string
+          minLength: 1
+          maxLength: 100
+          example: "Thompson"
+        preferredName:
+          type: string
+          maxLength: 100
+          example: "Em"
+        dateOfBirth:
+          type: string
+          format: date
+          description: "YYYY-MM-DD"
+          example: "1992-07-14"
+        biologicalSex:
+          type: string
+          enum: [male, female, intersex]
+          description: "Biological sex for clinical purposes"
+          example: "female"
+        genderIdentity:
+          type: string
+          enum: [male, female, non_binary, prefer_not_to_say, other]
+          example: "female"
+        nhsNumber:
+          type: string
+          pattern: '^\d{10}$'
+          description: "10-digit NHS number"
+          example: "9876543210"
+        contactPhoneNumber:
+          type: string
+          pattern: '^\+[1-9]\d{7,14}$'
+          description: "E.164 format e.g. +447700900123"
+          example: "+447700900234"
+        contactEmail:
+          type: string
+          format: email
+          example: "emily.thompson@example.com"
+        addressLine1:
+          type: string
+          maxLength: 100
+          example: "42 High Street"
+        addressLine2:
+          type: string
+          maxLength: 100
+          example: "Flat 3B"
+        city:
+          type: string
+          maxLength: 100
+          example: "London"
+        postcode:
+          type: string
+          pattern: '^[A-Z]{1,2}\d[A-Z\d]? ?\d[A-Z]{2}$'
+          description: "UK postcode"
+          example: "SW1A 1AA"
+        countryCode:
+          type: string
+          pattern: '^[A-Z]{2}$'
+          default: GB
+          example: "GB"
+        gpPracticeCode:
+          type: string
+          pattern: '^[A-Z]\d{5}$'
+          description: "GP practice ODS code"
+          example: "Y12345"
+        ethnicityCode:
+          type: string
+          enum: [A, B, C, D, E, F, G, H, J, K, L, M, N, P, R, S, Z]
+          description: "NHS ethnicity codes"
+          example: "A"
+        smokingStatus:
+          type: string
+          enum: [never, ex_smoker, current_smoker, unknown]
+          default: unknown
+          example: "never"
+        alcoholUnitsPerWeek:
+          type: number
+          format: float
+          minimum: 0
+          example: 8.0
+        bloodGroup:
+          type: string
+          enum: [A_pos, A_neg, B_pos, B_neg, AB_pos, AB_neg, O_pos, O_neg, unknown]
+          default: unknown
+          example: "A_pos"
+        organDonorConsent:
+          type: boolean
+          default: false
+          example: true
+        researchConsent:
+          type: boolean
+          default: false
+          example: false
+        nextOfKinName:
+          type: string
+          maxLength: 200
+          example: "James Thompson"
+        nextOfKinPhone:
+          type: string
+          pattern: '^\+[1-9]\d{7,14}$'
+          example: "+447700900567"
+        interpreterRequired:
+          type: boolean
+          default: false
+          example: false
+        preferredLanguage:
+          type: string
+          pattern: '^[a-z]{2,3}$'
+          description: "ISO 639 language code"
+          default: en
+          example: "en"
+      example:
+        firstName: "Emily"
+        lastName: "Thompson"
+        preferredName: "Em"
+        dateOfBirth: "1992-07-14"
+        biologicalSex: "female"
+        genderIdentity: "female"
+        nhsNumber: "9876543210"
+        contactPhoneNumber: "+447700900234"
+        contactEmail: "emily.thompson@example.com"
+        addressLine1: "42 High Street"
+        addressLine2: "Flat 3B"
+        city: "London"
+        postcode: "SW1A 1AA"
+        countryCode: "GB"
+        gpPracticeCode: "Y12345"
+        ethnicityCode: "A"
+        smokingStatus: "never"
+        alcoholUnitsPerWeek: 8.0
+        bloodGroup: "A_pos"
+        organDonorConsent: true
+        researchConsent: false
+        nextOfKinName: "James Thompson"
+        nextOfKinPhone: "+447700900567"
+        interpreterRequired: false
+        preferredLanguage: "en"
+
+    UpdatePatientRequest:
+      type: object
+      properties:
+        contactPhoneNumber:
+          type: string
+          pattern: '^\+[1-9]\d{7,14}$'
+        contactEmail:
+          type: string
+          format: email
+        addressLine1:
+          type: string
+        addressLine2:
+          type: string
+        city:
+          type: string
+        postcode:
+          type: string
+        gpPracticeCode:
+          type: string
+        smokingStatus:
+          type: string
+          enum: [never, ex_smoker, current_smoker, unknown]
+        alcoholUnitsPerWeek:
+          type: number
+          format: float
+          minimum: 0
+        nextOfKinName:
+          type: string
+        nextOfKinPhone:
+          type: string
+          pattern: '^\+[1-9]\d{7,14}$'
+
+    Patient:
+      allOf:
+        - $ref: '#/components/schemas/RegisterPatientRequest'
+        - type: object
+          properties:
+            patientId:
+              type: string
+              format: uuid
+            registeredAt:
+              type: string
+              format: date-time
+            status:
+              type: string
+              enum: [active, inactive, deceased, transferred]
+
+    BookAppointmentRequest:
+      type: object
+      required:
+        - patientId
+        - clinicianId
+        - appointmentType
+        - appointmentDateTime
+        - durationMinutes
+        - locationCode
+        - reasonForVisit
+        - bookingChannel
+      properties:
+        patientId:
+          type: string
+          format: uuid
+          example: "f1g2h3i4-5678-9012-3456-789abcdef123"
+        clinicianId:
+          type: string
+          format: uuid
+          example: "g2h3i4j5-6789-0123-4567-89abcdef0123"
+        appointmentType:
+          type: string
+          enum: [gp_consultation, nurse_consultation, specialist_referral, follow_up, annual_review, vaccination, procedure, mental_health, physiotherapy, telehealth]
+          example: "gp_consultation"
+        appointmentDateTime:
+          type: string
+          format: date-time
+          description: "ISO 8601 with timezone e.g. 2026-04-15T09:30:00Z"
+          example: "2026-04-15T09:30:00Z"
+        durationMinutes:
+          type: integer
+          minimum: 5
+          maximum: 480
+          default: 15
+          example: 15
+        locationCode:
+          type: string
+          description: "ODS site code"
+          example: "RYJ01"
+        reasonForVisit:
+          type: string
+          maxLength: 500
+          example: "Persistent cough for 2 weeks"
+        bookingChannel:
+          type: string
+          enum: [online, phone, walk_in, gp_referral, ae_referral, 111_referral]
+          example: "online"
+        urgency:
+          type: string
+          enum: [routine, urgent, emergency]
+          default: routine
+          example: "routine"
+        requiresInterpreter:
+          type: boolean
+          default: false
+          example: false
+        interpreterLanguage:
+          type: string
+          description: "ISO 639 language code"
+          example: "en"
+        requiresAccessibility:
+          type: boolean
+          default: false
+          example: false
+        accessibilityNeeds:
+          type: array
+          items:
+            type: string
+            enum: [wheelchair, hearing_loop, large_print, braille, sign_language, other]
+          example: []
+        linkedReferralId:
+          type: string
+          format: uuid
+          example: "h3i4j5k6-7890-1234-5678-9abcdef01234"
+        twoWeekWait:
+          type: boolean
+          default: false
+          description: "Cancer two-week wait pathway"
+          example: false
+        sendReminder:
+          type: boolean
+          default: true
+          example: true
+        reminderLeadHours:
+          type: integer
+          minimum: 1
+          maximum: 168
+          default: 24
+          example: 24
+      example:
+        patientId: "f1g2h3i4-5678-9012-3456-789abcdef123"
+        clinicianId: "g2h3i4j5-6789-0123-4567-89abcdef0123"
+        appointmentType: "gp_consultation"
+        appointmentDateTime: "2026-04-15T09:30:00Z"
+        durationMinutes: 15
+        locationCode: "RYJ01"
+        reasonForVisit: "Persistent cough for 2 weeks"
+        bookingChannel: "online"
+        urgency: "routine"
+        requiresInterpreter: false
+        requiresAccessibility: false
+        twoWeekWait: false
+        sendReminder: true
+        reminderLeadHours: 24
+
+    UpdateAppointmentRequest:
+      type: object
+      properties:
+        appointmentDateTime:
+          type: string
+          format: date-time
+        durationMinutes:
+          type: integer
+          minimum: 5
+          maximum: 480
+        clinicianId:
+          type: string
+          format: uuid
+        locationCode:
+          type: string
+        urgency:
+          type: string
+          enum: [routine, urgent, emergency]
+
+    CancelAppointmentRequest:
+      type: object
+      required:
+        - reason
+        - cancelledBy
+      properties:
+        reason:
+          type: string
+          enum: [patient_request, clinician_unavailable, no_show, duplicate, clinical_no_longer_required, other]
+        cancelledBy:
+          type: string
+          enum: [patient, clinician, admin, system]
+        notes:
+          type: string
+          maxLength: 500
+        rebookRequired:
+          type: boolean
+          default: false
+
+    Appointment:
+      type: object
+      properties:
+        appointmentId:
+          type: string
+          format: uuid
+        status:
+          type: string
+          enum: [booked, confirmed, arrived, in_progress, completed, cancelled, did_not_attend]
+        patientId:
+          type: string
+          format: uuid
+        clinicianId:
+          type: string
+          format: uuid
+        appointmentDateTime:
+          type: string
+          format: date-time
+        durationMinutes:
+          type: integer
+        locationCode:
+          type: string
+        confirmationCode:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+
+    IssuePrescriptionRequest:
+      type: object
+      required:
+        - patientId
+        - prescriberId
+        - medicationCode
+        - medicationName
+        - dosageMg
+        - dosageForm
+        - routeOfAdministration
+        - frequency
+        - durationDays
+        - quantityToDispense
+        - prescriptionDate
+      properties:
+        patientId:
+          type: string
+          format: uuid
+          example: "i4j5k6l7-8901-2345-6789-abcdef012345"
+        prescriberId:
+          type: string
+          format: uuid
+          example: "j5k6l7m8-9012-3456-789a-bcdef0123456"
+        appointmentId:
+          type: string
+          format: uuid
+          example: "k6l7m8n9-0123-4567-89ab-cdef01234567"
+        medicationCode:
+          type: string
+          description: "SNOMED CT or dm+d code"
+          pattern: '^[0-9]{6,18}$'
+          example: "320652008"
+        medicationName:
+          type: string
+          maxLength: 200
+          example: "Amoxicillin 500mg capsules"
+        dosageMg:
+          type: number
+          format: float
+          minimum: 0.001
+          maximum: 100000
+          description: "Dosage in milligrams"
+          example: 500
+        dosageForm:
+          type: string
+          enum: [tablet, capsule, liquid, injection, inhaler, patch, cream, drops, suppository, spray]
+          example: "capsule"
+        routeOfAdministration:
+          type: string
+          enum: [oral, intravenous, intramuscular, subcutaneous, topical, inhalation, rectal, sublingual, nasal, ophthalmic, otic]
+          example: "oral"
+        frequency:
+          type: string
+          enum: [once_daily, twice_daily, three_times_daily, four_times_daily, every_4_hours, every_6_hours, every_8_hours, weekly, monthly, as_required, stat]
+          example: "three_times_daily"
+        durationDays:
+          type: integer
+          minimum: 1
+          maximum: 365
+          example: 7
+        quantityToDispense:
+          type: integer
+          minimum: 1
+          maximum: 1000
+          example: 21
+        quantityUnit:
+          type: string
+          enum: [tablets, capsules, ml, mg, units, puffs, applications, doses]
+          example: "capsules"
+        prescriptionDate:
+          type: string
+          format: date
+          description: "YYYY-MM-DD"
+          example: "2026-04-10"
+        startDate:
+          type: string
+          format: date
+          description: "YYYY-MM-DD. Defaults to prescription date if omitted"
+          example: "2026-04-10"
+        repeatable:
+          type: boolean
+          default: false
+          example: false
+        numberOfRepeats:
+          type: integer
+          minimum: 0
+          maximum: 12
+          default: 0
+          example: 0
+        controlledDrug:
+          type: boolean
+          default: false
+          example: false
+        controlledDrugSchedule:
+          type: integer
+          minimum: 1
+          maximum: 5
+          description: "Schedule 1-5 for controlled drugs"
+          example: 2
+        takingWithFood:
+          type: boolean
+          example: false
+        patientInstructions:
+          type: string
+          maxLength: 1000
+          example: "Take one capsule three times daily with water. Complete the full course even if symptoms improve."
+        pharmacistNotes:
+          type: string
+          maxLength: 500
+          example: "Patient has no known allergies. Check for penicillin allergy before dispensing."
+        allergiesChecked:
+          type: boolean
+          default: true
+          example: true
+        interactionsChecked:
+          type: boolean
+          default: true
+          example: true
+        electronicPrescription:
+          type: boolean
+          default: true
+          example: true
+        dispensingPharmacyId:
+          type: string
+          format: uuid
+          example: "l7m8n9o0-1234-5678-90ab-cdef12345678"
+      example:
+        patientId: "i4j5k6l7-8901-2345-6789-abcdef012345"
+        prescriberId: "j5k6l7m8-9012-3456-789a-bcdef0123456"
+        appointmentId: "k6l7m8n9-0123-4567-89ab-cdef01234567"
+        medicationCode: "320652008"
+        medicationName: "Amoxicillin 500mg capsules"
+        dosageMg: 500
+        dosageForm: "capsule"
+        routeOfAdministration: "oral"
+        frequency: "three_times_daily"
+        durationDays: 7
+        quantityToDispense: 21
+        quantityUnit: "capsules"
+        prescriptionDate: "2026-04-10"
+        startDate: "2026-04-10"
+        repeatable: false
+        numberOfRepeats: 0
+        controlledDrug: false
+        takingWithFood: false
+        patientInstructions: "Take one capsule three times daily with water. Complete the full course even if symptoms improve."
+        pharmacistNotes: "Patient has no known allergies. Check for penicillin allergy before dispensing."
+        allergiesChecked: true
+        interactionsChecked: true
+        electronicPrescription: true
+        dispensingPharmacyId: "l7m8n9o0-1234-5678-90ab-cdef12345678"
+
+    DispenseRequest:
+      type: object
+      required:
+        - pharmacistId
+        - dispensedAt
+        - quantityDispensed
+        - batchNumber
+        - expiryDate
+      properties:
+        pharmacistId:
+          type: string
+          format: uuid
+        dispensedAt:
+          type: string
+          format: date-time
+        quantityDispensed:
+          type: integer
+          minimum: 1
+        batchNumber:
+          type: string
+          maxLength: 50
+        expiryDate:
+          type: string
+          format: date
+          description: "YYYY-MM-DD"
+        substitutionMade:
+          type: boolean
+          default: false
+        substitutionReason:
+          type: string
+          maxLength: 200
+
+    Prescription:
+      type: object
+      properties:
+        prescriptionId:
+          type: string
+          format: uuid
+        status:
+          type: string
+          enum: [issued, dispensed, partially_dispensed, cancelled, expired]
+        patientId:
+          type: string
+          format: uuid
+        medicationName:
+          type: string
+        issuedAt:
+          type: string
+          format: date-time
+        expiresAt:
+          type: string
+          format: date
+
+    SubmitLabResultsRequest:
+      type: object
+      required:
+        - patientId
+        - requestingClinicianId
+        - specimenType
+        - collectionDateTime
+        - labCode
+        - results
+      properties:
+        patientId:
+          type: string
+          format: uuid
+        requestingClinicianId:
+          type: string
+          format: uuid
+        appointmentId:
+          type: string
+          format: uuid
+        specimenType:
+          type: string
+          enum: [blood, urine, stool, swab, tissue_biopsy, csf, sputum, wound_swab, saliva, other]
+        collectionDateTime:
+          type: string
+          format: date-time
+          description: "ISO 8601 with timezone"
+        labCode:
+          type: string
+          description: "Accredited lab identifier"
+        processingDateTime:
+          type: string
+          format: date-time
+        reportDateTime:
+          type: string
+          format: date-time
+        results:
+          type: array
+          minItems: 1
+          items:
+            $ref: '#/components/schemas/LabTestResult'
+        overallInterpretation:
+          type: string
+          enum: [normal, abnormal, critical, pending, indeterminate]
+        authorisedById:
+          type: string
+          format: uuid
+          description: "Consultant or biomedical scientist who authorised the report"
+        criticalValueNotified:
+          type: boolean
+          default: false
+        criticalValueNotifiedAt:
+          type: string
+          format: date-time
+
+    LabTestResult:
+      type: object
+      required:
+        - testCode
+        - testName
+        - value
+        - unit
+        - interpretation
+      properties:
+        testCode:
+          type: string
+          description: "LOINC or SNOMED code"
+        testName:
+          type: string
+          maxLength: 200
+        value:
+          type: number
+          format: float
+        unit:
+          type: string
+          maxLength: 50
+          description: "e.g. mmol/L, g/dL, 10^9/L"
+        referenceRangeLow:
+          type: number
+          format: float
+        referenceRangeHigh:
+          type: number
+          format: float
+        interpretation:
+          type: string
+          enum: [normal, low, high, critically_low, critically_high, indeterminate]
+        notes:
+          type: string
+          maxLength: 500
+
+    LabResult:
+      type: object
+      properties:
+        labResultId:
+          type: string
+          format: uuid
+        patientId:
+          type: string
+          format: uuid
+        status:
+          type: string
+          enum: [pending, partial, complete, cancelled]
+        submittedAt:
+          type: string
+          format: date-time
+
+    ClinicalNoteRequest:
+      type: object
+      required:
+        - patientId
+        - authorId
+        - noteType
+        - noteDateTime
+        - content
+        - encounterType
+      properties:
+        patientId:
+          type: string
+          format: uuid
+        authorId:
+          type: string
+          format: uuid
+        appointmentId:
+          type: string
+          format: uuid
+        noteType:
+          type: string
+          enum: [soap_note, discharge_summary, referral_letter, procedure_note, nursing_note, handover, complaint_note, consent_form, safeguarding, mdt_note]
+        noteDateTime:
+          type: string
+          format: date-time
+          description: "ISO 8601 with timezone"
+        content:
+          type: string
+          minLength: 10
+          maxLength: 50000
+        encounterType:
+          type: string
+          enum: [inpatient, outpatient, emergency, telehealth, home_visit, community]
+        diagnosisCodes:
+          type: array
+          items:
+            type: string
+            description: "ICD-10 codes"
+            pattern: '^[A-Z]\d{2}(\.\d{1,4})?$'
+        procedureCodes:
+          type: array
+          items:
+            type: string
+            description: "OPCS-4 codes"
+        confidential:
+          type: boolean
+          default: false
+          description: "If true, note is flagged sensitive and access is restricted"
+        signedOff:
+          type: boolean
+          default: false
+        signedOffById:
+          type: string
+          format: uuid
+        signedOffAt:
+          type: string
+          format: date-time
+
+    ClinicalNote:
+      type: object
+      properties:
+        noteId:
+          type: string
+          format: uuid
+        patientId:
+          type: string
+          format: uuid
+        noteType:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+        status:
+          type: string
+          enum: [draft, final, amended, cancelled]
+
+    InsuranceAuthorisationRequest:
+      type: object
+      required:
+        - patientId
+        - insurerId
+        - policyNumber
+        - treatmentCode
+        - treatmentDescription
+        - requestedStartDate
+        - estimatedCostGBP
+        - urgency
+        - requestingClinicianId
+      properties:
+        patientId:
+          type: string
+          format: uuid
+        insurerId:
+          type: string
+          format: uuid
+        policyNumber:
+          type: string
+          maxLength: 30
+        membershipNumber:
+          type: string
+          maxLength: 30
+        treatmentCode:
+          type: string
+          description: "OPCS-4 or SNOMED procedure code"
+        treatmentDescription:
+          type: string
+          maxLength: 500
+        diagnosisCodes:
+          type: array
+          items:
+            type: string
+            pattern: '^[A-Z]\d{2}(\.\d{1,4})?$'
+        requestedStartDate:
+          type: string
+          format: date
+          description: "YYYY-MM-DD"
+        estimatedCostGBP:
+          type: number
+          format: float
+          minimum: 0
+        estimatedDurationDays:
+          type: integer
+          minimum: 1
+        urgency:
+          type: string
+          enum: [elective, urgent, emergency]
+        requestingClinicianId:
+          type: string
+          format: uuid
+        hospitalId:
+          type: string
+          format: uuid
+        clinicalJustification:
+          type: string
+          maxLength: 2000
+        previousTreatmentAttempted:
+          type: boolean
+          default: false
+        previousTreatmentDetails:
+          type: string
+          maxLength: 1000
+        attachedDocuments:
+          type: array
+          items:
+            type: string
+            format: uuid
+            description: "Document IDs for supporting clinical evidence"
+
+    AuthorisationResult:
+      type: object
+      properties:
+        authorisationId:
+          type: string
+          format: uuid
+        status:
+          type: string
+          enum: [approved, declined, pending_information, referred_to_medical_advisor]
+        authorisationCode:
+          type: string
+        approvedAmountGBP:
+          type: number
+        validFrom:
+          type: string
+          format: date
+        validTo:
+          type: string
+          format: date
+        notes:
+          type: string
+        submittedAt:
+          type: string
+          format: date-time
+
+    TriageRequest:
+      type: object
+      required:
+        - patientId
+        - presentingComplaint
+        - onsetDateTime
+        - severity
+        - consciousLevel
+        - respiratoryRatePerMin
+        - heartRatePerMin
+        - bloodPressureSystolicMmHg
+        - bloodPressureDiastolicMmHg
+        - temperatureCelsius
+        - oxygenSaturationPercent
+        - triageNurseId
+      properties:
+        patientId:
+          type: string
+          format: uuid
+        presentingComplaint:
+          type: string
+          maxLength: 1000
+        onsetDateTime:
+          type: string
+          format: date-time
+          description: "ISO 8601 when symptoms started"
+        severity:
+          type: string
+          enum: [mild, moderate, severe, life_threatening]
+        consciousLevel:
+          type: string
+          enum: [alert, voice, pain, unresponsive]
+          description: "AVPU scale"
+        respiratoryRatePerMin:
+          type: integer
+          minimum: 0
+          maximum: 100
+        heartRatePerMin:
+          type: integer
+          minimum: 0
+          maximum: 300
+        bloodPressureSystolicMmHg:
+          type: integer
+          minimum: 0
+          maximum: 300
+        bloodPressureDiastolicMmHg:
+          type: integer
+          minimum: 0
+          maximum: 200
+        temperatureCelsius:
+          type: number
+          format: float
+          minimum: 25.0
+          maximum: 45.0
+          description: "Body temperature in Celsius"
+        oxygenSaturationPercent:
+          type: number
+          format: float
+          minimum: 0
+          maximum: 100
+          description: "SpO2 percentage"
+        painScoreOutOf10:
+          type: integer
+          minimum: 0
+          maximum: 10
+        allergiesReported:
+          type: array
+          items:
+            type: string
+          maxItems: 50
+        currentMedications:
+          type: array
+          items:
+            type: string
+          maxItems: 50
+        pregnancyStatus:
+          type: string
+          enum: [not_pregnant, pregnant, unknown, not_applicable]
+          default: unknown
+        mobilityStatus:
+          type: string
+          enum: [ambulatory, assisted, non_ambulatory, stretcher]
+        triageNurseId:
+          type: string
+          format: uuid
+        triageDateTime:
+          type: string
+          format: date-time
+          description: "ISO 8601 when triage was performed"
+        isolationRequired:
+          type: boolean
+          default: false
+        isolationReason:
+          type: string
+          enum: [infectious_disease, immunocompromised, safeguarding, other]
+
+    TriageResult:
+      type: object
+      properties:
+        triageId:
+          type: string
+          format: uuid
+        manchesterTriageScore:
+          type: integer
+          minimum: 1
+          maximum: 5
+          description: "1=Immediate, 2=Very urgent, 3=Urgent, 4=Standard, 5=Non-urgent"
+        targetSeenWithinMinutes:
+          type: integer
+        recommendedCareArea:
+          type: string
+          enum: [resuscitation, majors, minors, ambulatory_care, discharge, refer_to_gp]
+        newsScore:
+          type: integer
+          minimum: 0
+          description: "National Early Warning Score"
+        triageDateTime:
+          type: string
+          format: date-time
+
+    Error:
+      type: object
+      properties:
+        code:
+          type: string
+        message:
+          type: string
+        field:
+          type: string
+        timestamp:
+          type: string
+          format: date-time

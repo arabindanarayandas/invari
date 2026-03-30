@@ -1,113 +1,181 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { GoogleLogin } from '@react-oauth/google';
-import { useAuth } from '../../context/AuthContext';
-import { CheckCircle2, AlertTriangle, XCircle, ChevronDown, ChevronRight, RotateCcw, Home } from 'lucide-react';
+import { Home, X, AlertTriangle, CheckCircle2, FileText } from 'lucide-react';
 
 /**
- * Step 3: Results Display
- * Shows detailed analysis with expandable endpoint cards
+ * Tooltip component that shows immediately on hover
+ * Uses fixed positioning to avoid overflow clipping
+ * Automatically adjusts position to stay within viewport
  */
-const SpecResults = ({ results, onReset, specData }) => {
+const Tooltip = ({ children, text, forceBottom = false, fullWidth = false }) => {
+  const [show, setShow] = useState(false);
+  const [position, setPosition] = useState({ top: 0, left: 0, align: 'center' });
+  const buttonRef = useState(null)[0];
+
+  const handleMouseEnter = (e) => {
+    const rect = e.currentTarget.getBoundingClientRect();
+    const tooltipWidth = 350; // Approximate max width
+    const viewportWidth = window.innerWidth;
+    const padding = 16;
+
+    let leftPos = rect.left + rect.width / 2;
+    let align = 'center';
+
+    // Check if tooltip would overflow on the right
+    if (leftPos + tooltipWidth / 2 > viewportWidth - padding) {
+      // Align to right edge of button
+      leftPos = rect.right - padding;
+      align = 'right';
+    }
+    // Check if tooltip would overflow on the left
+    else if (leftPos - tooltipWidth / 2 < padding) {
+      // Align to left edge of button
+      leftPos = rect.left + padding;
+      align = 'left';
+    }
+
+    if (forceBottom) {
+      // Position below button
+      setPosition({
+        top: rect.bottom + 8,
+        left: leftPos,
+        align
+      });
+    } else {
+      // Position above button
+      setPosition({
+        top: rect.top - 8,
+        left: leftPos,
+        align
+      });
+    }
+
+    setShow(true);
+  };
+
+  const handleMouseLeave = () => {
+    setShow(false);
+  };
+
+  const getTransform = () => {
+    if (position.align === 'right') return 'translateX(-100%)';
+    if (position.align === 'left') return 'translateX(0)';
+    return 'translateX(-50%)';
+  };
+
+  const getArrowPosition = () => {
+    if (position.align === 'right') return 'right-4';
+    if (position.align === 'left') return 'left-4';
+    return 'left-1/2 -translate-x-1/2';
+  };
+
+  return (
+    <>
+      <div
+        className={`${fullWidth ? 'w-full' : 'inline-block'}`}
+        onMouseEnter={handleMouseEnter}
+        onMouseLeave={handleMouseLeave}
+        ref={buttonRef}
+      >
+        {children}
+      </div>
+      {show && (
+        <div
+          className="fixed px-3 py-1.5 bg-slate-900 text-white text-xs rounded shadow-lg z-[9999] pointer-events-none max-w-[350px]"
+          style={{
+            top: forceBottom ? `${position.top}px` : 'auto',
+            bottom: forceBottom ? 'auto' : `${window.innerHeight - position.top}px`,
+            left: `${position.left}px`,
+            transform: getTransform()
+          }}
+        >
+          {text}
+          <div className={`absolute ${getArrowPosition()} border-4 border-transparent ${
+            forceBottom ? 'bottom-full border-b-slate-900' : 'top-full border-t-slate-900'
+          }`}></div>
+        </div>
+      )}
+    </>
+  );
+};
+
+/**
+ * Step 3: Results Display (Table View)
+ * Shows analysis results in a table format like LiveTrafficPage
+ */
+const SpecResults = ({ results, onTryItOut, specData }) => {
   const navigate = useNavigate();
-  const { googleLogin } = useAuth();
-  const [expandedEndpoint, setExpandedEndpoint] = useState(null);
-  const [filterRisk, setFilterRisk] = useState('all'); // 'all' | 'safe' | 'risky'
-  const [showLoginModal, setShowLoginModal] = useState(false);
-  const [uploadMode, setUploadMode] = useState(null); // 'demo' | 'manual'
-  const [isLoggingIn, setIsLoggingIn] = useState(false);
+  const [selectedEndpoint, setSelectedEndpoint] = useState(null);
+  const [showSpecDetails, setShowSpecDetails] = useState(false);
 
   const { endpoints, stats, apiInfo } = results;
 
-  // Read upload mode from localStorage on mount
-  useEffect(() => {
-    const mode = localStorage.getItem('uploadMode');
-    setUploadMode(mode);
-  }, []);
+  // Recursively resolve $ref in OpenAPI spec
+  const resolveRef = (obj, spec) => {
+    if (!obj || typeof obj !== 'object') return obj;
 
-  const handleGetEarlyAccess = () => {
-    // Show login modal instead of navigating
-    setShowLoginModal(true);
-  };
-
-  // Filter endpoints based on risk level
-  const filteredEndpoints = endpoints.filter(endpoint => {
-    if (filterRisk === 'all') return true;
-    if (filterRisk === 'safe') return endpoint.aiRisks.length === 0;
-    if (filterRisk === 'risky') return endpoint.aiRisks.length > 0;
-    return true;
-  });
-
-  const toggleEndpoint = (index) => {
-    // If demo mode, allow expanding details directly
-    if (uploadMode === 'demo') {
-      setExpandedEndpoint(expandedEndpoint === index ? null : index);
-    } else {
-      // If manual upload, show login modal
-      setShowLoginModal(true);
+    // Handle arrays
+    if (Array.isArray(obj)) {
+      return obj.map(item => resolveRef(item, spec));
     }
-  };
 
-  const handleTalkToUs = () => {
-    // Navigate to contact page
-    navigate('/contact');
-  };
+    // Handle $ref
+    if (obj.$ref && typeof obj.$ref === 'string') {
+      const refPath = obj.$ref;
 
-  const handleTrySample = () => {
-    // Redirect to landing page to try demo samples
-    navigate('/');
-  };
+      // Only handle internal references starting with #/
+      if (refPath.startsWith('#/')) {
+        const parts = refPath.substring(2).split('/'); // Remove #/ and split by /
+        let resolved = spec;
 
-  const handleGoogleSuccess = async (credentialResponse) => {
-    setIsLoggingIn(true);
-    try {
-      const result = await googleLogin(credentialResponse.credential);
-      if (result.success) {
-        // Save spec data to localStorage for after login
-        const filename = specData.filename || specData.url || 'openapi-spec';
-        const filenameWithExt = filename.endsWith('.json') || filename.endsWith('.yaml') || filename.endsWith('.yml')
-          ? filename
-          : `${filename}.json`;
+        // Navigate through the path
+        for (const part of parts) {
+          if (resolved && typeof resolved === 'object') {
+            resolved = resolved[part];
+          } else {
+            return obj; // Can't resolve, return original
+          }
+        }
 
-        localStorage.setItem('pendingTrialSpec', JSON.stringify({
-          spec: specData.spec,
-          filename: filenameWithExt
-        }));
-
-        // Close modal and navigate to agents page with create agent action
-        setShowLoginModal(false);
-        navigate('/agents?action=createAgent');
-      } else {
-        alert(result.error || 'Failed to sign in with Google');
+        // Recursively resolve the resolved object in case it has more refs
+        if (resolved) {
+          return resolveRef(resolved, spec);
+        }
       }
-    } catch (error) {
-      console.error('Google login error:', error);
-      alert('Failed to sign in with Google. Please try again.');
-    } finally {
-      setIsLoggingIn(false);
+
+      return obj; // Can't resolve, return original
     }
+
+    // Recursively resolve all properties
+    const resolved = {};
+    for (const [key, value] of Object.entries(obj)) {
+      resolved[key] = resolveRef(value, spec);
+    }
+    return resolved;
   };
 
-  const handleGoogleError = () => {
-    console.error('Google Login Failed');
-    alert('Failed to sign in with Google. Please try again.');
-  };
+  // Get endpoint spec details from OpenAPI spec with all $refs resolved
+  const getEndpointSpecDetails = (endpoint) => {
+    if (!specData?.spec || !endpoint) return null;
 
-  const getRiskBadgeClass = (riskCount) => {
-    if (riskCount === 0) return 'bg-success/10 text-success';
-    if (riskCount <= 2) return 'bg-repair/10 text-repair';
-    return 'bg-red-500/10 text-red-600';
-  };
+    let spec = specData.spec;
+    if (typeof spec === 'string') {
+      try {
+        spec = JSON.parse(spec);
+      } catch (e) {
+        return null;
+      }
+    }
 
-  const getRiskLabel = (riskCount) => {
-    if (riskCount === 0) return 'AI-safe';
-    return `${riskCount} AI-prone`;
-  };
+    const paths = spec?.paths || {};
+    const pathItem = paths[endpoint.path];
+    if (!pathItem) return null;
 
-  const getSeverityIcon = (severity) => {
-    if (severity === 'high') return <XCircle className="w-4 h-4 text-red-600" />;
-    if (severity === 'medium') return <AlertTriangle className="w-4 h-4 text-repair" />;
-    return <CheckCircle2 className="w-4 h-4 text-success" />;
+    const operation = pathItem[endpoint.method.toLowerCase()];
+    if (!operation) return null;
+
+    // Resolve all $refs in the operation
+    return resolveRef(operation, spec);
   };
 
   return (
@@ -130,7 +198,7 @@ const SpecResults = ({ results, onReset, specData }) => {
             <div className="flex items-center gap-3">
               <button
                 onClick={() => navigate('/')}
-                className="flex items-center gap-2 text-on-surface text-body-md font-medium hover:text-primary transition-colors underline-offset-4 hover:underline"
+                className="flex items-center gap-2 text-on-surface text-body-md font-medium hover:text-primary transition-colors underline-offset-4 hover:underline cursor-pointer"
               >
                 <Home className="w-4 h-4" />
                 Home
@@ -168,386 +236,306 @@ const SpecResults = ({ results, onReset, specData }) => {
         </div>
       </div>
 
-      {/* Filter Tabs */}
-      <div className="bg-surface-container-lowest border-b border-outline-variant">
-        <div className="max-w-7xl mx-auto px-4">
-          <div className="flex gap-1 py-2">
-            <button
-              onClick={() => setFilterRisk('risky')}
-              className={`px-4 py-2 rounded-xs text-body-md font-medium transition-colors ${
-                filterRisk === 'risky'
-                  ? 'bg-repair text-white'
-                  : 'text-on-surface-variant hover:bg-surface-container-low'
-              }`}
-            >
-              AI-prone ({stats.lowRisk + stats.highRisk})
-            </button>
-            <button
-              onClick={() => setFilterRisk('safe')}
-              className={`px-4 py-2 rounded-xs text-body-md font-medium transition-colors ${
-                filterRisk === 'safe'
-                  ? 'bg-success text-white'
-                  : 'text-on-surface-variant hover:bg-surface-container-low'
-              }`}
-            >
-              AI-safe ({stats.safe})
-            </button>
-            <button
-              onClick={() => setFilterRisk('all')}
-              className={`px-4 py-2 rounded-xs text-body-md font-medium transition-colors ${
-                filterRisk === 'all'
-                  ? 'bg-primary text-white'
-                  : 'text-on-surface-variant hover:bg-surface-container-low'
-              }`}
-            >
-              All ({stats.total})
-            </button>
+      {/* Table Section */}
+      <div className="max-w-7xl mx-auto px-4 py-6">
+        <div className="bg-surface-container-lowest rounded-sm border border-outline-variant overflow-hidden">
+          {/* Table Header */}
+          <div className="px-4 py-3 bg-surface-container-low border-b border-outline-variant">
+            <div className="grid grid-cols-[auto_1fr_auto] gap-4 text-[10px] font-semibold text-on-surface-variant uppercase tracking-wider font-mono">
+              <div className="w-20">Method</div>
+              <div>Endpoint</div>
+              <div className="w-48">Status</div>
+            </div>
+          </div>
+
+          {/* Table Body */}
+          <div>
+            {endpoints.length === 0 ? (
+              <div className="flex items-center justify-center py-12">
+                <div className="text-on-surface-variant">No endpoints found</div>
+              </div>
+            ) : (
+              endpoints.map((endpoint, index) => (
+                <div
+                  key={index}
+                  className={`px-4 py-4 border-b border-outline-variant transition-all cursor-pointer ${
+                    selectedEndpoint === endpoint
+                      ? 'bg-primary/5 border-l-4 border-l-primary'
+                      : 'hover:bg-surface-container-high'
+                  }`}
+                  onClick={() => setSelectedEndpoint(endpoint)}
+                >
+                  <div className="grid grid-cols-[auto_1fr_auto] gap-4 items-center">
+                    {/* Method Badge */}
+                    <div className="w-20">
+                      <span
+                        className={`px-2.5 py-1 rounded-xs font-mono text-label-sm font-semibold ${
+                          endpoint.method === 'POST'
+                            ? 'bg-success/20 text-success border border-success/20'
+                            : endpoint.method === 'GET'
+                            ? 'bg-primary/20 text-primary border border-primary/20'
+                            : endpoint.method === 'PUT' || endpoint.method === 'PATCH'
+                            ? 'bg-repair/20 text-repair border border-repair/20'
+                            : endpoint.method === 'DELETE'
+                            ? 'bg-red-500/20 text-red-600 border border-red-500/20'
+                            : 'bg-gray-200 text-gray-700'
+                        }`}
+                      >
+                        {endpoint.method}
+                      </span>
+                    </div>
+
+                    {/* Endpoint Path */}
+                    <div className="font-mono text-label-md text-on-surface truncate">
+                      {endpoint.path}
+                    </div>
+
+                    {/* Status + Try it out button */}
+                    <div className="w-48 flex items-center gap-2 justify-end">
+                      {/* Status Badge */}
+                      <span
+                        className={`px-3 py-1 rounded-xs font-mono text-label-sm font-semibold ${
+                          endpoint.aiRisks.length === 0
+                            ? 'bg-success/10 text-success'
+                            : 'bg-repair/10 text-repair'
+                        }`}
+                      >
+                        {endpoint.aiRisks.length === 0
+                          ? 'AI-safe'
+                          : `${endpoint.aiRisks.length} AI-prone`}
+                      </span>
+
+                      {/* Try it out button - only for POST/PATCH */}
+                      {onTryItOut && (endpoint.method === 'POST' || endpoint.method === 'PATCH') && (
+                        <Tooltip text="Test this endpoint with sample request body and see Invari repair in action" forceBottom={true}>
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              onTryItOut(endpoint);
+                            }}
+                            className="px-3 py-1 bg-primary text-white text-label-sm font-semibold rounded-xs hover:bg-blue-700 transition-colors whitespace-nowrap cursor-pointer"
+                          >
+                            Try it out →
+                          </button>
+                        </Tooltip>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              ))
+            )}
           </div>
         </div>
       </div>
 
-      {/* Endpoint List */}
-      <div className="max-w-7xl mx-auto px-4 py-6">
-        <div className="space-y-2">
-          {filteredEndpoints.map((endpoint, index) => (
-            <div
-              key={index}
-              className="bg-surface-container-lowest rounded-sm border border-outline-variant overflow-hidden"
-            >
-              {/* Endpoint Header - Clickable */}
-              <button
-                onClick={() => toggleEndpoint(index)}
-                className="w-full flex items-center justify-between p-4 hover:bg-surface-container-low transition-colors text-left"
-              >
-                <div className="flex items-center gap-3 flex-1">
-                  {/* Expand Icon */}
-                  {expandedEndpoint === index ? (
-                    <ChevronDown className="w-5 h-5 text-on-surface-variant flex-shrink-0" />
-                  ) : (
-                    <ChevronRight className="w-5 h-5 text-on-surface-variant flex-shrink-0" />
-                  )}
-
-                  {/* Method Badge */}
-                  <span
-                    className={`px-2.5 py-1 rounded-xs font-mono text-label-sm font-semibold ${
-                      endpoint.method === 'POST'
-                        ? 'bg-repair/20 text-repair'
-                        : endpoint.method === 'GET'
-                        ? 'bg-success/20 text-success'
-                        : endpoint.method === 'PUT'
-                        ? 'bg-primary/20 text-primary'
-                        : endpoint.method === 'DELETE'
-                        ? 'bg-red-500/20 text-red-600'
-                        : 'bg-gray-200 text-gray-700'
+      {/* Slide-out Panel: Endpoint Details */}
+      <div
+        className={`fixed top-0 right-0 h-full w-[500px] bg-white border-l border-slate-200 shadow-2xl transform transition-transform duration-300 ease-in-out z-50 ${
+          selectedEndpoint ? 'translate-x-0' : 'translate-x-full'
+        }`}
+      >
+        <div className="flex flex-col h-full">
+          {/* Header */}
+          <div className="p-4 border-b border-slate-200 flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <h2 className="text-sm font-semibold text-slate-900">Request Overview</h2>
+              {selectedEndpoint && (
+                <span className="text-xs text-slate-500 font-mono">{selectedEndpoint.method}</span>
+              )}
+            </div>
+            <div className="flex items-center gap-2">
+              {selectedEndpoint && (
+                <Tooltip text={showSpecDetails ? 'Hide OpenAPI specification details' : 'Show OpenAPI specification details for this endpoint'}>
+                  <button
+                    onClick={() => {
+                      setShowSpecDetails(!showSpecDetails);
+                    }}
+                    className={`flex items-center gap-1.5 px-3 py-1.5 rounded text-xs font-semibold transition-colors cursor-pointer ${
+                      showSpecDetails
+                        ? 'bg-primary text-white'
+                        : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
                     }`}
                   >
-                    {endpoint.method}
-                  </span>
+                    <FileText className="w-3.5 h-3.5" />
+                    {showSpecDetails ? 'Hide' : 'Show'} Spec
+                  </button>
+                </Tooltip>
+              )}
+              {selectedEndpoint && (
+                <button
+                  onClick={() => {
+                    setSelectedEndpoint(null);
+                    setShowSpecDetails(false);
+                  }}
+                  className="p-1 hover:bg-slate-100 rounded transition-colors cursor-pointer"
+                >
+                  <X className="w-4 h-4 text-slate-600" />
+                </button>
+              )}
+            </div>
+          </div>
 
-                  {/* Path */}
-                  <span className="font-mono text-label-md text-on-surface flex-1 truncate">
-                    {endpoint.path}
-                  </span>
+          {/* Content */}
+          <div className="flex-1 overflow-y-auto p-4">
+            {selectedEndpoint ? (
+              <div className="space-y-6">
+                {/* No Data Message */}
+                {!showSpecDetails && (
+                  <div className="bg-slate-100 rounded-lg p-6 border border-slate-300 text-center">
+                    <div className="text-slate-400 mb-2">
+                      <AlertTriangle className="w-12 h-12 mx-auto opacity-30" />
+                    </div>
+                    <h3 className="text-sm font-semibold text-slate-700 mb-1">No Request Data</h3>
+                    <p className="text-xs text-slate-500">
+                      This is a static analysis view. Use "Try it out" to test with real requests.
+                    </p>
+                  </div>
+                )}
 
-                  {/* Summary */}
-                  {endpoint.summary && (
-                    <span className="text-body-sm text-on-surface-variant hidden lg:block">
-                      {endpoint.summary}
-                    </span>
-                  )}
+                {/* OpenAPI Spec Details */}
+                {showSpecDetails && (
+                  <div className="bg-slate-50 rounded-lg p-4 border border-slate-200">
+                    <h3 className="text-sm font-semibold text-slate-900 mb-3 flex items-center gap-2">
+                      <FileText className="w-4 h-4 text-primary" />
+                      OpenAPI Specification
+                    </h3>
+                    <div className="bg-white rounded border border-slate-300 p-3 max-h-96 overflow-auto">
+                      <pre className="text-xs font-mono text-slate-700 whitespace-pre-wrap">
+                        {JSON.stringify(getEndpointSpecDetails(selectedEndpoint), null, 2) || 'No spec details available'}
+                      </pre>
+                    </div>
+                  </div>
+                )}
+
+                {/* Endpoint Info */}
+                <div className="bg-slate-50 rounded-lg p-4 border border-slate-200">
+                  <h3 className="text-sm font-semibold text-slate-900 mb-3">Endpoint Information</h3>
+                  <div className="space-y-2 text-xs">
+                    <div className="flex justify-between">
+                      <span className="text-slate-600">Method:</span>
+                      <span className={`font-mono font-semibold ${
+                        selectedEndpoint.method === 'GET' ? 'text-blue-600' :
+                        selectedEndpoint.method === 'POST' ? 'text-emerald-600' :
+                        selectedEndpoint.method === 'PUT' || selectedEndpoint.method === 'PATCH' ? 'text-amber-600' :
+                        selectedEndpoint.method === 'DELETE' ? 'text-red-600' :
+                        'text-slate-700'
+                      }`}>{selectedEndpoint.method}</span>
+                    </div>
+                    <div className="flex justify-between items-start">
+                      <span className="text-slate-600">Path:</span>
+                      <span className="text-slate-700 font-mono text-right break-all max-w-[70%]">
+                        {selectedEndpoint.path}
+                      </span>
+                    </div>
+                    {selectedEndpoint.summary && (
+                      <div className="flex justify-between items-start">
+                        <span className="text-slate-600">Summary:</span>
+                        <span className="text-slate-700 text-right max-w-[70%]">
+                          {selectedEndpoint.summary}
+                        </span>
+                      </div>
+                    )}
+                  </div>
                 </div>
 
-                {/* Risk Badge */}
-                <span
-                  className={`px-3 py-1 rounded-xs font-mono text-label-sm font-semibold ${getRiskBadgeClass(
-                    endpoint.aiRisks.length
-                  )}`}
-                >
-                  {getRiskLabel(endpoint.aiRisks.length)}
-                </span>
-              </button>
-
-              {/* Expanded Details */}
-              {expandedEndpoint === index && (
-                <div className="border-t border-outline-variant bg-surface-container-low">
-                  {endpoint.description && (
-                    <div className="px-4 py-3 border-b border-outline-variant">
-                      <p className="text-body-sm text-on-surface-variant">
-                        {endpoint.description}
-                      </p>
-                    </div>
-                  )}
-
-                  {/* AI Risks */}
-                  {endpoint.aiRisks.length > 0 ? (
-                    <div className="px-4 py-4">
-                      <h4 className="text-label-md font-semibold text-on-surface mb-3">
-                        AI-Prone Issues ({endpoint.aiRisks.length})
-                      </h4>
-                      <div className="space-y-2">
-                        {endpoint.aiRisks.map((risk, riskIndex) => (
-                          <div
-                            key={riskIndex}
-                            className="flex gap-3 p-3 bg-surface-container-lowest rounded-xs border border-outline-variant"
-                          >
-                            <div className="flex-shrink-0 mt-0.5">
-                              {getSeverityIcon(risk.severity)}
-                            </div>
+                {/* AI-Prone Issues */}
+                {selectedEndpoint.aiRisks && selectedEndpoint.aiRisks.length > 0 && (
+                  <div>
+                    <h3 className="text-sm font-semibold text-slate-900 mb-3">
+                      AI-Prone Issues ({selectedEndpoint.aiRisks.length})
+                    </h3>
+                    <div className="space-y-2">
+                      {selectedEndpoint.aiRisks.map((risk, riskIndex) => (
+                        <div
+                          key={riskIndex}
+                          className="bg-amber-50 border border-amber-200 rounded-lg p-3"
+                        >
+                          <div className="flex items-start gap-2">
+                            <AlertTriangle className="w-4 h-4 text-amber-600 mt-0.5 flex-shrink-0" />
                             <div className="flex-1">
                               <div className="flex items-center gap-2 mb-1">
-                                <span className="font-mono text-label-sm font-semibold text-on-surface">
+                                <span className="font-mono text-xs font-semibold text-slate-900">
                                   {risk.field}
                                 </span>
-                                <span className="px-2 py-0.5 bg-surface-container-high text-on-surface-variant rounded-xs text-label-sm font-mono">
+                                <span className="px-2 py-0.5 bg-slate-200 text-slate-700 rounded-xs text-[10px] font-mono">
                                   {risk.type}
                                 </span>
                               </div>
-                              <p className="text-body-sm text-on-surface mb-1">
-                                {risk.message}
-                              </p>
-                              <p className="text-body-sm text-repair">
-                                {risk.suggestion}
-                              </p>
-                              {risk.validValues && (
-                                <div className="mt-2 p-2 bg-surface-container-high rounded-xs">
-                                  <span className="text-label-sm text-on-surface-variant font-mono">
-                                    Valid: {risk.validValues.join(', ')}
-                                  </span>
-                                </div>
-                              )}
+                              <p className="text-xs text-slate-700 mb-1">{risk.message}</p>
+                              <p className="text-xs text-amber-700">{risk.suggestion}</p>
                             </div>
                           </div>
-                        ))}
-                      </div>
+                        </div>
+                      ))}
                     </div>
-                  ) : (
-                    <div className="px-4 py-6 text-center">
-                      <CheckCircle2 className="w-12 h-12 mx-auto mb-3 text-success" />
-                      <p className="text-body-md text-success font-medium">
-                        No AI-prone issues detected
-                      </p>
-                      <p className="text-body-sm text-on-surface-variant mt-1">
-                        This endpoint should work reliably with AI-generated requests
-                      </p>
-                    </div>
-                  )}
+                  </div>
+                )}
 
-                  {/* Fields Overview */}
-                  {endpoint.fields && endpoint.fields.length > 0 && (
-                    <div className="px-4 py-4 border-t border-outline-variant">
-                      <h4 className="text-label-md font-semibold text-on-surface mb-3">
-                        Fields ({endpoint.fields.length})
-                      </h4>
-                      <div className="space-y-1">
-                        {endpoint.fields.map((field, fieldIndex) => (
-                          <div
-                            key={fieldIndex}
-                            className="flex items-center justify-between py-2 px-3 bg-surface-container-lowest rounded-xs"
-                          >
-                            <div className="flex items-center gap-2">
-                              <span className="font-mono text-label-sm text-on-surface">
-                                {field.name}
+                {/* AI-Safe Message */}
+                {selectedEndpoint.aiRisks && selectedEndpoint.aiRisks.length === 0 && (
+                  <div className="bg-emerald-50 border border-emerald-200 rounded-lg p-4 text-center">
+                    <CheckCircle2 className="w-10 h-10 mx-auto mb-2 text-emerald-600" />
+                    <p className="text-sm font-semibold text-emerald-700 mb-1">
+                      No AI-prone issues detected
+                    </p>
+                    <p className="text-xs text-emerald-600">
+                      This endpoint should work reliably with AI-generated requests
+                    </p>
+                  </div>
+                )}
+
+                {/* Fields Overview */}
+                {selectedEndpoint.fields && selectedEndpoint.fields.length > 0 && (
+                  <div>
+                    <h3 className="text-sm font-semibold text-slate-900 mb-3">
+                      Fields ({selectedEndpoint.fields.length})
+                    </h3>
+                    <div className="space-y-1">
+                      {selectedEndpoint.fields.map((field, fieldIndex) => (
+                        <div
+                          key={fieldIndex}
+                          className="flex items-center justify-between py-2 px-3 bg-slate-50 rounded-xs"
+                        >
+                          <div className="flex items-center gap-2">
+                            <span className="font-mono text-xs text-slate-900">
+                              {field.name}
+                            </span>
+                            {field.required && (
+                              <span className="px-1.5 py-0.5 bg-red-100 text-red-600 rounded-xs text-[10px] font-mono">
+                                required
                               </span>
-                              {field.required && (
-                                <span className="px-1.5 py-0.5 bg-red-500/10 text-red-600 rounded-xs text-label-sm font-mono">
-                                  required
-                                </span>
-                              )}
-                            </div>
-                            <div className="flex items-center gap-2">
-                              <span className="text-label-sm text-on-surface-variant font-mono">
-                                {field.type}
-                              </span>
-                              <span className="text-label-sm text-on-surface-variant">
-                                in {field.location}
-                              </span>
-                            </div>
+                            )}
                           </div>
-                        ))}
-                      </div>
+                          <div className="flex items-center gap-2">
+                            <span className="text-xs text-slate-500 font-mono">
+                              {field.type}
+                            </span>
+                            <span className="text-xs text-slate-400">
+                              in {field.location}
+                            </span>
+                          </div>
+                        </div>
+                      ))}
                     </div>
-                  )}
-                </div>
-              )}
-            </div>
-          ))}
-        </div>
-
-        {/* Empty State */}
-        {filteredEndpoints.length === 0 && (
-          <div className="text-center py-12">
-            <p className="text-body-lg text-on-surface-variant">
-              No endpoints match the selected filter
-            </p>
+                  </div>
+                )}
+              </div>
+            ) : (
+              <div className="h-full flex flex-col items-center justify-center text-slate-500">
+                <AlertTriangle className="w-12 h-12 opacity-20 mb-3" />
+                <p className="text-sm">Select an endpoint to view details</p>
+              </div>
+            )}
           </div>
-        )}
-
-        {/* CTA Section */}
-        <div className="mt-12 p-8 bg-primary/5 border border-primary/20 rounded-sm text-center">
-          <h3 className="text-heading-sm font-bold text-on-surface mb-3">
-            Ready to make your API AI-ready?
-          </h3>
-          <p className="text-body-md text-on-surface-variant mb-6 max-w-2xl mx-auto">
-            invari.ai auto-repairs AI-generated requests before they hit your API.
-            No SDK, no code changes — just a proxy that makes everything work.
-          </p>
-          <button
-            onClick={handleGetEarlyAccess}
-            className="bg-primary text-white px-6 py-3 rounded-sm font-semibold text-body-lg hover:bg-blue-700 transition-colors"
-          >
-            Get Started
-          </button>
         </div>
       </div>
 
-      {/* Login Modal - Reference Demo Design */}
-      {showLoginModal && (
+      {/* Backdrop Overlay */}
+      {selectedEndpoint && (
         <div
-          className="fixed inset-0 flex items-center justify-center z-50 px-4"
-          style={{
-            background: 'rgba(0,0,0,0.4)',
-            backdropFilter: 'blur(4px)'
-          }}
-          onClick={() => setShowLoginModal(false)}
-        >
-          <div
-            className="bg-white rounded-2xl p-10 w-full shadow-2xl"
-            style={{
-              maxWidth: '440px',
-              border: '1px solid #e2e0d8',
-              boxShadow: '0 24px 64px rgba(0,0,0,0.15)',
-              fontFamily: "'DM Sans', sans-serif"
-            }}
-            onClick={(e) => e.stopPropagation()}
-          >
-            {/* Icon + Label Header */}
-            <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '6px' }}>
-              <div style={{
-                width: '32px',
-                height: '32px',
-                background: '#d4f0e7',
-                borderRadius: '8px',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                fontSize: '16px'
-              }}>
-                🔍
-              </div>
-              <p style={{
-                fontFamily: "'JetBrains Mono', monospace",
-                fontSize: '10px',
-                color: '#6b6860',
-                textTransform: 'uppercase',
-                letterSpacing: '0.1em',
-                margin: 0
-              }}>
-                Full audit log
-              </p>
-            </div>
-
-            {/* Title */}
-            <h2 style={{
-              fontSize: '20px',
-              fontWeight: 600,
-              marginBottom: '6px',
-              color: '#1a1916'
-            }}>
-              This is production-grade data.
-            </h2>
-
-            {/* Subtitle */}
-            <p style={{
-              fontSize: '13px',
-              color: '#6b6860',
-              marginBottom: '24px',
-              lineHeight: 1.6
-            }}>
-              Every repair is logged — field by field, request by request. Create a free account to access the full trace.
-            </p>
-
-            {/* Google Sign In Button */}
-            <div style={{ width: '100%' }}>
-              <GoogleLogin
-                onSuccess={handleGoogleSuccess}
-                onError={handleGoogleError}
-                useOneTap
-                theme="outline"
-                size="large"
-                text="continue_with"
-                shape="rectangular"
-                width="100%"
-              />
-            </div>
-
-            {/* Conditional OR divider + Sample button for manual mode */}
-            {uploadMode === 'manual' && (
-              <>
-                {/* OR Divider */}
-                <div style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '12px',
-                  margin: '20px 0'
-                }}>
-                  <div style={{ flex: 1, height: '1px', background: '#e2e0d8' }} />
-                  <span style={{
-                    fontSize: '11px',
-                    color: '#6b6860',
-                    fontFamily: "'JetBrains Mono', monospace",
-                    textTransform: 'uppercase',
-                    letterSpacing: '0.08em'
-                  }}>
-                    or
-                  </span>
-                  <div style={{ flex: 1, height: '1px', background: '#e2e0d8' }} />
-                </div>
-
-                {/* Try Sample Button */}
-                <button
-                  onClick={handleTrySample}
-                  style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    gap: '10px',
-                    width: '100%',
-                    padding: '12px',
-                    border: '1.5px solid #e2e0d8',
-                    borderRadius: '10px',
-                    background: 'white',
-                    fontSize: '14px',
-                    fontWeight: 500,
-                    cursor: 'pointer',
-                    color: '#1a1916',
-                    transition: 'all 0.15s'
-                  }}
-                  onMouseEnter={(e) => {
-                    e.currentTarget.style.borderColor = '#1a1916';
-                    e.currentTarget.style.background = '#f0efe9';
-                  }}
-                  onMouseLeave={(e) => {
-                    e.currentTarget.style.borderColor = '#e2e0d8';
-                    e.currentTarget.style.background = 'white';
-                  }}
-                >
-                  Try a Sample Instead
-                </button>
-              </>
-            )}
-
-            {/* Footer Note */}
-            <p style={{
-              fontSize: '11px',
-              color: '#6b6860',
-              textAlign: 'center',
-              marginTop: '16px',
-              fontFamily: "'JetBrains Mono', monospace"
-            }}>
-              Free account · No credit card · Works in 60 seconds
-            </p>
-          </div>
-        </div>
+          className="fixed inset-0 bg-black/20 z-40 transition-opacity duration-300"
+          onClick={() => setSelectedEndpoint(null)}
+        />
       )}
     </div>
   );

@@ -1,0 +1,950 @@
+openapi: 3.0.3
+info:
+  title: NexBank Core Banking API
+  description: >
+    Core banking and financial services API covering accounts, payments, transfers,
+    cards, loans, and compliance. Designed for integration with AI agents, copilots,
+    and automated financial workflow systems. All monetary values in minor units (pence/cents)
+    unless otherwise specified.
+  version: 3.1.0
+  contact:
+    email: api@nexbank.com
+
+servers:
+  - url: https://api.nexbank.com/v3
+    description: Production
+
+tags:
+  - name: Accounts
+  - name: Payments
+  - name: Transfers
+  - name: Cards
+  - name: Loans
+  - name: Compliance
+
+paths:
+
+  /accounts:
+    post:
+      tags: [Accounts]
+      summary: Open a new bank account
+      operationId: createAccount
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateAccountRequest'
+      responses:
+        '201':
+          description: Account created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Account'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '409':
+          description: Account already exists for this customer
+
+  /accounts/{accountId}/balance:
+    get:
+      tags: [Accounts]
+      summary: Get account balance
+      operationId: getBalance
+      parameters:
+        - name: accountId
+          in: path
+          required: true
+          schema:
+            type: string
+            pattern: '^[A-Z]{2}\d{2}[A-Z0-9]{4}\d{7}([A-Z0-9]?){0,16}$'
+            description: IBAN format
+      responses:
+        '200':
+          description: Balance details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BalanceResponse'
+
+  /payments/domestic:
+    post:
+      tags: [Payments]
+      summary: Initiate a domestic payment
+      operationId: domesticPayment
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DomesticPaymentRequest'
+      responses:
+        '202':
+          description: Payment accepted for processing
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaymentResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '402':
+          description: Insufficient funds
+        '422':
+          $ref: '#/components/responses/ValidationError'
+
+  /payments/international:
+    post:
+      tags: [Payments]
+      summary: Initiate an international SWIFT payment
+      operationId: internationalPayment
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/InternationalPaymentRequest'
+      responses:
+        '202':
+          description: Payment accepted
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaymentResponse'
+
+  /payments/{paymentId}/status:
+    get:
+      tags: [Payments]
+      summary: Get payment status
+      operationId: getPaymentStatus
+      parameters:
+        - name: paymentId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Payment status
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaymentStatusResponse'
+
+  /transfers/internal:
+    post:
+      tags: [Transfers]
+      summary: Transfer between own accounts
+      operationId: internalTransfer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/InternalTransferRequest'
+      responses:
+        '200':
+          description: Transfer completed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TransferResult'
+
+  /cards:
+    post:
+      tags: [Cards]
+      summary: Issue a new card
+      operationId: issueCard
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/IssueCardRequest'
+      responses:
+        '201':
+          description: Card issued
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Card'
+
+  /cards/{cardId}/controls:
+    patch:
+      tags: [Cards]
+      summary: Update card controls (freeze, limits, etc.)
+      operationId: updateCardControls
+      parameters:
+        - name: cardId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CardControlsRequest'
+      responses:
+        '200':
+          description: Controls updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Card'
+
+  /loans/apply:
+    post:
+      tags: [Loans]
+      summary: Submit a loan application
+      operationId: applyForLoan
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoanApplicationRequest'
+      responses:
+        '202':
+          description: Application submitted
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LoanApplicationResult'
+
+  /compliance/kyc:
+    post:
+      tags: [Compliance]
+      summary: Submit KYC verification data
+      operationId: submitKYC
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/KYCRequest'
+      responses:
+        '202':
+          description: KYC submitted for review
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/KYCResult'
+
+components:
+
+  responses:
+    BadRequest:
+      description: Malformed request
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    ValidationError:
+      description: Validation failed
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+
+  schemas:
+
+    CreateAccountRequest:
+      type: object
+      required:
+        - customerId
+        - accountType
+        - currency
+        - countryCode
+      properties:
+        customerId:
+          type: string
+          format: uuid
+          example: "c1d2e3f4-5678-90ab-cdef-1234567890ab"
+        accountType:
+          type: string
+          enum: [current, savings, business_current, business_savings, isa, fixed_term]
+          example: "current"
+        currency:
+          type: string
+          pattern: '^[A-Z]{3}$'
+          description: "ISO 4217 currency code e.g. GBP, EUR, USD"
+          example: "GBP"
+        countryCode:
+          type: string
+          pattern: '^[A-Z]{2}$'
+          description: "ISO 3166-1 alpha-2"
+          example: "GB"
+        initialDepositPence:
+          type: integer
+          minimum: 0
+          description: "Opening deposit in minor units (pence)"
+          example: 50000
+        overdraftLimitPence:
+          type: integer
+          minimum: 0
+          default: 0
+          example: 100000
+        interestRatePercent:
+          type: number
+          format: float
+          minimum: 0
+          maximum: 100
+          example: 0.5
+        termMonths:
+          type: integer
+          minimum: 1
+          maximum: 120
+          description: "For fixed term accounts only"
+          example: 12
+        jointAccountHolder:
+          type: string
+          format: uuid
+          example: "d4e5f6g7-8901-2345-6789-0abcdef12345"
+        autoTopUp:
+          type: boolean
+          default: false
+          example: false
+        autoTopUpThresholdPence:
+          type: integer
+          minimum: 0
+          example: 10000
+        autoTopUpAmountPence:
+          type: integer
+          minimum: 100
+          example: 50000
+      example:
+        customerId: "c1d2e3f4-5678-90ab-cdef-1234567890ab"
+        accountType: "current"
+        currency: "GBP"
+        countryCode: "GB"
+        initialDepositPence: 50000
+        overdraftLimitPence: 100000
+        interestRatePercent: 0.5
+        autoTopUp: false
+
+    Account:
+      type: object
+      properties:
+        accountId:
+          type: string
+          format: uuid
+        iban:
+          type: string
+        sortCode:
+          type: string
+          pattern: '^\d{2}-\d{2}-\d{2}$'
+        accountNumber:
+          type: string
+          pattern: '^\d{8}$'
+        accountType:
+          type: string
+        currency:
+          type: string
+        balancePence:
+          type: integer
+        availableBalancePence:
+          type: integer
+        status:
+          type: string
+          enum: [active, frozen, closed, pending_verification]
+        openedAt:
+          type: string
+          format: date-time
+
+    BalanceResponse:
+      type: object
+      properties:
+        accountId:
+          type: string
+          format: uuid
+        currency:
+          type: string
+        balancePence:
+          type: integer
+        availableBalancePence:
+          type: integer
+        pendingTransactionsPence:
+          type: integer
+        overdraftLimitPence:
+          type: integer
+        lastUpdated:
+          type: string
+          format: date-time
+
+    DomesticPaymentRequest:
+      type: object
+      required:
+        - debitAccountId
+        - creditSortCode
+        - creditAccountNumber
+        - amountPence
+        - currency
+        - paymentReference
+        - paymentDate
+        - paymentType
+      properties:
+        debitAccountId:
+          type: string
+          format: uuid
+          example: "a1b2c3d4-5e6f-7890-abcd-ef1234567890"
+        creditSortCode:
+          type: string
+          pattern: '^\d{6}$'
+          description: "6-digit sort code no dashes e.g. 040004"
+          example: "040004"
+        creditAccountNumber:
+          type: string
+          pattern: '^\d{8}$'
+          description: "8-digit account number"
+          example: "12345678"
+        amountPence:
+          type: integer
+          minimum: 1
+          maximum: 1000000000
+          description: "Amount in pence. £10.00 = 1000"
+          example: 150000
+        currency:
+          type: string
+          enum: [GBP]
+          example: "GBP"
+        paymentReference:
+          type: string
+          minLength: 1
+          maxLength: 18
+          pattern: '^[A-Za-z0-9 ]{1,18}$'
+          description: "Alphanumeric reference shown on statement"
+          example: "Invoice 2026-0415"
+        paymentDate:
+          type: string
+          format: date
+          description: "YYYY-MM-DD. Use today for immediate payment"
+          example: "2026-04-01"
+        paymentType:
+          type: string
+          enum: [BACS, CHAPS, Faster_Payments]
+          example: "Faster_Payments"
+        scheduledPayment:
+          type: boolean
+          default: false
+          example: false
+        recurringFrequency:
+          type: string
+          enum: [weekly, fortnightly, monthly, quarterly, annually]
+          example: "monthly"
+        recurringEndDate:
+          type: string
+          format: date
+          example: "2027-03-31"
+        notifyOnSuccess:
+          type: boolean
+          default: true
+          example: true
+        notifyOnFailure:
+          type: boolean
+          default: true
+          example: true
+      example:
+        debitAccountId: "a1b2c3d4-5e6f-7890-abcd-ef1234567890"
+        creditSortCode: "040004"
+        creditAccountNumber: "12345678"
+        amountPence: 150000
+        currency: "GBP"
+        paymentReference: "Invoice 2026-0415"
+        paymentDate: "2026-04-01"
+        paymentType: "Faster_Payments"
+        scheduledPayment: false
+        notifyOnSuccess: true
+        notifyOnFailure: true
+
+    InternationalPaymentRequest:
+      type: object
+      required:
+        - debitAccountId
+        - beneficiaryIban
+        - beneficiaryBic
+        - beneficiaryName
+        - amountMinorUnits
+        - currency
+        - paymentReference
+        - valueDate
+        - purposeCode
+      properties:
+        debitAccountId:
+          type: string
+          format: uuid
+          example: "b2c3d4e5-6f78-9012-3456-789abcdef012"
+        beneficiaryIban:
+          type: string
+          pattern: '^[A-Z]{2}\d{2}[A-Z0-9]{4}\d{7}([A-Z0-9]?){0,16}$'
+          example: "DE89370400440532013000"
+        beneficiaryBic:
+          type: string
+          pattern: '^[A-Z]{6}[A-Z0-9]{2}([A-Z0-9]{3})?$'
+          description: "SWIFT BIC code"
+          example: "COBADEFFXXX"
+        beneficiaryName:
+          type: string
+          maxLength: 140
+          example: "Schmidt GmbH"
+        beneficiaryAddressLine1:
+          type: string
+          maxLength: 70
+          example: "Hauptstrasse 123"
+        beneficiaryAddressLine2:
+          type: string
+          maxLength: 70
+          example: "10115 Berlin"
+        beneficiaryCountryCode:
+          type: string
+          pattern: '^[A-Z]{2}$'
+          example: "DE"
+        amountMinorUnits:
+          type: integer
+          minimum: 1
+          description: "Amount in minor currency units (cents, pence, etc.)"
+          example: 250000
+        currency:
+          type: string
+          pattern: '^[A-Z]{3}$'
+          example: "EUR"
+        paymentReference:
+          type: string
+          maxLength: 140
+          example: "Invoice INV-2026-042 for services rendered"
+        valueDate:
+          type: string
+          format: date
+          description: "YYYY-MM-DD"
+          example: "2026-04-05"
+        purposeCode:
+          type: string
+          enum: [TRADE, SALARY, PENSION, INVESTMENT, FAMILY, EDUCATION, MEDICAL, OTHER]
+          example: "TRADE"
+        chargeBearer:
+          type: string
+          enum: [SHA, OUR, BEN]
+          default: SHA
+          description: "Who pays SWIFT charges. SHA=shared, OUR=sender, BEN=beneficiary"
+          example: "SHA"
+        fxRateType:
+          type: string
+          enum: [spot, forward, market]
+          default: spot
+          example: "spot"
+        urgency:
+          type: string
+          enum: [standard, express, same_day]
+          default: standard
+          example: "standard"
+      example:
+        debitAccountId: "b2c3d4e5-6f78-9012-3456-789abcdef012"
+        beneficiaryIban: "DE89370400440532013000"
+        beneficiaryBic: "COBADEFFXXX"
+        beneficiaryName: "Schmidt GmbH"
+        beneficiaryAddressLine1: "Hauptstrasse 123"
+        beneficiaryAddressLine2: "10115 Berlin"
+        beneficiaryCountryCode: "DE"
+        amountMinorUnits: 250000
+        currency: "EUR"
+        paymentReference: "Invoice INV-2026-042 for services rendered"
+        valueDate: "2026-04-05"
+        purposeCode: "TRADE"
+        chargeBearer: "SHA"
+        fxRateType: "spot"
+        urgency: "standard"
+
+    InternalTransferRequest:
+      type: object
+      required:
+        - fromAccountId
+        - toAccountId
+        - amountPence
+        - transferDate
+      properties:
+        fromAccountId:
+          type: string
+          format: uuid
+        toAccountId:
+          type: string
+          format: uuid
+        amountPence:
+          type: integer
+          minimum: 1
+        transferDate:
+          type: string
+          format: date
+        reference:
+          type: string
+          maxLength: 100
+        scheduledTransfer:
+          type: boolean
+          default: false
+
+    IssueCardRequest:
+      type: object
+      required:
+        - accountId
+        - cardHolderName
+        - cardType
+        - deliveryAddressId
+        - spendLimitPencePerDay
+      properties:
+        accountId:
+          type: string
+          format: uuid
+          example: "c3d4e5f6-7890-1234-5678-90abcdef1234"
+        cardHolderName:
+          type: string
+          minLength: 2
+          maxLength: 26
+          description: "Name as it will appear on the card"
+          example: "MR J SMITH"
+        cardType:
+          type: string
+          enum: [debit, credit, prepaid, virtual]
+          example: "debit"
+        deliveryAddressId:
+          type: string
+          format: uuid
+          example: "d4e5f6g7-8901-2345-6789-abcdef012345"
+        spendLimitPencePerDay:
+          type: integer
+          minimum: 100
+          maximum: 1000000000
+          description: "Daily spend limit in pence"
+          example: 50000000
+        contactlessEnabled:
+          type: boolean
+          default: true
+          example: true
+        onlinePaymentsEnabled:
+          type: boolean
+          default: true
+          example: true
+        internationalPaymentsEnabled:
+          type: boolean
+          default: false
+          example: true
+        atmWithdrawalLimitPencePerDay:
+          type: integer
+          minimum: 0
+          maximum: 100000000
+          example: 30000000
+        expiryYears:
+          type: integer
+          minimum: 1
+          maximum: 5
+          default: 3
+          example: 3
+        pinPreference:
+          type: string
+          enum: [postal, digital, branch]
+          default: digital
+          example: "digital"
+      example:
+        accountId: "c3d4e5f6-7890-1234-5678-90abcdef1234"
+        cardHolderName: "MR J SMITH"
+        cardType: "debit"
+        deliveryAddressId: "d4e5f6g7-8901-2345-6789-abcdef012345"
+        spendLimitPencePerDay: 50000000
+        contactlessEnabled: true
+        onlinePaymentsEnabled: true
+        internationalPaymentsEnabled: true
+        atmWithdrawalLimitPencePerDay: 30000000
+        expiryYears: 3
+        pinPreference: "digital"
+
+    CardControlsRequest:
+      type: object
+      properties:
+        frozen:
+          type: boolean
+        spendLimitPencePerDay:
+          type: integer
+          minimum: 0
+        atmWithdrawalLimitPencePerDay:
+          type: integer
+          minimum: 0
+        contactlessEnabled:
+          type: boolean
+        onlinePaymentsEnabled:
+          type: boolean
+        internationalPaymentsEnabled:
+          type: boolean
+        allowedMerchantCategories:
+          type: array
+          items:
+            type: string
+            enum: [retail, restaurants, travel, entertainment, fuel, atm, online, other]
+        blockedCountryCodes:
+          type: array
+          items:
+            type: string
+            pattern: '^[A-Z]{2}$'
+
+    Card:
+      type: object
+      properties:
+        cardId:
+          type: string
+          format: uuid
+        maskedPan:
+          type: string
+          pattern: '^\*{12}\d{4}$'
+        cardType:
+          type: string
+        status:
+          type: string
+          enum: [active, frozen, cancelled, expired, pending_activation]
+        expiryDate:
+          type: string
+          pattern: '^\d{2}/\d{2}$'
+        issuedAt:
+          type: string
+          format: date-time
+
+    LoanApplicationRequest:
+      type: object
+      required:
+        - customerId
+        - loanType
+        - amountRequestedPence
+        - termMonths
+        - purpose
+        - annualIncomeGrossPence
+        - employmentStatus
+      properties:
+        customerId:
+          type: string
+          format: uuid
+        loanType:
+          type: string
+          enum: [personal, mortgage, auto, business, student, home_improvement]
+        amountRequestedPence:
+          type: integer
+          minimum: 100000
+          maximum: 100000000000
+          description: "Requested amount in pence"
+        termMonths:
+          type: integer
+          minimum: 3
+          maximum: 360
+        purpose:
+          type: string
+          enum: [debt_consolidation, home_improvement, vehicle, education, holiday, business, medical, other]
+        annualIncomeGrossPence:
+          type: integer
+          minimum: 0
+          description: "Gross annual income in pence"
+        employmentStatus:
+          type: string
+          enum: [employed_full_time, employed_part_time, self_employed, retired, unemployed, student]
+        employerName:
+          type: string
+          maxLength: 200
+        monthsInCurrentJob:
+          type: integer
+          minimum: 0
+        monthlyExpensesPence:
+          type: integer
+          minimum: 0
+        existingDebtsPence:
+          type: integer
+          minimum: 0
+        creditScore:
+          type: integer
+          minimum: 0
+          maximum: 999
+        collateralType:
+          type: string
+          enum: [property, vehicle, savings, none]
+          default: none
+        collateralValuePence:
+          type: integer
+          minimum: 0
+        preferredRepaymentDay:
+          type: integer
+          minimum: 1
+          maximum: 28
+          description: "Day of month for repayments"
+        jointApplicantId:
+          type: string
+          format: uuid
+
+    LoanApplicationResult:
+      type: object
+      properties:
+        applicationId:
+          type: string
+          format: uuid
+        status:
+          type: string
+          enum: [approved, declined, referred, pending_documents]
+        offeredRatePercent:
+          type: number
+          format: float
+        offeredAmountPence:
+          type: integer
+        offeredTermMonths:
+          type: integer
+        monthlyRepaymentPence:
+          type: integer
+        totalRepayableAmountPence:
+          type: integer
+        decisionAt:
+          type: string
+          format: date-time
+        offerExpiresAt:
+          type: string
+          format: date-time
+
+    KYCRequest:
+      type: object
+      required:
+        - customerId
+        - documentType
+        - documentNumber
+        - documentIssuingCountry
+        - documentExpiryDate
+        - dateOfBirth
+        - nationalityCode
+      properties:
+        customerId:
+          type: string
+          format: uuid
+          example: "e5f6g7h8-9012-3456-7890-abcdef123456"
+        documentType:
+          type: string
+          enum: [passport, driving_licence, national_id, residence_permit]
+          example: "passport"
+        documentNumber:
+          type: string
+          minLength: 5
+          maxLength: 20
+          example: "987654321"
+        documentIssuingCountry:
+          type: string
+          pattern: '^[A-Z]{2}$'
+          example: "GB"
+        documentExpiryDate:
+          type: string
+          format: date
+          description: "YYYY-MM-DD"
+          example: "2030-12-31"
+        dateOfBirth:
+          type: string
+          format: date
+          description: "YYYY-MM-DD"
+          example: "1988-06-15"
+        nationalityCode:
+          type: string
+          pattern: '^[A-Z]{2}$'
+          example: "GB"
+        pepStatus:
+          type: boolean
+          default: false
+          description: "Politically Exposed Person"
+          example: false
+        sanctionsCheck:
+          type: boolean
+          default: true
+          example: true
+        addressVerificationRequired:
+          type: boolean
+          default: true
+          example: true
+        sourceOfFunds:
+          type: string
+          enum: [employment, business, investment, inheritance, pension, savings, other]
+          example: "employment"
+      example:
+        customerId: "e5f6g7h8-9012-3456-7890-abcdef123456"
+        documentType: "passport"
+        documentNumber: "987654321"
+        documentIssuingCountry: "GB"
+        documentExpiryDate: "2030-12-31"
+        dateOfBirth: "1988-06-15"
+        nationalityCode: "GB"
+        pepStatus: false
+        sanctionsCheck: true
+        addressVerificationRequired: true
+        sourceOfFunds: "employment"
+
+    KYCResult:
+      type: object
+      properties:
+        kycId:
+          type: string
+          format: uuid
+        status:
+          type: string
+          enum: [approved, declined, pending_review, additional_docs_required]
+        riskRating:
+          type: string
+          enum: [low, medium, high]
+        submittedAt:
+          type: string
+          format: date-time
+        reviewDeadline:
+          type: string
+          format: date-time
+
+    PaymentResponse:
+      type: object
+      properties:
+        paymentId:
+          type: string
+          format: uuid
+        status:
+          type: string
+          enum: [accepted, processing, completed, failed, cancelled]
+        estimatedSettlement:
+          type: string
+          format: date-time
+        feesPence:
+          type: integer
+
+    PaymentStatusResponse:
+      type: object
+      properties:
+        paymentId:
+          type: string
+          format: uuid
+        status:
+          type: string
+          enum: [accepted, processing, completed, failed, cancelled, reversed]
+        statusMessage:
+          type: string
+        updatedAt:
+          type: string
+          format: date-time
+
+    TransferResult:
+      type: object
+      properties:
+        transferId:
+          type: string
+          format: uuid
+        status:
+          type: string
+          enum: [completed, pending, failed]
+        completedAt:
+          type: string
+          format: date-time
+
+    Error:
+      type: object
+      properties:
+        code:
+          type: string
+        message:
+          type: string
+        field:
+          type: string
+        timestamp:
+          type: string
+          format: date-time
