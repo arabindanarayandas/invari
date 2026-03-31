@@ -49,6 +49,35 @@ paths:
           description: Patient already registered
 
   /patients/{patientId}:
+    get:
+      tags: [Patients]
+      summary: Retrieve patient details by patient ID
+      operationId: getPatientById
+      parameters:
+        - name: patientId
+          in: path
+          required: true
+          description: Unique patient identifier
+          schema:
+            type: string
+            format: uuid
+          example: "f1g2h3i4-5678-9012-3456-789abcdef123"
+      responses:
+        '200':
+          description: Patient details retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Patient'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          description: Patient not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
     patch:
       tags: [Patients]
       summary: Update patient demographics
@@ -98,6 +127,35 @@ paths:
           description: Slot unavailable
 
   /appointments/{appointmentId}:
+    get:
+      tags: [Appointments]
+      summary: Retrieve appointment details by appointment ID
+      operationId: getAppointmentById
+      parameters:
+        - name: appointmentId
+          in: path
+          required: true
+          description: Unique appointment identifier
+          schema:
+            type: string
+            format: uuid
+          example: "k6l7m8n9-0123-4567-89ab-cdef01234567"
+      responses:
+        '200':
+          description: Appointment details retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Appointment'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          description: Appointment not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
     patch:
       tags: [Appointments]
       summary: Update or reschedule appointment
@@ -167,6 +225,36 @@ paths:
           $ref: '#/components/responses/BadRequest'
         '422':
           description: Drug interaction detected
+
+  /prescriptions/{prescriptionId}:
+    get:
+      tags: [Prescriptions]
+      summary: Retrieve prescription details by prescription ID
+      operationId: getPrescriptionById
+      parameters:
+        - name: prescriptionId
+          in: path
+          required: true
+          description: Unique prescription identifier
+          schema:
+            type: string
+            format: uuid
+          example: "l7m8n9o0-1234-5678-90ab-cdef12345678"
+      responses:
+        '200':
+          description: Prescription details retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Prescription'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          description: Prescription not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
 
   /prescriptions/{prescriptionId}/dispense:
     post:

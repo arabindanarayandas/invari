@@ -1,6 +1,8 @@
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { Home, X, AlertTriangle, CheckCircle2, FileText } from 'lucide-react';
+import { useNavigate, Link } from 'react-router-dom';
+import { X, AlertTriangle, CheckCircle2, FileText, Lock, Mail } from 'lucide-react';
+import { GoogleLogin } from '@react-oauth/google';
+import { useAuth } from '../../context/AuthContext';
 
 /**
  * Tooltip component that shows immediately on hover
@@ -103,12 +105,61 @@ const Tooltip = ({ children, text, forceBottom = false, fullWidth = false }) => 
  * Step 3: Results Display (Table View)
  * Shows analysis results in a table format like LiveTrafficPage
  */
-const SpecResults = ({ results, onTryItOut, specData }) => {
+const SpecResults = ({ results, onTryItOut, specData, disableLoginGating = false }) => {
   const navigate = useNavigate();
+  const { isAuthenticated, login, googleLogin } = useAuth();
   const [selectedEndpoint, setSelectedEndpoint] = useState(null);
   const [showSpecDetails, setShowSpecDetails] = useState(false);
+  const [showLoginModal, setShowLoginModal] = useState(false);
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [loginError, setLoginError] = useState('');
+  const [isLoggingIn, setIsLoggingIn] = useState(false);
 
   const { endpoints, stats, apiInfo } = results;
+
+  const handleEmailLogin = async (e) => {
+    e.preventDefault();
+    setLoginError('');
+    setIsLoggingIn(true);
+
+    try {
+      const result = await login(email, password);
+      if (result.success) {
+        setShowLoginModal(false);
+        setEmail('');
+        setPassword('');
+      } else {
+        setLoginError(result.error || 'Login failed. Please check your credentials.');
+      }
+    } catch (err) {
+      setLoginError('An error occurred. Please try again.');
+    } finally {
+      setIsLoggingIn(false);
+    }
+  };
+
+  const handleGoogleSuccess = async (credentialResponse) => {
+    setLoginError('');
+    setIsLoggingIn(true);
+
+    try {
+      const result = await googleLogin(credentialResponse.credential);
+      if (result.success) {
+        setShowLoginModal(false);
+      } else {
+        setLoginError(result.error || 'Google login failed. Please try again.');
+      }
+    } catch (err) {
+      setLoginError('An error occurred during Google login. Please try again.');
+    } finally {
+      setIsLoggingIn(false);
+    }
+  };
+
+  const handleGoogleError = () => {
+    setLoginError('Google login failed. Please try again.');
+  };
 
   // Recursively resolve $ref in OpenAPI spec
   const resolveRef = (obj, spec) => {
@@ -178,32 +229,71 @@ const SpecResults = ({ results, onTryItOut, specData }) => {
     return resolveRef(operation, spec);
   };
 
+  // Calculate which endpoints are free to try (not locked)
+  const postPatchEndpoints = endpoints.filter(e => e.method === 'POST' || e.method === 'PATCH');
+  const freeLimit = postPatchEndpoints.length >= 3 ? 3 : 1;
+
+  // Helper function to check if an endpoint is locked
+  const isEndpointLocked = (endpoint) => {
+    if (isAuthenticated) return false; // All endpoints unlocked for authenticated users
+    if (!onTryItOut) return false; // Not using try it out feature
+    if (endpoint.method !== 'POST' && endpoint.method !== 'PATCH') return false; // Only POST/PATCH can be tried
+
+    const endpointIndex = postPatchEndpoints.findIndex(e =>
+      e.path === endpoint.path && e.method === endpoint.method
+    );
+
+    return endpointIndex >= freeLimit;
+  };
+
   return (
     <div className="min-h-screen bg-surface">
+      {/* Top Banner */}
+      <div style={{ background: '#1b1c1a', color: 'rgba(255,255,255,0.8)', textAlign: 'center', padding: '10px 20px', fontFamily: "'JetBrains Mono', monospace", fontSize: '11px', letterSpacing: '0.02em', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px', flexWrap: 'wrap' }}>
+        <span style={{ background: '#1D9E75', color: 'white', padding: '2px 12px', borderRadius: '999px', fontSize: '10px', fontWeight: 'bold', letterSpacing: '0.1em', textTransform: 'uppercase' }}>⚡ Source-available</span>
+        invari is source-available under the
+        <a href="https://polyformproject.org/licenses/noncommercial/1.0.0/" target="_blank" rel="noopener noreferrer" style={{ color: '#1D9E75', textDecoration: 'none', fontWeight: 600 }}>PolyForm Noncommercial License 1.0.0</a>
+        — free to self-host for non-commercial use.
+        <a href="https://github.com/arabindanarayandas/invari" target="_blank" rel="noopener noreferrer" style={{ color: 'rgba(255,255,255,0.8)', borderBottom: '1px solid rgba(255,255,255,0.3)', textDecoration: 'none', transition: 'all 0.2s' }}>View on GitHub →</a>
+      </div>
+
+      {/* Navigation */}
+      <nav style={{ position: 'sticky', top: 0, zIndex: 50, background: 'rgba(250, 249, 246, 0.9)', backdropFilter: 'blur(12px)', borderBottom: '1px solid rgba(188, 202, 193, 0.4)' }}>
+        <div style={{ maxWidth: '1280px', margin: '0 auto', padding: '0 24px', height: '56px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+          <Link to="/" style={{ fontFamily: "'Noto Serif', serif", fontSize: '18px', fontWeight: 'bold', color: '#1b1c1a', textDecoration: 'none' }}>
+            invari<span style={{ color: '#1D9E75' }}>.ai</span>
+          </Link>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '32px' }} className="nav-links-main">
+            <Link to="/how-it-works" style={{ fontSize: '14px', color: '#3d4943', textDecoration: 'none', transition: 'color 0.2s' }}>How it works</Link>
+            <Link to="/pricing" style={{ fontSize: '14px', color: '#3d4943', textDecoration: 'none', transition: 'color 0.2s' }}>Pricing</Link>
+            <a href="https://github.com/arabindanarayandas/invari" target="_blank" rel="noopener noreferrer" style={{ fontSize: '14px', color: '#3d4943', textDecoration: 'none', transition: 'color 0.2s' }}>GitHub</a>
+            <Link to="/contact" style={{ fontSize: '14px', color: '#3d4943', textDecoration: 'none', transition: 'color 0.2s' }}>Contact</Link>
+          </div>
+          {isAuthenticated ? (
+            <Link to="/dashboard" style={{ background: '#1b1c1a', color: 'white', fontFamily: "'JetBrains Mono', monospace", fontSize: '12px', fontWeight: 600, padding: '8px 16px', borderRadius: '6px', textDecoration: 'none', transition: 'opacity 0.2s' }}>
+              Dashboard →
+            </Link>
+          ) : (
+            <button onClick={() => setShowLoginModal(true)} style={{ background: '#1b1c1a', color: 'white', fontFamily: "'JetBrains Mono', monospace", fontSize: '12px', fontWeight: 600, padding: '8px 16px', borderRadius: '6px', border: 'none', cursor: 'pointer', transition: 'opacity 0.2s' }}>
+              Sign In
+            </button>
+          )}
+        </div>
+      </nav>
+
       {/* Header Section */}
       <div className="bg-surface-container-lowest border-b border-outline-variant">
         <div className="max-w-7xl mx-auto px-4 py-8">
-          <div className="flex items-start justify-between mb-6">
-            <div>
-              <div className="inline-block px-3 py-1 bg-primary/10 text-primary rounded-xs text-label-sm font-mono mb-3">
-                ANALYSIS COMPLETE
-              </div>
-              <h1 className="text-heading-lg font-bold text-on-surface mb-2">
-                {apiInfo.title}
-              </h1>
-              <p className="text-body-md text-on-surface-variant">
-                {apiInfo.description || `Version ${apiInfo.version}`}
-              </p>
+          <div className="mb-6">
+            <div className="inline-block px-3 py-1 bg-primary/10 text-primary rounded-xs text-label-sm font-mono mb-3">
+              ANALYSIS COMPLETE
             </div>
-            <div className="flex items-center gap-3">
-              <button
-                onClick={() => navigate('/')}
-                className="flex items-center gap-2 text-on-surface text-body-md font-medium hover:text-primary transition-colors underline-offset-4 hover:underline cursor-pointer"
-              >
-                <Home className="w-4 h-4" />
-                Home
-              </button>
-            </div>
+            <h1 className="text-heading-lg font-bold text-on-surface mb-2">
+              {apiInfo.title}
+            </h1>
+            <p className="text-body-md text-on-surface-variant">
+              {apiInfo.description || `Version ${apiInfo.version}`}
+            </p>
           </div>
 
           {/* Stats Summary */}
@@ -249,22 +339,28 @@ const SpecResults = ({ results, onTryItOut, specData }) => {
           </div>
 
           {/* Table Body */}
-          <div>
+          <div style={{ position: 'relative', minHeight: !isAuthenticated && endpoints.length > 3 ? '700px' : 'auto' }}>
             {endpoints.length === 0 ? (
               <div className="flex items-center justify-center py-12">
                 <div className="text-on-surface-variant">No endpoints found</div>
               </div>
             ) : (
-              endpoints.map((endpoint, index) => (
-                <div
-                  key={index}
-                  className={`px-4 py-4 border-b border-outline-variant transition-all cursor-pointer ${
-                    selectedEndpoint === endpoint
-                      ? 'bg-primary/5 border-l-4 border-l-primary'
-                      : 'hover:bg-surface-container-high'
-                  }`}
-                  onClick={() => setSelectedEndpoint(endpoint)}
-                >
+              <>
+                {endpoints.map((endpoint, index) => (
+                  <div
+                    key={index}
+                    className={`px-4 py-4 border-b border-outline-variant transition-all cursor-pointer ${
+                      selectedEndpoint === endpoint
+                        ? 'bg-primary/5 border-l-4 border-l-primary'
+                        : 'hover:bg-surface-container-high'
+                    }`}
+                    style={{
+                      filter: !isAuthenticated && index >= 3 ? 'blur(4px)' : 'none',
+                      pointerEvents: !isAuthenticated && index >= 3 ? 'none' : 'auto',
+                      userSelect: !isAuthenticated && index >= 3 ? 'none' : 'auto'
+                    }}
+                    onClick={() => setSelectedEndpoint(endpoint)}
+                  >
                   <div className="grid grid-cols-[auto_1fr_auto] gap-4 items-center">
                     {/* Method Badge */}
                     <div className="w-20">
@@ -305,24 +401,122 @@ const SpecResults = ({ results, onTryItOut, specData }) => {
                           : `${endpoint.aiRisks.length} AI-prone`}
                       </span>
 
-                      {/* Try it out button - only for POST/PATCH */}
+                      {/* Try it out button or Lock button - only for POST/PATCH */}
                       {onTryItOut && (endpoint.method === 'POST' || endpoint.method === 'PATCH') && (
-                        <Tooltip text="Test this endpoint with sample request body and see Invari repair in action" forceBottom={true}>
-                          <button
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              onTryItOut(endpoint);
-                            }}
-                            className="px-3 py-1 bg-primary text-white text-label-sm font-semibold rounded-xs hover:bg-blue-700 transition-colors whitespace-nowrap cursor-pointer"
-                          >
-                            Try it out →
-                          </button>
-                        </Tooltip>
+                        <>
+                          {isEndpointLocked(endpoint) ? (
+                            <Tooltip text="Sign in to unlock and test this endpoint with sample requests" forceBottom={true}>
+                              <button
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  setShowLoginModal(true);
+                                }}
+                                className="px-3 py-1 bg-slate-200 text-slate-600 text-label-sm font-semibold rounded-xs hover:bg-slate-300 transition-colors whitespace-nowrap cursor-pointer flex items-center gap-1.5"
+                              >
+                                <Lock className="w-3.5 h-3.5" />
+                                Try it out
+                              </button>
+                            </Tooltip>
+                          ) : (
+                            <Tooltip text="Test this endpoint with sample request body and see Invari repair in action" forceBottom={true}>
+                              <button
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  onTryItOut(endpoint);
+                                }}
+                                className="px-3 py-1 bg-primary text-white text-label-sm font-semibold rounded-xs hover:bg-blue-700 transition-colors whitespace-nowrap cursor-pointer"
+                              >
+                                Try it out →
+                              </button>
+                            </Tooltip>
+                          )}
+                        </>
                       )}
                     </div>
                   </div>
                 </div>
-              ))
+                ))}
+
+                {/* Overlay for locked endpoints */}
+                {!isAuthenticated && endpoints.length > 3 && (
+                  <div style={{
+                    position: 'absolute',
+                    top: '240px', // Position after 3 endpoints (each ~80px height)
+                    left: 0,
+                    right: 0,
+                    minHeight: '500px',
+                    background: 'linear-gradient(to bottom, rgba(250, 249, 246, 0.6) 0%, rgba(250, 249, 246, 0.95) 20%, rgba(250, 249, 246, 1) 100%)',
+                    backdropFilter: 'blur(2px)',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    padding: '32px',
+                    paddingTop: '120px',
+                    zIndex: 10
+                  }}>
+                    <div style={{
+                      background: '#ffffff',
+                      borderRadius: '12px',
+                      padding: '32px',
+                      textAlign: 'center',
+                      boxShadow: '0 4px 24px rgba(0, 0, 0, 0.1)',
+                      border: '1px solid rgba(188, 202, 193, 0.3)',
+                      maxWidth: '400px'
+                    }}>
+                      <div style={{
+                        width: '48px',
+                        height: '48px',
+                        borderRadius: '50%',
+                        background: 'rgba(29, 158, 117, 0.1)',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        margin: '0 auto 16px'
+                      }}>
+                        <Lock style={{ width: '24px', height: '24px', color: '#1D9E75' }} />
+                      </div>
+                      <h3 style={{
+                        fontFamily: "'Noto Serif', serif",
+                        fontSize: '20px',
+                        fontWeight: 600,
+                        color: '#1b1c1a',
+                        marginBottom: '8px'
+                      }}>
+                        {endpoints.length - 3} More {endpoints.length - 3 === 1 ? 'Endpoint' : 'Endpoints'} Available
+                      </h3>
+                      <p style={{
+                        fontSize: '14px',
+                        color: '#3d4943',
+                        lineHeight: 1.6,
+                        marginBottom: '24px'
+                      }}>
+                        Sign in to view all {endpoints.length} API endpoints and their AI-risk analysis
+                      </p>
+                      <button
+                        onClick={() => setShowLoginModal(true)}
+                        style={{
+                          width: '100%',
+                          background: '#1b1c1a',
+                          color: 'white',
+                          fontFamily: "'JetBrains Mono', monospace",
+                          fontSize: '14px',
+                          fontWeight: 600,
+                          padding: '12px 24px',
+                          borderRadius: '6px',
+                          border: 'none',
+                          cursor: 'pointer',
+                          transition: 'opacity 0.2s'
+                        }}
+                        onMouseEnter={(e) => e.target.style.opacity = '0.9'}
+                        onMouseLeave={(e) => e.target.style.opacity = '1'}
+                      >
+                        Sign In to View All
+                      </button>
+                    </div>
+                  </div>
+                )}
+              </>
             )}
           </div>
         </div>
@@ -537,6 +731,109 @@ const SpecResults = ({ results, onTryItOut, specData }) => {
           onClick={() => setSelectedEndpoint(null)}
         />
       )}
+
+      {/* Login Modal */}
+      {showLoginModal && (
+        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000 }} onClick={() => setShowLoginModal(false)}>
+          <div style={{ background: '#ffffff', borderRadius: '16px', padding: '32px', maxWidth: '460px', width: '90%', boxShadow: '0 8px 32px rgba(0,0,0,0.12)' }} onClick={(e) => e.stopPropagation()}>
+            {/* Header */}
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '12px' }}>
+              <h2 style={{ fontFamily: "'Instrument Serif', serif", fontSize: '28px', fontWeight: 400, color: '#1a1916' }}>
+                Sign In
+              </h2>
+              <button onClick={() => setShowLoginModal(false)} style={{ background: 'transparent', border: 'none', cursor: 'pointer', padding: '4px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <X style={{ width: '20px', height: '20px', color: '#6b6860' }} />
+              </button>
+            </div>
+            <p style={{ fontSize: '14px', color: '#6b6860', marginBottom: '24px', lineHeight: 1.6 }}>
+              Access your account to manage and protect your APIs
+            </p>
+
+            {/* Error Message */}
+            {loginError && (
+              <div style={{ marginBottom: '16px', padding: '12px 16px', background: '#fde8e8', border: '1px solid #E24B4A', borderRadius: '8px' }}>
+                <p style={{ color: '#E24B4A', fontSize: '14px' }}>{loginError}</p>
+              </div>
+            )}
+
+            {/* Email/Password Form */}
+            <form onSubmit={handleEmailLogin} style={{ marginBottom: '20px' }}>
+              <div style={{ marginBottom: '16px' }}>
+                <label style={{ display: 'block', fontSize: '12px', fontWeight: 600, color: '#1a1916', fontFamily: "'JetBrains Mono', monospace", letterSpacing: '0.04em', marginBottom: '8px' }}>
+                  EMAIL
+                </label>
+                <div style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
+                  <Mail style={{ position: 'absolute', left: '12px', width: '16px', height: '16px', color: '#6b6860' }} />
+                  <input
+                    type="email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    placeholder="Enter your email"
+                    required
+                    disabled={isLoggingIn}
+                    style={{ width: '100%', padding: '12px 14px 12px 40px', border: '1px solid #e2e0d8', borderRadius: '10px', fontSize: '14px', fontFamily: "'DM Sans', sans-serif", background: '#ffffff', color: '#1a1916', outline: 'none', transition: 'border-color 0.15s' }}
+                  />
+                </div>
+              </div>
+
+              <div style={{ marginBottom: '20px' }}>
+                <label style={{ display: 'block', fontSize: '12px', fontWeight: 600, color: '#1a1916', fontFamily: "'JetBrains Mono', monospace", letterSpacing: '0.04em', marginBottom: '8px' }}>
+                  PASSWORD
+                </label>
+                <div style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
+                  <Lock style={{ position: 'absolute', left: '12px', width: '16px', height: '16px', color: '#6b6860' }} />
+                  <input
+                    type="password"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    placeholder="Enter your password"
+                    required
+                    disabled={isLoggingIn}
+                    style={{ width: '100%', padding: '12px 14px 12px 40px', border: '1px solid #e2e0d8', borderRadius: '10px', fontSize: '14px', fontFamily: "'DM Sans', sans-serif", background: '#ffffff', color: '#1a1916', outline: 'none', transition: 'border-color 0.15s' }}
+                  />
+                </div>
+              </div>
+
+              <button type="submit" disabled={isLoggingIn} style={{ width: '100%', padding: '12px 20px', background: isLoggingIn ? '#e2e0d8' : '#1D9E75', color: isLoggingIn ? '#6b6860' : 'white', border: 'none', borderRadius: '8px', fontSize: '14px', fontWeight: 600, cursor: isLoggingIn ? 'not-allowed' : 'pointer', transition: 'background 0.15s', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}>
+                {isLoggingIn && (
+                  <div style={{ width: '14px', height: '14px', border: '2px solid rgba(255,255,255,0.3)', borderTopColor: '#fff', borderRadius: '50%', animation: 'spin 0.8s linear infinite' }}></div>
+                )}
+                {isLoggingIn ? 'Signing in...' : 'Sign In'}
+              </button>
+            </form>
+
+            {/* Divider */}
+            <div style={{ position: 'relative', marginBottom: '20px' }}>
+              <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center' }}>
+                <div style={{ width: '100%', borderTop: '1px solid #e2e0d8' }}></div>
+              </div>
+              <div style={{ position: 'relative', display: 'flex', justifyContent: 'center' }}>
+                <span style={{ padding: '0 16px', background: '#ffffff', fontSize: '14px', color: '#6b6860' }}>OR</span>
+              </div>
+            </div>
+
+            {/* Google Login */}
+            <div style={{ display: 'flex', justifyContent: 'center' }}>
+              <GoogleLogin
+                onSuccess={handleGoogleSuccess}
+                onError={handleGoogleError}
+                theme="outline"
+                size="large"
+                text="continue_with"
+                shape="rectangular"
+                width="100%"
+              />
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Keyframes for animations */}
+      <style>{`
+        @keyframes spin {
+          to { transform: rotate(360deg); }
+        }
+      `}</style>
     </div>
   );
 };

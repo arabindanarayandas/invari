@@ -182,6 +182,36 @@ paths:
               schema:
                 $ref: '#/components/schemas/Policy'
 
+  /policies/{policyId}:
+    get:
+      tags: [Policies]
+      summary: Retrieve policy details by policy ID
+      operationId: getPolicyById
+      parameters:
+        - name: policyId
+          in: path
+          required: true
+          description: Unique policy identifier
+          schema:
+            type: string
+            format: uuid
+          example: "q2r3s4t5-6789-0123-4567-89abcdef0123"
+      responses:
+        '200':
+          description: Policy details retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Policy'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          description: Policy not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
   /policies/{policyId}/amend:
     post:
       tags: [Policies]
@@ -226,6 +256,36 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Claim'
+
+  /claims/{claimId}:
+    get:
+      tags: [Claims]
+      summary: Retrieve claim details by claim ID
+      operationId: getClaimById
+      parameters:
+        - name: claimId
+          in: path
+          required: true
+          description: Unique claim identifier
+          schema:
+            type: string
+            format: uuid
+          example: "v7w8x9y0-1234-5678-901a-bcdef2345678"
+      responses:
+        '200':
+          description: Claim details retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Claim'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          description: Claim not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
 
   /claims/{claimId}/assess:
     post:
@@ -480,6 +540,34 @@ components:
         adviserId: "o0p1q2r3-4567-8901-2345-6789abcdef01"
         distributionChannel: "adviser"
 
+    ApplicationResult:
+      type: object
+      properties:
+        applicationId:
+          type: string
+          format: uuid
+          example: "a1b2c3d4-5678-9012-3456-789abcdef012"
+        applicationNumber:
+          type: string
+          pattern: '^APP\d{10}$'
+          example: "APP0000123456"
+        status:
+          type: string
+          enum: [submitted, under_review, approved, declined, pending_information]
+          example: "submitted"
+        submittedAt:
+          type: string
+          format: date-time
+          example: "2026-04-01T10:30:00Z"
+        estimatedDecisionDate:
+          type: string
+          format: date
+          description: "YYYY-MM-DD"
+          example: "2026-04-15"
+        referenceNumber:
+          type: string
+          example: "REF-2026-04-001234"
+
     HealthInsuranceApplicationRequest:
       type: object
       required:
@@ -515,7 +603,7 @@ components:
         countryOfResidence:
           type: string
           pattern: '^[A-Z]{2}$'
-          default: GB
+          default: "GB"
         annualExcessPence:
           type: integer
           minimum: 0
@@ -626,7 +714,7 @@ components:
         propertyCountryCode:
           type: string
           pattern: '^[A-Z]{2}$'
-          default: GB
+          default: "GB"
           example: "GB"
         yearBuilt:
           type: integer
@@ -1340,6 +1428,52 @@ components:
         attachedDocumentIds: ["s4t5u6v7-8901-2345-6789-0abcdef12345", "t5u6v7w8-9012-3456-789a-bcdef0123456"]
         urgentPaymentRequired: false
         bankAccountForPayment: "u6v7w8x9-0123-4567-890a-bcdef1234567"
+
+    Claim:
+      type: object
+      properties:
+        claimId:
+          type: string
+          format: uuid
+          example: "v7w8x9y0-1234-5678-901a-bcdef2345678"
+        claimNumber:
+          type: string
+          pattern: '^CLM\d{10}$'
+          example: "CLM0000987654"
+        status:
+          type: string
+          enum: [registered, under_assessment, approved, partially_approved, rejected, paid, closed, fraud_investigation]
+          example: "registered"
+        policyId:
+          type: string
+          format: uuid
+          example: "q2r3s4t5-6789-0123-4567-89abcdef0123"
+        claimantId:
+          type: string
+          format: uuid
+          example: "r3s4t5u6-7890-1234-5678-9abcdef01234"
+        claimType:
+          type: string
+          enum: [death, critical_illness, income_protection, total_permanent_disability, property_damage, theft, liability, health_treatment, dental, optical]
+          example: "property_damage"
+        incidentDate:
+          type: string
+          format: date
+          description: "YYYY-MM-DD"
+          example: "2026-03-15"
+        claimedAmountPence:
+          type: integer
+          minimum: 1
+          example: 850000
+        registeredAt:
+          type: string
+          format: date-time
+          example: "2026-03-17T14:30:00Z"
+        estimatedSettlementDate:
+          type: string
+          format: date
+          description: "YYYY-MM-DD"
+          example: "2026-04-15"
 
     ClaimAssessmentRequest:
       type: object

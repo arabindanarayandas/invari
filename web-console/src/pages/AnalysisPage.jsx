@@ -245,6 +245,7 @@ const AnalysisPage = () => {
   const [testLoading, setTestLoading] = useState(false);
   const [testError, setTestError] = useState('');
   const [hallucinationInfo, setHallucinationInfo] = useState(null);
+  const [isHallucinating, setIsHallucinating] = useState(false);
 
   // Resolve $ref in OpenAPI schema
   const resolveSchema = (schema, spec) => {
@@ -329,62 +330,117 @@ const AnalysisPage = () => {
   };
 
   const hallucinateRequestBody = () => {
-    if (!testBody) return;
+    if (!testBody || isHallucinating) return;
 
-    try {
-      const body = JSON.parse(testBody);
-      const keys = Object.keys(body);
-      if (keys.length === 0) return;
+    setIsHallucinating(true);
 
-      // Pick random key to hallucinate
-      const randomKey = keys[Math.floor(Math.random() * keys.length)];
-      const originalValue = body[randomKey];
-      let newValue = originalValue;
-      let changeType = '';
-
-      // Apply TYPE COERCION only
-      if (typeof originalValue === 'number') {
-        // Number → String with comma formatting
-        newValue = originalValue.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',');
-        changeType = 'Number → String';
-      } else if (typeof originalValue === 'boolean') {
-        // Boolean → String (yes/no or true/false)
-        const formats = [
-          originalValue ? 'yes' : 'no',
-          originalValue ? 'true' : 'false',
-          originalValue ? 'True' : 'False',
-          originalValue ? '1' : '0'
-        ];
-        newValue = formats[Math.floor(Math.random() * formats.length)];
-        changeType = 'Boolean → String';
-      } else if (typeof originalValue === 'string') {
-        // String → Number (if it looks numeric)
-        if (/^\d+$/.test(originalValue)) {
-          newValue = parseInt(originalValue);
-          changeType = 'String → Number';
-        } else if (/^\d+\.\d+$/.test(originalValue)) {
-          newValue = parseFloat(originalValue);
-          changeType = 'String → Number';
+    // Small delay for visual feedback
+    setTimeout(() => {
+      try {
+        const body = JSON.parse(testBody);
+        const keys = Object.keys(body);
+        if (keys.length === 0) {
+          setIsHallucinating(false);
+          return;
         }
-        // Otherwise leave string as-is
-      }
 
-      // Only update if value actually changed
-      if (newValue !== originalValue) {
-        body[randomKey] = newValue;
-        setTestBody(JSON.stringify(body, null, 2));
+        // Shuffle keys to vary which field gets transformed
+        const shuffledKeys = [...keys].sort(() => Math.random() - 0.5);
 
-        // Set hallucination info for display
-        setHallucinationInfo({
-          field: randomKey,
-          from: JSON.stringify(originalValue),
-          to: JSON.stringify(newValue),
-          type: changeType
-        });
+        // Try each key until we find one we can transform
+        for (const key of shuffledKeys) {
+          const originalValue = body[key];
+          let newValue = originalValue;
+          let changeType = '';
+          let transformed = false;
+
+          // Apply TYPE COERCION transformations
+          if (typeof originalValue === 'number') {
+            // Number → String with various formats
+            const formats = [
+              originalValue.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ','), // Comma formatting
+              originalValue.toString() + '.0', // Add decimal
+              ' ' + originalValue.toString() + ' ', // Add spaces
+              originalValue.toString()
+            ];
+            newValue = formats[Math.floor(Math.random() * formats.length)];
+            changeType = 'Number → String';
+            transformed = true;
+          } else if (typeof originalValue === 'boolean') {
+            // Boolean → String (various formats)
+            const formats = [
+              originalValue ? 'yes' : 'no',
+              originalValue ? 'true' : 'false',
+              originalValue ? 'True' : 'False',
+              originalValue ? 'YES' : 'NO',
+              originalValue ? '1' : '0'
+            ];
+            newValue = formats[Math.floor(Math.random() * formats.length)];
+            changeType = 'Boolean → String';
+            transformed = true;
+          } else if (typeof originalValue === 'string' && originalValue.trim() !== '') {
+            // String transformations
+            if (/^\d+$/.test(originalValue)) {
+              // String → Number (integer)
+              newValue = parseInt(originalValue);
+              changeType = 'String → Number';
+              transformed = true;
+            } else if (/^\d+\.\d+$/.test(originalValue)) {
+              // String → Number (float)
+              newValue = parseFloat(originalValue);
+              changeType = 'String → Number';
+              transformed = true;
+            } else if (originalValue.toLowerCase() === 'true' || originalValue.toLowerCase() === 'false') {
+              // String → Boolean
+              newValue = originalValue.toLowerCase() === 'true';
+              changeType = 'String → Boolean';
+              transformed = true;
+            } else if (originalValue.toLowerCase() === 'yes' || originalValue.toLowerCase() === 'no') {
+              // String → Boolean
+              newValue = originalValue.toLowerCase() === 'yes';
+              changeType = 'String → Boolean';
+              transformed = true;
+            } else {
+              // Case transformations for non-transformable strings
+              const caseTransforms = [
+                originalValue.toUpperCase(),
+                originalValue.toLowerCase(),
+                originalValue.charAt(0).toUpperCase() + originalValue.slice(1).toLowerCase()
+              ].filter(v => v !== originalValue);
+
+              if (caseTransforms.length > 0) {
+                newValue = caseTransforms[Math.floor(Math.random() * caseTransforms.length)];
+                changeType = 'Case Change';
+                transformed = true;
+              }
+            }
+          }
+
+          // If we successfully transformed this field, apply it and break
+          if (transformed && newValue !== originalValue) {
+            body[key] = newValue;
+            setTestBody(JSON.stringify(body, null, 2));
+
+            // Set hallucination info for display
+            setHallucinationInfo({
+              field: key,
+              from: JSON.stringify(originalValue),
+              to: JSON.stringify(newValue),
+              type: changeType
+            });
+
+            setIsHallucinating(false);
+            return;
+          }
+        }
+
+        // If we couldn't transform any field, just clear loading state
+        setIsHallucinating(false);
+      } catch (e) {
+        console.error('Failed to hallucinate:', e);
+        setIsHallucinating(false);
       }
-    } catch (e) {
-      console.error('Failed to hallucinate:', e);
-    }
+    }, 300); // 300ms delay for visual feedback
   };
 
   const handleTryItOut = (endpoint) => {
@@ -539,10 +595,15 @@ const AnalysisPage = () => {
                   <Tooltip text="Introduce an AI hallucination (error) to test repair functionality" forceBottom={true}>
                     <button
                       onClick={hallucinateRequestBody}
-                      className="flex items-center gap-1.5 px-2 py-1 text-xs font-medium text-purple-600 hover:text-purple-700 hover:bg-purple-50 rounded transition-colors cursor-pointer"
+                      disabled={isHallucinating}
+                      className={`flex items-center gap-1.5 px-2 py-1 text-xs font-medium rounded transition-colors ${
+                        isHallucinating
+                          ? 'text-purple-400 bg-purple-50 cursor-not-allowed'
+                          : 'text-purple-600 hover:text-purple-700 hover:bg-purple-50 cursor-pointer'
+                      }`}
                     >
-                      <Sparkles className="w-3.5 h-3.5" />
-                      Hallucinate
+                      <Sparkles className={`w-3.5 h-3.5 ${isHallucinating ? 'animate-spin' : ''}`} />
+                      {isHallucinating ? 'Hallucinating...' : 'Hallucinate'}
                     </button>
                   </Tooltip>
                 </div>
