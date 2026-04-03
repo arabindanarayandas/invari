@@ -3,10 +3,11 @@ import { useState } from 'react';
 import { Link } from 'react-router-dom';
 
 /**
- * Sidebar component following the "Observational Blueprint" design system
+ * Sidebar component following the "Technical Editorial" design system
  * - No border, distinction via surface-container-low fill
  * - 2px vertical "needle" indicator for active state
  * - 64px collapsed / 240px expanded width
+ * - 8px border radius for buttons
  */
 const Sidebar = ({ activeView, onNavigate, onLogout }) => {
   const [isCollapsed, setIsCollapsed] = useState(false);
@@ -18,8 +19,8 @@ const Sidebar = ({ activeView, onNavigate, onLogout }) => {
 
   return (
     <div className={`
-      ${isCollapsed ? 'w-16' : 'w-60'}
-      bg-surface-container-low flex flex-col h-screen fixed left-0 top-0
+      ${isCollapsed ? 'w-16' : 'w-[200px]'}
+      bg-surface border-r border-outline flex flex-col h-screen fixed left-0 top-0
       transition-all duration-300 z-20
     `}>
       {/* Header - Logo area */}
@@ -35,7 +36,7 @@ const Sidebar = ({ activeView, onNavigate, onLogout }) => {
         </Link>
         <button
           onClick={() => setIsCollapsed(!isCollapsed)}
-          className="p-2 rounded-sm hover:bg-surface-container-high transition-colors cursor-pointer"
+          className="p-2 rounded-[8px] hover:bg-surface-container-high transition-colors cursor-pointer"
           aria-label="Toggle sidebar"
         >
           {isCollapsed ? (
@@ -58,25 +59,19 @@ const Sidebar = ({ activeView, onNavigate, onLogout }) => {
                 key={item.id}
                 onClick={() => onNavigate(item.id)}
                 className={`
-                  w-full flex items-center gap-3 px-3 py-2.5 rounded-sm
-                  transition-all duration-150 relative group cursor-pointer
+                  w-full flex items-center gap-3 px-5 py-2 transition-all duration-150 relative group cursor-pointer
                   ${isActive
-                    ? 'bg-primary/10 text-primary'
-                    : 'text-on-surface hover:bg-surface-container-high'
+                    ? 'text-primary font-semibold'
+                    : 'text-muted hover:text-on-surface hover:bg-surface-container-low'
                   }
                 `}
               >
-                {/* Active needle indicator */}
-                {isActive && (
-                  <div className="absolute left-0 top-0 bottom-0 w-0.5 bg-primary rounded-r" />
-                )}
-
-                <Icon className={`w-5 h-5 flex-shrink-0 ${
-                  isActive ? 'text-primary' : 'text-on-surface-variant'
+                <Icon className={`w-4 h-4 flex-shrink-0 ${
+                  isActive ? 'text-primary' : ''
                 }`} />
 
                 {!isCollapsed && (
-                  <span className="font-medium text-body-sm">
+                  <span className="text-[13px]">
                     {item.label}
                   </span>
                 )}
@@ -85,7 +80,7 @@ const Sidebar = ({ activeView, onNavigate, onLogout }) => {
                 {isCollapsed && (
                   <div className="
                     absolute left-full ml-2 px-2 py-1 bg-on-surface text-white
-                    text-label-sm rounded-sm whitespace-nowrap
+                    text-label-sm rounded-[8px] whitespace-nowrap
                     opacity-0 group-hover:opacity-100 pointer-events-none
                     transition-opacity duration-150
                   ">
@@ -105,7 +100,7 @@ const Sidebar = ({ activeView, onNavigate, onLogout }) => {
           className="
             w-full flex items-center gap-3 px-3 py-2.5
             text-on-surface hover:bg-surface-container-high
-            rounded-sm transition-colors duration-150 group cursor-pointer
+            rounded-[8px] transition-colors duration-150 group cursor-pointer
           "
         >
           <LogOut className="w-5 h-5 text-on-surface-variant flex-shrink-0" />
@@ -117,7 +112,7 @@ const Sidebar = ({ activeView, onNavigate, onLogout }) => {
           {isCollapsed && (
             <div className="
               absolute left-full ml-2 px-2 py-1 bg-on-surface text-white
-              text-label-sm rounded-sm whitespace-nowrap
+              text-label-sm rounded-[8px] whitespace-nowrap
               opacity-0 group-hover:opacity-100 pointer-events-none
               transition-opacity duration-150
             ">

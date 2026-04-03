@@ -58,21 +58,22 @@
   }
 
   code {
-    background-color: var(--color-code-bg);
-    color: var(--color-code-text);
+    background-color: var(--color-code-bg-light);
+    color: var(--color-code-text-dark);
     padding: var(--spacing-0-5) var(--spacing-1);
-    border-radius: var(--radius-xs);
+    border-radius: var(--radius-sm);
     border: 1px solid var(--color-code-border);
+    font-size: var(--type-code-sm-size);
   }
 
   pre {
     background-color: var(--color-code-bg);
     color: var(--color-code-text);
     padding: var(--spacing-4);
-    border-radius: var(--radius-sm);
-    border: 1px solid var(--color-code-border);
+    border-radius: var(--radius-lg);
     overflow-x: auto;
-    line-height: var(--line-height-normal);
+    line-height: var(--line-height-code);
+    font-size: var(--type-code-md-size);
   }
 
   pre code {
@@ -97,13 +98,17 @@
   a {
     color: var(--color-primary);
     text-decoration: none;
-    transition: var(--transition-colors);
+    transition: var(--transition-fast-color); /* 100ms color transition from HTML analysis */
     cursor: pointer;
   }
 
   a:hover {
     color: var(--color-primary-dark);
     text-decoration: underline;
+  }
+
+  a:active {
+    color: var(--color-primary-darker);
   }
 
   a:focus-visible {
@@ -114,12 +119,26 @@
 
   /* ===== Buttons ===== */
 
+  button {
+    font-family: var(--font-family-sans);
+    font-size: var(--type-body-sm-size); /* 13px from HTML analysis */
+    font-weight: var(--font-weight-medium);
+    transition: var(--transition-quick); /* 120ms from HTML analysis */
+    border-radius: var(--radius-xl); /* 8px from HTML analysis */
+  }
+
   button:not(:disabled) {
     cursor: pointer;
   }
 
   button:disabled {
     cursor: not-allowed;
+    opacity: 0.55;
+  }
+
+  button:hover:not(:disabled) {
+    opacity: 0.88;
+    transform: translateY(-1px);
   }
 
   /* ===== Lists ===== */
@@ -206,6 +225,7 @@
     width: 100%;
     border-collapse: separate;
     border-spacing: 0;
+    font-size: var(--type-body-md-size);
   }
 
   thead {
@@ -213,15 +233,20 @@
   }
 
   th {
-    font-weight: var(--font-weight-medium);
+    font-weight: var(--font-weight-semibold);
     text-align: left;
     padding: var(--spacing-3);
     border-bottom: 1px solid var(--color-table-border);
+    font-size: var(--type-label-md-size);
   }
 
   td {
     padding: var(--spacing-3);
     border-bottom: 1px solid var(--color-table-border);
+  }
+
+  tbody tr {
+    transition: var(--transition-fast);
   }
 
   tbody tr:hover {
@@ -248,7 +273,7 @@
 
   ::-webkit-scrollbar-thumb {
     background-color: var(--color-scrollbar-thumb);
-    border-radius: var(--radius-sm);
+    border-radius: var(--radius-xs); /* 3px from HTML analysis */
   }
 
   ::-webkit-scrollbar-thumb:hover {
@@ -259,6 +284,59 @@
   * {
     scrollbar-width: thin;
     scrollbar-color: var(--color-scrollbar-thumb) var(--color-scrollbar-track);
+  }
+
+  /* ===== Utility Classes for Component Patterns ===== */
+
+  /* Pills/Badges - From HTML Analysis */
+  .pill {
+    display: inline-flex;
+    align-items: center;
+    padding: var(--spacing-0-5) var(--spacing-3-5); /* 2px 8px */
+    border-radius: var(--radius-pill); /* 100px fully rounded */
+    font-family: var(--font-family-mono);
+    font-size: var(--type-label-md-size); /* 10px */
+    font-weight: var(--font-weight-bold);
+    text-transform: uppercase;
+    letter-spacing: var(--letter-spacing-wide);
+  }
+
+  /* Callouts - From HTML Analysis */
+  .callout {
+    padding: var(--spacing-5) var(--spacing-5-5); /* ~11px 12px */
+    border-left: 3px solid;
+    border-radius: 0 var(--radius-default) var(--radius-default) 0; /* Right corners rounded */
+    font-size: var(--type-body-sm-size); /* 13px */
+    line-height: var(--line-height-relaxed); /* 1.7 */
+  }
+
+  .callout-note {
+    background-color: var(--color-callout-note-bg);
+    border-color: var(--color-callout-note-border);
+    color: var(--color-callout-note-text);
+  }
+
+  .callout-tip {
+    background-color: var(--color-callout-tip-bg);
+    border-color: var(--color-callout-tip-border);
+    color: var(--color-callout-tip-text);
+  }
+
+  .callout-warn {
+    background-color: var(--color-callout-warn-bg);
+    border-color: var(--color-callout-warn-border);
+    color: var(--color-callout-warn-text);
+  }
+
+  .callout-danger {
+    background-color: var(--color-callout-danger-bg);
+    border-color: var(--color-callout-danger-border);
+    color: var(--color-callout-danger-text);
+  }
+
+  /* Live Indicator - From HTML Analysis */
+  .live-indicator {
+    animation: pulse var(--duration-pulse) infinite;
   }
 
   /* ===== Utility Classes ===== */

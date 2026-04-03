@@ -7,82 +7,111 @@
   :root {
     /* ===== Semantic Typography Tokens ===== */
 
-    /* Display - For large editorial impact */
-    --type-display-lg-size: var(--font-size-6xl);
-    --type-display-lg-line: var(--line-height-tight);
+    /* Display - For large editorial impact (Stats, Hero) */
+    --type-display-xl-size: var(--font-size-6xl);      /* 36px - Stat values, latency */
+    --type-display-xl-line: var(--line-height-none);
+    --type-display-xl-weight: var(--font-weight-bold);
+    --type-display-xl-tracking: var(--letter-spacing-normal);
+
+    --type-display-lg-size: var(--font-size-5xl);      /* 32px - Stat values */
+    --type-display-lg-line: var(--line-height-none);
     --type-display-lg-weight: var(--font-weight-bold);
-    --type-display-lg-tracking: var(--letter-spacing-tight);
+    --type-display-lg-tracking: var(--letter-spacing-normal);
 
-    --type-display-md-size: var(--font-size-5xl);
-    --type-display-md-line: var(--line-height-tight);
-    --type-display-md-weight: var(--font-weight-bold);
-    --type-display-md-tracking: var(--letter-spacing-tight);
+    --type-display-md-size: var(--font-size-4xl-plus); /* 30px - Hero titles */
+    --type-display-md-line: var(--line-height-tighter);
+    --type-display-md-weight: var(--font-weight-normal);
+    --type-display-md-tracking: var(--letter-spacing-normal);
 
-    --type-display-sm-size: var(--font-size-4xl);
-    --type-display-sm-line: var(--line-height-snug);
-    --type-display-sm-weight: var(--font-weight-bold);
+    --type-display-sm-size: var(--font-size-4xl);      /* 28px - Hero titles (small) */
+    --type-display-sm-line: var(--line-height-tighter);
+    --type-display-sm-weight: var(--font-weight-normal);
     --type-display-sm-tracking: var(--letter-spacing-normal);
 
-    /* Heading - For section titles */
-    --type-heading-lg-size: var(--font-size-2xl);
-    --type-heading-lg-line: var(--line-height-snug);
-    --type-heading-lg-weight: var(--font-weight-semibold);
+    /* Heading - For section titles (From HTML Analysis) */
+    --type-heading-xl-size: var(--font-size-3xl);       /* 26px - Page titles */
+    --type-heading-xl-line: var(--line-height-compact);
+    --type-heading-xl-weight: var(--font-weight-normal);
+    --type-heading-xl-tracking: var(--letter-spacing-normal);
+
+    --type-heading-lg-size: var(--font-size-2xl-plus);  /* 22px - Modal titles, agent names */
+    --type-heading-lg-line: var(--line-height-tight);
+    --type-heading-lg-weight: var(--font-weight-normal);
     --type-heading-lg-tracking: var(--letter-spacing-normal);
 
-    --type-heading-md-size: var(--font-size-xl);
-    --type-heading-md-line: var(--line-height-snug);
-    --type-heading-md-weight: var(--font-weight-semibold);
+    --type-heading-md-size: var(--font-size-2xl);       /* 20px - Modal titles (small) */
+    --type-heading-md-line: var(--line-height-tight);
+    --type-heading-md-weight: var(--font-weight-normal);
     --type-heading-md-tracking: var(--letter-spacing-normal);
 
-    --type-heading-sm-size: var(--font-size-lg);
-    --type-heading-sm-line: var(--line-height-normal);
-    --type-heading-sm-weight: var(--font-weight-semibold);
+    --type-heading-sm-size: var(--font-size-xl);        /* 19px - h2 headings */
+    --type-heading-sm-line: var(--line-height-compact);
+    --type-heading-sm-weight: var(--font-weight-normal);
     --type-heading-sm-tracking: var(--letter-spacing-normal);
 
-    /* Body - For readable content */
-    --type-body-lg-size: var(--font-size-md);
-    --type-body-lg-line: var(--line-height-normal);
+    --type-heading-xs-size: var(--font-size-lg-plus);   /* 18px - API names */
+    --type-heading-xs-line: var(--line-height-snug);
+    --type-heading-xs-weight: var(--font-weight-normal);
+    --type-heading-xs-tracking: var(--letter-spacing-normal);
+
+    /* Body - For readable content (From HTML Analysis) */
+    --type-body-xl-size: var(--font-size-lg);           /* 16px - Section titles */
+    --type-body-xl-line: var(--line-height-comfortable);
+    --type-body-xl-weight: var(--font-weight-normal);
+    --type-body-xl-tracking: var(--letter-spacing-normal);
+
+    --type-body-lg-size: var(--font-size-md-plus);      /* 15px - Intro text, card names */
+    --type-body-lg-line: var(--line-height-comfortable);
     --type-body-lg-weight: var(--font-weight-normal);
     --type-body-lg-tracking: var(--letter-spacing-normal);
 
-    --type-body-md-size: var(--font-size-base);
-    --type-body-md-line: var(--line-height-normal);
+    --type-body-md-size: var(--font-size-md);           /* 14px - Body text, h3, icons */
+    --type-body-md-line: var(--line-height-comfortable);
     --type-body-md-weight: var(--font-weight-normal);
     --type-body-md-tracking: var(--letter-spacing-normal);
 
-    --type-body-sm-size: var(--font-size-sm);
+    --type-body-sm-size: var(--font-size-base);         /* 13px - Button text, tabs, nav */
     --type-body-sm-line: var(--line-height-normal);
     --type-body-sm-weight: var(--font-weight-normal);
     --type-body-sm-tracking: var(--letter-spacing-normal);
 
-    /* Label - For UI labels and captions */
-    --type-label-lg-size: var(--font-size-base);
+    --type-body-xs-size: var(--font-size-sm);           /* 12px - Descriptions, table cells */
+    --type-body-xs-line: var(--line-height-comfortable);
+    --type-body-xs-weight: var(--font-weight-normal);
+    --type-body-xs-tracking: var(--letter-spacing-normal);
+
+    /* Label - For UI labels and captions (From HTML Analysis) */
+    --type-label-lg-size: var(--font-size-xs);          /* 11px - Meta info, counts */
     --type-label-lg-line: var(--line-height-snug);
-    --type-label-lg-weight: var(--font-weight-medium);
+    --type-label-lg-weight: var(--font-weight-normal);
     --type-label-lg-tracking: var(--letter-spacing-normal);
 
-    --type-label-md-size: var(--font-size-sm);
+    --type-label-md-size: var(--font-size-2xs);         /* 10px - Form labels, badges, table headers */
     --type-label-md-line: var(--line-height-snug);
-    --type-label-md-weight: var(--font-weight-medium);
-    --type-label-md-tracking: var(--letter-spacing-normal);
+    --type-label-md-weight: var(--font-weight-bold);
+    --type-label-md-tracking: var(--letter-spacing-wide);
 
-    --type-label-sm-size: var(--font-size-xs);
-    --type-label-sm-line: var(--line-height-snug);
-    --type-label-sm-weight: var(--font-weight-medium);
-    --type-label-sm-tracking: var(--letter-spacing-wide);
+    --type-label-sm-size: var(--font-size-3xs);         /* 9px - Tags, labels */
+    --type-label-sm-line: var(--line-height-tight);
+    --type-label-sm-weight: var(--font-weight-bold);
+    --type-label-sm-tracking: var(--letter-spacing-widest);
 
-    /* Code - For technical data (JetBrains Mono) */
-    --type-code-lg-size: var(--font-size-base);
-    --type-code-lg-line: var(--line-height-normal);
+    /* Code - For technical data (JetBrains Mono - From HTML Analysis) */
+    --type-code-lg-size: var(--font-size-md);           /* 14px - Large code blocks */
+    --type-code-lg-line: var(--line-height-code);
     --type-code-lg-weight: var(--font-weight-normal);
 
-    --type-code-md-size: var(--font-size-sm);
-    --type-code-md-line: var(--line-height-normal);
+    --type-code-md-size: var(--font-size-base);         /* 13px - Code blocks */
+    --type-code-md-line: var(--line-height-code);
     --type-code-md-weight: var(--font-weight-normal);
 
-    --type-code-sm-size: var(--font-size-xs);
-    --type-code-sm-line: var(--line-height-snug);
+    --type-code-sm-size: var(--font-size-sm);           /* 12px - Inline code */
+    --type-code-sm-line: var(--line-height-normal);
     --type-code-sm-weight: var(--font-weight-normal);
+
+    --type-code-xs-size: var(--font-size-xs);           /* 11px - Small code, technical labels */
+    --type-code-xs-line: var(--line-height-normal);
+    --type-code-xs-weight: var(--font-weight-normal);
   }
 
   /* Responsive Typography Scale */

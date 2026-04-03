@@ -74,13 +74,13 @@ const SyncHistoryTab = ({ application }) => {
   const getStatusBadge = (status) => {
     switch (status) {
       case 'success':
-        return <span className="px-2 py-1 text-xs font-semibold bg-emerald-100 text-emerald-700 rounded">SUCCESS</span>;
+        return <span className="px-2 py-0.5 text-[10px] font-bold font-mono uppercase tracking-[0.1em] bg-[#d4f0e7] text-[#166534] rounded">SUCCESS</span>;
       case 'no_change':
-        return <span className="px-2 py-1 text-xs font-semibold bg-slate-100 text-slate-600 rounded">NO CHANGES</span>;
+        return <span className="px-2 py-0.5 text-[10px] font-bold font-mono uppercase tracking-[0.1em] bg-surface-container-high text-on-surface-variant rounded">NO CHANGES</span>;
       case 'failure':
-        return <span className="px-2 py-1 text-xs font-semibold bg-red-100 text-red-700 rounded">FAILED</span>;
+        return <span className="px-2 py-0.5 text-[10px] font-bold font-mono uppercase tracking-[0.1em] bg-[#fee2e2] text-[#dc2626] rounded">FAILED</span>;
       default:
-        return <span className="px-2 py-1 text-xs font-semibold bg-slate-100 text-slate-600 rounded">{status}</span>;
+        return <span className="px-2 py-0.5 text-[10px] font-bold font-mono uppercase tracking-[0.1em] bg-surface-container-high text-on-surface-variant rounded">{status}</span>;
     }
   };
 
@@ -102,7 +102,7 @@ const SyncHistoryTab = ({ application }) => {
       <Card className="p-6 shadow-sm">
         <div className="flex items-start justify-between mb-4">
           <div className="flex-1">
-            <h2 className="text-sm font-semibold text-slate-900 mb-2">Auto-Sync Configuration</h2>
+            <h2 className="font-serif text-[16px] font-normal text-on-surface mb-2">Auto-Sync Configuration</h2>
             <div className="space-y-2">
               <div className="flex items-center gap-2">
                 <span className="text-xs text-slate-600">Source URL:</span>
@@ -128,7 +128,7 @@ const SyncHistoryTab = ({ application }) => {
             <button
               onClick={handleManualSync}
               disabled={syncing}
-              className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 disabled:bg-slate-300 disabled:text-slate-500 text-white rounded-lg font-medium text-sm transition-all disabled:cursor-not-allowed flex items-center gap-2"
+              className="px-[18px] py-[9px] bg-primary hover:opacity-88 disabled:bg-surface-container-high disabled:text-on-surface-variant text-white rounded-[8px] font-medium text-[13px] transition-all disabled:cursor-not-allowed flex items-center gap-2"
             >
               <RefreshCw className={`w-4 h-4 ${syncing ? 'animate-spin' : ''}`} />
               {syncing ? 'Syncing...' : 'Sync Now'}
@@ -137,7 +137,7 @@ const SyncHistoryTab = ({ application }) => {
         </div>
 
         {syncError && (
-          <div className="mt-4 p-3 bg-red-50 border border-red-200 rounded-lg flex items-start gap-2">
+          <div className="mt-4 p-3 bg-red-50 border border-red-200 rounded-[8px] flex items-start gap-2">
             <XCircle className="w-4 h-4 text-red-600 mt-0.5" />
             <div className="flex-1">
               <p className="text-sm font-medium text-red-900">Sync Failed</p>
@@ -154,40 +154,40 @@ const SyncHistoryTab = ({ application }) => {
             <span className="text-xs font-medium text-slate-600">Filter:</span>
             <button
               onClick={() => setFilter('all')}
-              className={`px-3 py-1 text-xs font-medium rounded transition-all ${
+              className={`px-3 py-1 text-[10px] font-bold font-mono uppercase tracking-[0.1em] rounded-[8px] transition-all ${
                 filter === 'all'
-                  ? 'bg-slate-900 text-white'
-                  : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                  ? 'bg-on-surface text-white'
+                  : 'bg-surface-container-high text-on-surface-variant hover:bg-surface-container-highest'
               }`}
             >
               All
             </button>
             <button
               onClick={() => setFilter('success')}
-              className={`px-3 py-1 text-xs font-medium rounded transition-all ${
+              className={`px-3 py-1 text-[10px] font-bold font-mono uppercase tracking-[0.1em] rounded-[8px] transition-all ${
                 filter === 'success'
-                  ? 'bg-emerald-600 text-white'
-                  : 'bg-emerald-50 text-emerald-700 hover:bg-emerald-100'
+                  ? 'bg-success text-white'
+                  : 'bg-[#d4f0e7] text-[#166534] hover:opacity-88'
               }`}
             >
               Success
             </button>
             <button
               onClick={() => setFilter('no_change')}
-              className={`px-3 py-1 text-xs font-medium rounded transition-all ${
+              className={`px-3 py-1 text-[10px] font-bold font-mono uppercase tracking-[0.1em] rounded-[8px] transition-all ${
                 filter === 'no_change'
-                  ? 'bg-slate-600 text-white'
-                  : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                  ? 'bg-on-surface-variant text-white'
+                  : 'bg-surface-container-high text-on-surface-variant hover:bg-surface-container-highest'
               }`}
             >
               No Changes
             </button>
             <button
               onClick={() => setFilter('failure')}
-              className={`px-3 py-1 text-xs font-medium rounded transition-all ${
+              className={`px-3 py-1 text-[10px] font-bold font-mono uppercase tracking-[0.1em] rounded-[8px] transition-all ${
                 filter === 'failure'
-                  ? 'bg-red-600 text-white'
-                  : 'bg-red-50 text-red-700 hover:bg-red-100'
+                  ? 'bg-error text-white'
+                  : 'bg-[#fee2e2] text-[#dc2626] hover:opacity-88'
               }`}
             >
               Failed

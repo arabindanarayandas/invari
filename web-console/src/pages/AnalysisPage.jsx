@@ -557,46 +557,38 @@ const AnalysisPage = () => {
       {/* Try it out modal */}
       {testingEndpoint && (
         <div
-          className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4"
+          className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 p-4"
           onClick={handleCloseTest}
         >
           <div
-            className="bg-white rounded-lg shadow-xl max-w-3xl w-full max-h-[90vh] overflow-y-auto"
+            className="bg-surface rounded-[14px] shadow-2xl max-w-3xl w-full max-h-[90vh] overflow-y-auto"
             onClick={(e) => e.stopPropagation()}
           >
             {/* Header */}
-            <div className="border-b border-slate-200 p-4">
-              <div className="flex items-center justify-between mb-2">
-                <h3 className="text-lg font-semibold">Try it out</h3>
-                <button
-                  onClick={handleCloseTest}
-                  className="text-slate-400 hover:text-slate-600 cursor-pointer"
-                >
-                  ✕
-                </button>
-              </div>
+            <div className="p-7 pb-4">
+              <h3 className="font-serif text-[20px] font-normal text-on-surface mb-[6px]">Try it out</h3>
               <div className="flex items-center gap-2">
-                <span className={`px-2 py-1 text-xs font-bold rounded ${
+                <span className={`px-2 py-1 text-[10px] font-bold rounded ${
                   testingEndpoint.method === 'POST' ? 'bg-emerald-100 text-emerald-700' : 'bg-amber-100 text-amber-700'
                 }`}>
                   {testingEndpoint.method}
                 </span>
-                <span className="font-mono text-sm text-slate-700">{testingEndpoint.path}</span>
+                <span className="font-mono text-[13px] text-muted">{testingEndpoint.path}</span>
               </div>
             </div>
 
             {/* Body */}
-            <div className="p-4 space-y-4">
+            <div className="p-7 pt-0 space-y-4">
               <div>
                 <div className="flex items-center justify-between mb-2">
-                  <label className="block text-sm font-semibold text-slate-700">
+                  <label className="block font-mono text-[10px] uppercase tracking-[0.1em] text-muted font-semibold">
                     Request Body
                   </label>
                   <Tooltip text="Introduce an AI hallucination (error) to test repair functionality" forceBottom={true}>
                     <button
                       onClick={hallucinateRequestBody}
                       disabled={isHallucinating}
-                      className={`flex items-center gap-1.5 px-2 py-1 text-xs font-medium rounded transition-colors ${
+                      className={`flex items-center gap-1.5 px-2 py-1 text-[10px] font-medium rounded transition-colors ${
                         isHallucinating
                           ? 'text-purple-400 bg-purple-50 cursor-not-allowed'
                           : 'text-purple-600 hover:text-purple-700 hover:bg-purple-50 cursor-pointer'
@@ -616,13 +608,13 @@ const AnalysisPage = () => {
                       setHallucinationInfo(null);
                     }
                   }}
-                  className="w-full h-48 px-3 py-2 font-mono text-sm border border-slate-300 rounded-lg focus:outline-none focus:border-primary resize-none"
+                  className="w-full h-48 px-[13px] py-[10px] font-mono text-[13px] border border-outline rounded-lg bg-surface-low text-on-surface focus:outline-none focus:border-green transition-colors duration-150 resize-none"
                   placeholder="// JSON request body"
                 />
                 {hallucinationInfo && (
                   <div className="mt-2 p-2 bg-purple-50 border border-purple-200 rounded-lg flex items-start gap-2">
                     <Sparkles className="w-4 h-4 text-purple-600 mt-0.5 flex-shrink-0" />
-                    <div className="flex-1 text-xs">
+                    <div className="flex-1 text-[12px]">
                       <p className="font-semibold text-purple-900 mb-0.5">
                         Hallucinated field: <span className="font-mono bg-purple-100 px-1.5 py-0.5 rounded">{hallucinationInfo.field}</span>
                       </p>
@@ -642,7 +634,7 @@ const AnalysisPage = () => {
                   </div>
                 )}
                 {testError && (
-                  <p className="text-sm text-red-600 mt-1">{testError}</p>
+                  <p className="text-[13px] text-red-600 mt-1">{testError}</p>
                 )}
               </div>
 
@@ -650,7 +642,7 @@ const AnalysisPage = () => {
                 <button
                   onClick={handleSendTest}
                   disabled={testLoading}
-                  className="w-full py-2.5 bg-primary text-white font-semibold rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors cursor-pointer"
+                  className="w-full px-5 py-[9px] bg-green text-white border-0 rounded-lg text-[13px] font-semibold hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed transition-opacity cursor-pointer"
                 >
                   {testLoading ? 'Validating...' : 'Send Request'}
                 </button>
@@ -658,14 +650,14 @@ const AnalysisPage = () => {
 
               {/* Result */}
               {testResult && (
-                <div className="border border-slate-200 rounded-lg overflow-hidden">
+                <div className="border border-outline rounded-lg overflow-hidden">
                   <div className={`p-3 ${
                     testResult.status === 'stable' ? 'bg-emerald-50' :
                     testResult.status === 'repaired' ? 'bg-amber-50' :
                     'bg-red-50'
                   }`}>
                     <div className="flex items-center gap-3">
-                      <span className={`px-3 py-1 rounded-full text-xs font-semibold ${
+                      <span className={`px-3 py-1 rounded-full text-[10px] font-semibold ${
                         testResult.status === 'stable' ? 'bg-emerald-100 text-emerald-700' :
                         testResult.status === 'repaired' ? 'bg-amber-100 text-amber-700' :
                         'bg-red-100 text-red-700'
@@ -674,7 +666,7 @@ const AnalysisPage = () => {
                          testResult.status === 'repaired' ? '⚠ Repaired' :
                          '✗ Blocked'}
                       </span>
-                      <span className="text-xs text-slate-500">
+                      <span className="text-[12px] text-muted">
                         {testResult.overheadMs}ms overhead
                       </span>
                     </div>
@@ -683,19 +675,19 @@ const AnalysisPage = () => {
                   <div className="p-4 space-y-3">
                     {/* Drift details */}
                     {testResult.driftDetails && (
-                      <div className={`p-3 rounded-lg text-sm ${
+                      <div className={`p-3 rounded-lg text-[13px] ${
                         testResult.status === 'blocked' ? 'bg-red-50' : 'bg-amber-50'
                       }`}>
-                        <p className="font-semibold mb-2">
+                        <p className="font-semibold mb-2 text-on-surface">
                           {testResult.status === 'blocked' ? 'Block reason' : 'Repair details'}
                         </p>
                         {testResult.driftDetails.reason && (
-                          <p className="text-slate-600 mb-2">{testResult.driftDetails.reason}</p>
+                          <p className="text-muted mb-2">{testResult.driftDetails.reason}</p>
                         )}
                         {testResult.driftDetails.repairActions?.map((action, i) => (
-                          <div key={i} className="flex items-start gap-2 mt-1 text-xs">
+                          <div key={i} className="flex items-start gap-2 mt-1 text-[12px]">
                             <span className="text-amber-600">→</span>
-                            <span>
+                            <span className="text-on-surface">
                               <strong>{action.type.replace(/_/g, ' ')}</strong>
                               {action.field && `: ${action.field}`}
                               {action.from && action.to && ` "${action.from}" → "${action.to}"`}
@@ -708,15 +700,15 @@ const AnalysisPage = () => {
                     {/* Bodies comparison */}
                     <div className="grid grid-cols-2 gap-3">
                       <div>
-                        <p className="text-xs font-semibold text-slate-500 uppercase mb-1.5">Original</p>
-                        <pre className="bg-slate-50 border border-slate-200 rounded p-2 text-xs font-mono overflow-auto max-h-40">
+                        <p className="font-mono text-[10px] font-semibold text-muted uppercase tracking-[0.1em] mb-1.5">Original</p>
+                        <pre className="bg-surface-low border border-outline rounded p-2 text-[12px] font-mono text-on-surface overflow-auto max-h-40">
                           {JSON.stringify(testResult.originalBody, null, 2)}
                         </pre>
                       </div>
                       {testResult.sanitizedBody && (
                         <div>
-                          <p className="text-xs font-semibold text-emerald-600 uppercase mb-1.5">Repaired</p>
-                          <pre className="bg-emerald-50 border border-emerald-200 rounded p-2 text-xs font-mono overflow-auto max-h-40">
+                          <p className="font-mono text-[10px] font-semibold text-emerald-600 uppercase tracking-[0.1em] mb-1.5">Repaired</p>
+                          <pre className="bg-emerald-50 border border-emerald-200 rounded p-2 text-[12px] font-mono text-emerald-700 overflow-auto max-h-40">
                             {JSON.stringify(testResult.sanitizedBody, null, 2)}
                           </pre>
                         </div>
@@ -725,9 +717,9 @@ const AnalysisPage = () => {
 
                     {/* Feedback */}
                     {testResult.feedback && (
-                      <div className="p-3 bg-blue-50 rounded-lg text-sm">
-                        <p className="font-semibold mb-1">Feedback</p>
-                        <p className="text-slate-600">{testResult.feedback.summary || 'Validation successful'}</p>
+                      <div className="p-3 bg-green-bg border border-green rounded-lg text-[13px]">
+                        <p className="font-semibold mb-1 text-on-surface">Feedback</p>
+                        <p className="text-muted">{testResult.feedback.summary || 'Validation successful'}</p>
                       </div>
                     )}
                   </div>

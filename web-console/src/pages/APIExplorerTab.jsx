@@ -129,16 +129,17 @@ const APIExplorerTab = ({ application }) => {
   const getMethodColor = (method) => {
     switch (method) {
       case 'GET':
-        return 'bg-primary/10 text-primary border-primary/20';
+        return 'bg-[#dcfce7] text-[#166534]';
       case 'POST':
-        return 'bg-success/10 text-success border-success/20';
-      case 'PUT':
+        return 'bg-[#dbeafe] text-[#1d4ed8]';
       case 'PATCH':
-        return 'bg-warning/10 text-warning border-warning/20';
+        return 'bg-[#fef3c7] text-[#b45309]';
       case 'DELETE':
-        return 'bg-error/10 text-error border-error/20';
+        return 'bg-[#fee2e2] text-[#dc2626]';
+      case 'PUT':
+        return 'bg-[#fef3c7] text-[#b45309]'; // Same as PATCH
       default:
-        return 'bg-surface-container-low text-on-surface-variant border-outline-variant';
+        return 'bg-surface-container-low text-on-surface-variant';
     }
   };
 
@@ -257,7 +258,7 @@ const APIExplorerTab = ({ application }) => {
         <Card className="p-4">
           <div className="flex items-center justify-between mb-3">
             <div>
-              <h3 className="text-body-sm font-semibold text-on-surface">
+              <h3 className="font-serif text-[18px] font-normal text-on-surface mb-0.5">
                 {endpoints?.title || 'API Endpoints'}
               </h3>
               <p className="text-label-sm text-on-surface-variant">

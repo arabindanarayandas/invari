@@ -103,7 +103,7 @@ const SpecUpload = ({ onSubmit }) => {
   return (
     <div className="w-full">
       {/* Upload Widget */}
-      <div className="bg-[#111] border border-[#222] rounded-lg p-8">
+      <div className="bg-[#111] border border-[#222] rounded-[8px]-lg p-8">
         {/* Mode Toggle */}
         <div className="flex gap-3 mb-6">
           <button
@@ -112,7 +112,7 @@ const SpecUpload = ({ onSubmit }) => {
               setMode("file");
               setError(null);
             }}
-            className={`flex-1 px-6 py-3 border-2 rounded font-medium transition-all flex items-center justify-center gap-2 ${
+            className={`flex-1 px-6 py-3 border-2 rounded-[8px] font-medium transition-all flex items-center justify-center gap-2 ${
               mode === "file"
                 ? "border-[#1D9E75] bg-[#1D9E75]/10 text-[#1D9E75]"
                 : "border-[#222] bg-[#0d0d0d] text-[#888] hover:border-[#444]"
@@ -127,7 +127,7 @@ const SpecUpload = ({ onSubmit }) => {
               setMode("url");
               setError(null);
             }}
-            className={`flex-1 px-6 py-3 border-2 rounded font-medium transition-all flex items-center justify-center gap-2 ${
+            className={`flex-1 px-6 py-3 border-2 rounded-[8px] font-medium transition-all flex items-center justify-center gap-2 ${
               mode === "url"
                 ? "border-[#1D9E75] bg-[#1D9E75]/10 text-[#1D9E75]"
                 : "border-[#222] bg-[#0d0d0d] text-[#888] hover:border-[#444]"
@@ -141,7 +141,7 @@ const SpecUpload = ({ onSubmit }) => {
         {/* File Upload Mode */}
         {mode === "file" && (
           <div
-            className={`border-2 border-dashed rounded p-12 text-center transition-colors ${
+            className={`border-2 border-dashed rounded-[8px] p-12 text-center transition-colors ${
               dragActive
                 ? "border-[#1D9E75] bg-[#1D9E75]/5"
                 : "border-[#222] bg-[#0d0d0d]"
@@ -168,7 +168,7 @@ const SpecUpload = ({ onSubmit }) => {
             <button
               type="button"
               onClick={() => fileInputRef.current?.click()}
-              className="bg-[#1a1a1a] text-white px-6 py-2.5 rounded font-medium hover:bg-[#222] transition-colors border border-[#222]"
+              className="bg-[#1a1a1a] text-white px-6 py-2.5 rounded-[8px] font-medium hover:bg-[#222] transition-colors border border-[#222]"
             >
               Browse Files
             </button>
@@ -188,7 +188,7 @@ const SpecUpload = ({ onSubmit }) => {
                   setSelectedUrl(e.target.value);
                   setError(null);
                 }}
-                className="w-full px-4 py-3 border border-[#222] rounded focus:outline-none focus:border-[#1D9E75] text-white bg-[#0d0d0d]"
+                className="w-full px-4 py-3 border border-[#222] rounded-[8px] focus:outline-none focus:border-[#1D9E75] text-white bg-[#0d0d0d]"
               >
                 <option value="">Choose an example API...</option>
                 {exampleSpecs.map((spec) => (
@@ -200,7 +200,7 @@ const SpecUpload = ({ onSubmit }) => {
             </div>
 
             {error && (
-              <div className="p-4 bg-red-500/10 border border-red-500/20 rounded">
+              <div className="p-4 bg-red-500/10 border border-red-500/20 rounded-[8px]">
                 <p className="text-sm text-red-400">{error}</p>
               </div>
             )}
@@ -209,11 +209,11 @@ const SpecUpload = ({ onSubmit }) => {
               type="button"
               onClick={handleUrlFetch}
               disabled={!selectedUrl || loading}
-              className="w-full px-6 py-3 bg-[#1D9E75] hover:opacity-90 disabled:bg-[#222] disabled:text-[#666] text-white rounded font-medium transition-all disabled:cursor-not-allowed flex items-center justify-center gap-2"
+              className="w-full px-6 py-3 bg-[#1D9E75] hover:opacity-90 disabled:bg-[#222] disabled:text-[#666] text-white rounded-[8px] font-medium transition-all disabled:cursor-not-allowed flex items-center justify-center gap-2"
             >
               {loading ? (
                 <>
-                  <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                  <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-[8px]-full animate-spin" />
                   Fetching...
                 </>
               ) : (

@@ -1,11 +1,12 @@
 import React from 'react';
 
 /**
- * Button component following the "Observational Blueprint" design system
- * - 4px corner radius for industrial sharp edges
- * - No gradients or shadows
- * - Primary: Solid blue (#0052FF) with white text
- * - Secondary: Surface container with on-surface text
+ * Button component following the "Technical Editorial" design system
+ * - 8px border radius for refined edges
+ * - Hover opacity: 0.88 for subtle interaction
+ * - 13px font size with precise padding
+ * - Primary: Emerald green (#1D9E75)
+ * - Secondary: Surface tonal layers
  */
 export const Button = React.forwardRef(({
   variant = 'primary',
@@ -18,22 +19,22 @@ export const Button = React.forwardRef(({
   type = 'button',
   ...props
 }, ref) => {
-  const baseClasses = 'inline-flex items-center justify-center font-medium transition-colors duration-150 focus:ring-2 focus:ring-primary focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed rounded-sm';
+  const baseClasses = 'inline-flex items-center justify-center font-medium transition-all duration-150 focus:ring-2 focus:ring-primary focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed rounded-[8px]';
 
   const variantClasses = {
-    primary: 'bg-primary text-white hover:bg-primary-dark active:bg-primary-darker', /* Emerald green */
-    secondary: 'bg-surface-container-high text-on-surface hover:bg-surface-container-highest active:bg-surface-container', /* No border - tonal layering */
-    ghost: 'text-on-surface hover:bg-surface-container-low active:bg-surface-container-high',
-    danger: 'bg-red-600 text-white hover:bg-red-700 active:bg-red-800',
-    repair: 'bg-repair text-white hover:bg-orange-700 active:bg-orange-800',
-    success: 'bg-success text-white hover:bg-green-700 active:bg-green-800',
+    primary: 'bg-primary text-white hover:opacity-88 active:opacity-75', /* Emerald green */
+    secondary: 'bg-surface-container-high text-on-surface hover:opacity-88 active:opacity-75', /* Tonal layering */
+    ghost: 'text-on-surface hover:bg-surface-container-low active:bg-surface-container-high hover:opacity-88',
+    danger: 'bg-red-600 text-white hover:opacity-88 active:opacity-75',
+    repair: 'bg-repair text-white hover:opacity-88 active:opacity-75',
+    success: 'bg-success text-white hover:opacity-88 active:opacity-75',
   };
 
   const sizeClasses = {
-    xs: 'h-6 px-2 text-label-sm gap-1',
-    sm: 'h-8 px-3 text-body-sm gap-1.5',
-    md: 'h-10 px-4 text-body-md gap-2',
-    lg: 'h-12 px-6 text-body-lg gap-2.5',
+    xs: 'px-[12px] py-[6px] text-[11px] gap-1',
+    sm: 'px-[15px] py-[7px] text-[12px] gap-1.5',
+    md: 'px-[18px] py-[9px] text-[13px] gap-2',
+    lg: 'px-[24px] py-[12px] text-[14px] gap-2.5',
   };
 
   const widthClass = fullWidth ? 'w-full' : '';

@@ -83,7 +83,7 @@ const Tooltip = ({ children, text, forceBottom = false, fullWidth = false }) => 
       </div>
       {show && (
         <div
-          className="fixed px-3 py-1.5 bg-slate-900 text-white text-xs rounded shadow-lg z-[9999] pointer-events-none max-w-[350px]"
+          className="fixed px-3 py-1.5 bg-slate-900 text-white text-xs rounded-[8px] shadow-lg z-[9999] pointer-events-none max-w-[350px]"
           style={{
             top: forceBottom ? `${position.top}px` : 'auto',
             bottom: forceBottom ? 'auto' : `${window.innerHeight - position.top}px`,
@@ -544,7 +544,7 @@ const SpecResults = ({ results, onTryItOut, specData, disableLoginGating = false
                     onClick={() => {
                       setShowSpecDetails(!showSpecDetails);
                     }}
-                    className={`flex items-center gap-1.5 px-3 py-1.5 rounded text-xs font-semibold transition-colors cursor-pointer ${
+                    className={`flex items-center gap-1.5 px-3 py-1.5 rounded-[8px] text-xs font-semibold transition-colors cursor-pointer ${
                       showSpecDetails
                         ? 'bg-primary text-white'
                         : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
@@ -561,7 +561,7 @@ const SpecResults = ({ results, onTryItOut, specData, disableLoginGating = false
                     setSelectedEndpoint(null);
                     setShowSpecDetails(false);
                   }}
-                  className="p-1 hover:bg-slate-100 rounded transition-colors cursor-pointer"
+                  className="p-1 hover:bg-slate-100 rounded-[8px] transition-colors cursor-pointer"
                 >
                   <X className="w-4 h-4 text-slate-600" />
                 </button>
@@ -593,7 +593,7 @@ const SpecResults = ({ results, onTryItOut, specData, disableLoginGating = false
                       <FileText className="w-4 h-4 text-primary" />
                       OpenAPI Specification
                     </h3>
-                    <div className="bg-white rounded border border-slate-300 p-3 max-h-96 overflow-auto">
+                    <div className="bg-white rounded-[8px] border border-slate-300 p-3 max-h-96 overflow-auto">
                       <pre className="text-xs font-mono text-slate-700 whitespace-pre-wrap">
                         {JSON.stringify(getEndpointSpecDetails(selectedEndpoint), null, 2) || 'No spec details available'}
                       </pre>

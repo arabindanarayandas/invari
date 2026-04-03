@@ -76,18 +76,27 @@
     --color-red-600: #DC2626;
     --color-red-700: #B91C1C;
 
+    /* Shorthand Color Variables - From HTML screen-lab design system */
+    --green-dim: #d4f0e7;
+    --green-bg: #f0faf5;
+    --amber-dim: #fef3c7;
+    --red-dim: #fee2e2;
+    --blue-dim: #eff6ff;
+
     /* Design System Specific Colors */
-    --color-on-surface: #1B1C1A; /* Text on surfaces */
+    --color-on-surface: #1B1C1A; /* Text on surfaces (primary text) */
     --color-on-surface-variant: #45483D; /* Secondary text */
-    --color-outline: #75786B; /* Dividers and borders (when absolutely needed) */
+    --color-muted: #6B6860; /* Muted/tertiary text */
+    --color-outline: #BCCAC1; /* Dividers and borders (greenish-gray from screen-lab) */
     --color-outline-variant: #BCCAC1; /* Ghost borders at 15% opacity */
 
-    /* Surface Colors - Technical Editorial (from invari-design.md) */
-    --color-surface-base: #FAF9F6; /* Level 0 - Widest layout areas */
-    --color-surface-low: #F4F3F0; /* Level 1 - Grouping large blocks (warm workshop) */
+    /* Surface Colors - Technical Editorial (from screen-lab design system) */
+    --color-surface-base: #FAF9F6; /* Level 0 - Widest layout areas (page background) */
+    --color-surface-low: #F4F3F0; /* Level 1 - Sunken/recessed surfaces */
     --color-surface-default: #FFFFFF; /* Level 2 - Cards and active areas */
-    --color-surface-container: #EFEEEB; /* Level 2 - Tables/secondary nav */
-    --color-surface-high: #E3E2DF; /* Level 3 - Active states/nested panels */
+    --color-surface-mid: #EFEEEB; /* Level 2.5 - Mid-level surfaces */
+    --color-surface-container: #EFEEEB; /* Level 2 - Mid-level surfaces/tables */
+    --color-surface-high: #E9E8E5; /* Level 3 - Elevated surfaces/active states */
     --color-surface-overlay: rgba(255, 255, 255, 0.95); /* Glass effect base */
 
     /* ===== Typography Tokens ===== */
@@ -97,83 +106,90 @@
     --font-family-sans: 'Manrope', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; /* Body - Functional voice */
     --font-family-mono: 'JetBrains Mono', 'IBM Plex Mono', 'SF Mono', Monaco, Consolas, monospace; /* Technical - Precise voice */
 
-    /* Font Sizes - Type Scale (1.25 ratio) */
-    --font-size-2xs: 0.625rem;   /* 10px */
-    --font-size-xs: 0.6875rem;   /* 11px */
-    --font-size-sm: 0.75rem;     /* 12px */
-    --font-size-base: 0.875rem;  /* 14px */
-    --font-size-md: 1rem;        /* 16px */
-    --font-size-lg: 1.125rem;    /* 18px */
-    --font-size-xl: 1.25rem;     /* 20px */
-    --font-size-2xl: 1.5rem;     /* 24px */
-    --font-size-3xl: 1.875rem;   /* 30px */
-    --font-size-4xl: 2.25rem;    /* 36px */
-    --font-size-5xl: 2.75rem;    /* 44px */
-    --font-size-6xl: 3.5rem;     /* 56px */
+    /* Font Sizes - Complete Scale from HTML Analysis */
+    --font-size-3xs: 0.5625rem;  /* 9px - Labels, tags */
+    --font-size-2xs: 0.625rem;   /* 10px - Form labels, badges, table headers */
+    --font-size-xs: 0.6875rem;   /* 11px - Meta info, counts, technical labels */
+    --font-size-sm: 0.75rem;     /* 12px - Input text, descriptions, table cells */
+    --font-size-base: 0.8125rem; /* 13px - Button text, tabs, navigation */
+    --font-size-md: 0.875rem;    /* 14px - Body text, h3 headings, icons */
+    --font-size-md-plus: 0.9375rem; /* 15px - Intro text, card names */
+    --font-size-lg: 1rem;        /* 16px - Section titles */
+    --font-size-lg-plus: 1.125rem; /* 18px - API names */
+    --font-size-xl: 1.1875rem;   /* 19px - h2 headings */
+    --font-size-2xl: 1.25rem;    /* 20px - Modal titles (small) */
+    --font-size-2xl-plus: 1.375rem; /* 22px - Modal titles, agent names */
+    --font-size-3xl: 1.625rem;   /* 26px - Page titles */
+    --font-size-4xl: 1.75rem;    /* 28px - Hero titles (small) */
+    --font-size-4xl-plus: 1.875rem; /* 30px - Hero titles */
+    --font-size-5xl: 2rem;       /* 32px - Stat values (small) */
+    --font-size-6xl: 2.25rem;    /* 36px - Stat values, latency displays */
 
-    /* Line Heights */
-    --line-height-none: 1;
-    --line-height-tight: 1.25;
-    --line-height-snug: 1.375;
-    --line-height-normal: 1.5;
-    --line-height-relaxed: 1.625;
-    --line-height-loose: 2;
+    /* Line Heights - Complete Scale from HTML Analysis */
+    --line-height-none: 1;        /* Stat values */
+    --line-height-tighter: 1.2;   /* Headings (tight) */
+    --line-height-tight: 1.25;    /* Headings */
+    --line-height-compact: 1.3;   /* Headings (comfortable) */
+    --line-height-snug: 1.4;      /* UI elements, links */
+    --line-height-normal: 1.5;    /* UI elements, links */
+    --line-height-comfortable: 1.6; /* Body text, cards */
+    --line-height-relaxed: 1.7;   /* Body text, long-form */
+    --line-height-loose: 1.75;    /* Long-form content */
+    --line-height-spacious: 1.8;  /* Long-form content */
+    --line-height-code: 1.9;      /* Code blocks */
+    --line-height-list: 2;        /* Line-item lists */
 
-    /* Font Weights */
-    --font-weight-thin: 100;
-    --font-weight-light: 300;
-    --font-weight-normal: 400;
-    --font-weight-medium: 500;
-    --font-weight-semibold: 600;
-    --font-weight-bold: 700;
-    --font-weight-extrabold: 800;
-    --font-weight-black: 900;
+    /* Font Weights - From HTML Analysis */
+    --font-weight-light: 300;     /* Diff arrows */
+    --font-weight-normal: 400;    /* Default, titles */
+    --font-weight-medium: 500;    /* Active TOC, links */
+    --font-weight-semibold: 600;  /* Active states, emphasis */
+    --font-weight-bold: 700;      /* Headings, badges, buttons */
 
-    /* Letter Spacing */
-    --letter-spacing-tighter: -0.05em;
-    --letter-spacing-tight: -0.025em;
-    --letter-spacing-normal: 0;
-    --letter-spacing-wide: 0.025em;
-    --letter-spacing-wider: 0.05em;
-    --letter-spacing-widest: 0.1em;
+    /* Letter Spacing - From HTML Analysis */
+    --letter-spacing-tighter: -2px;   /* Custom list markers */
+    --letter-spacing-normal: 0;       /* Default */
+    --letter-spacing-subtle: 0.06em;  /* Industry chips */
+    --letter-spacing-medium: 0.08em;  /* Table headers, subtle labels */
+    --letter-spacing-wide: 0.1em;     /* Form labels, uppercase labels */
+    --letter-spacing-wider: 0.12em;   /* Section titles, primary labels */
+    --letter-spacing-widest: 0.14em;  /* Eyebrow text */
 
-    /* ===== Spacing Tokens (4px Grid) ===== */
+    /* ===== Spacing Tokens - Complete Scale from HTML Analysis ===== */
 
     --spacing-0: 0;
     --spacing-px: 1px;
-    --spacing-0-5: 0.125rem;  /* 2px */
-    --spacing-1: 0.25rem;     /* 4px - Base unit */
-    --spacing-1-5: 0.375rem;  /* 6px */
-    --spacing-2: 0.5rem;      /* 8px */
-    --spacing-2-5: 0.625rem;  /* 10px */
-    --spacing-3: 0.75rem;     /* 12px */
-    --spacing-3-5: 0.875rem;  /* 14px */
-    --spacing-4: 1rem;        /* 16px */
-    --spacing-5: 1.25rem;     /* 20px */
-    --spacing-6: 1.5rem;      /* 24px */
-    --spacing-7: 1.75rem;     /* 28px */
-    --spacing-8: 2rem;        /* 32px - Data row height */
-    --spacing-9: 2.25rem;     /* 36px */
-    --spacing-10: 2.5rem;     /* 40px */
-    --spacing-11: 2.75rem;    /* 44px */
-    --spacing-12: 3rem;       /* 48px */
-    --spacing-14: 3.5rem;     /* 56px */
-    --spacing-16: 4rem;       /* 64px - Collapsed sidebar */
-    --spacing-20: 5rem;       /* 80px */
-    --spacing-24: 6rem;       /* 96px */
-    --spacing-28: 7rem;       /* 112px */
-    --spacing-32: 8rem;       /* 128px */
-    --spacing-36: 9rem;       /* 144px */
-    --spacing-40: 10rem;      /* 160px */
-    --spacing-44: 11rem;      /* 176px */
-    --spacing-48: 12rem;      /* 192px */
-    --spacing-52: 13rem;      /* 208px */
-    --spacing-56: 14rem;      /* 224px */
-    --spacing-60: 15rem;      /* 240px - Expanded sidebar */
-    --spacing-64: 16rem;      /* 256px */
-    --spacing-72: 18rem;      /* 288px */
-    --spacing-80: 20rem;      /* 320px */
-    --spacing-96: 24rem;      /* 384px */
+    --spacing-0-5: 0.125rem;  /* 2px - Badges, pills (vertical) */
+    --spacing-1: 0.1875rem;   /* 3px - Small elements */
+    --spacing-1-5: 0.25rem;   /* 4px - Inline code, small gaps */
+    --spacing-2: 0.3125rem;   /* 5px - Small buttons */
+    --spacing-2-5: 0.375rem;  /* 6px - Action buttons, small gaps */
+    --spacing-3: 0.4375rem;   /* 7px - Inputs (vertical) */
+    --spacing-3-5: 0.5rem;    /* 8px - Standard gaps, badges (horizontal) */
+    --spacing-4: 0.5625rem;   /* 9px - Buttons (vertical small) */
+    --spacing-4-5: 0.625rem;  /* 10px - Standard padding, gaps */
+    --spacing-5: 0.6875rem;   /* 11px - Inputs (vertical) */
+    --spacing-5-5: 0.75rem;   /* 12px - Cards, sections, gaps */
+    --spacing-6: 0.8125rem;   /* 13px - Buttons (vertical) */
+    --spacing-6-5: 0.875rem;  /* 14px - Cards, sections */
+    --spacing-7: 1rem;        /* 16px - Standard padding */
+    --spacing-8: 1.125rem;    /* 18px - Buttons (horizontal small) */
+    --spacing-9: 1.25rem;     /* 20px - Buttons, sections */
+    --spacing-10: 1.375rem;   /* 22px - Buttons (horizontal) */
+    --spacing-11: 1.5rem;     /* 24px - Sections */
+    --spacing-12: 1.75rem;    /* 28px - Buttons (horizontal large), sections */
+    --spacing-14: 2rem;       /* 32px - Sections */
+    --spacing-16: 2.25rem;    /* 36px - Large sections */
+    --spacing-18: 2.5rem;     /* 40px - Large sections */
+    --spacing-20: 3rem;       /* 48px - Very large sections */
+    --spacing-24: 3.5rem;     /* 56px - Very large sections */
+    --spacing-28: 3.75rem;    /* 60px - Page padding */
+    --spacing-32: 4rem;       /* 64px - Page padding */
+    --spacing-40: 6rem;       /* 96px - Extra large sections */
+    --spacing-nav-h: 3.25rem; /* 52px - Navigation height */
+    --spacing-sidebar-lab: 12.5rem;  /* 200px - Lab sidebar */
+    --spacing-sidebar-docs: 15rem;   /* 240px - Docs sidebar */
+    --spacing-toc: 12.5rem;   /* 200px - Table of contents width */
 
     /* ===== Border Tokens ===== */
 
@@ -184,34 +200,44 @@
     --border-width-4: 4px;
     --border-width-8: 8px;
 
-    /* Border Radius - Industrial sharp edges */
+    /* Border Radius - Complete Scale from HTML Analysis */
     --radius-none: 0;
-    --radius-xs: 0.125rem;    /* 2px */
-    --radius-sm: 0.25rem;     /* 4px - Default */
-    --radius-md: 0.375rem;    /* 6px */
-    --radius-lg: 0.5rem;      /* 8px - Maximum */
-    --radius-xl: 0.75rem;     /* 12px - Avoid */
-    --radius-2xl: 1rem;       /* 16px - Avoid */
-    --radius-3xl: 1.5rem;     /* 24px - Never use */
-    --radius-full: 9999px;    /* Pills only */
+    --radius-xs: 0.1875rem;   /* 3px - Scrollbar thumb, kbd */
+    --radius-sm: 0.25rem;     /* 4px - Badges, inline code */
+    --radius-md: 0.3125rem;   /* 5px - Small buttons */
+    --radius-default: 0.375rem; /* 6px - Action buttons, icons */
+    --radius-lg: 0.4375rem;   /* 7px - Inputs, search fields */
+    --radius-xl: 0.5rem;      /* 8px - Standard buttons, cards, code blocks */
+    --radius-2xl: 0.625rem;   /* 10px - Large buttons, stat cards */
+    --radius-3xl: 0.75rem;    /* 12px - Large cards, sections */
+    --radius-4xl: 0.875rem;   /* 14px - Modals (small) */
+    --radius-5xl: 1rem;       /* 16px - Modals */
+    --radius-6xl: 1.5rem;     /* 24px - Large containers */
+    --radius-full: 9999px;    /* Pills, chips, status badges, circular elements */
+    --radius-pill: 100px;     /* Alternative pill radius */
 
-    /* ===== Shadow Tokens (Minimal) ===== */
+    /* ===== Shadow Tokens - Complete Elevation System from HTML Analysis ===== */
 
-    /* We avoid shadows per design system, but keep for exceptional cases */
     --shadow-none: none;
-    --shadow-ghost: 0 0 0 1px rgba(229, 231, 235, 0.2);
-    --shadow-xs: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+    --shadow-subtle: 0 1px 3px rgba(0, 0, 0, 0.08); /* Active toggle */
+    --shadow-card-hover: 0 2px 12px rgba(29, 158, 117, 0.08); /* Card hover (green tint) */
     --shadow-sm: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+    --shadow-md: 0 4px 16px rgba(27, 28, 26, 0.18); /* Primary button */
+    --shadow-lg: 0 6px 20px rgba(27, 28, 26, 0.22); /* Button hover */
+    --shadow-xl: 0 8px 24px rgba(27, 28, 26, 0.18); /* Icon elements */
+    --shadow-2xl: 0 20px 60px rgba(0, 0, 0, 0.2);   /* Modal (large) */
+    --shadow-modal: 0 24px 64px rgba(0, 0, 0, 0.2); /* Modal (very large) */
+    --shadow-focus-ring: 0 0 0 3px rgba(29, 158, 117, 0.08); /* Focus ring (green) */
 
     /* ===== Animation Tokens ===== */
 
-    /* Duration */
+    /* Duration - From HTML Analysis */
     --duration-instant: 0ms;
-    --duration-fast: 100ms;
-    --duration-normal: 150ms; /* Default */
-    --duration-slow: 300ms;
-    --duration-slower: 500ms;
-    --duration-slowest: 1000ms;
+    --duration-fast: 100ms;   /* Color transitions on links */
+    --duration-quick: 120ms;  /* Most interactive elements (buttons, links, tabs) */
+    --duration-normal: 150ms; /* Cards, forms, upload zones */
+    --duration-slow: 300ms;   /* Grid animations, slower effects */
+    --duration-pulse: 1500ms; /* Live indicator pulse animation */
 
     /* Easing */
     --ease-linear: linear;
@@ -220,7 +246,7 @@
     --ease-in-out: cubic-bezier(0.4, 0, 0.2, 1);
     --ease-bounce: cubic-bezier(0.68, -0.55, 0.265, 1.55);
 
-    /* ===== Z-Index Scale ===== */
+    /* ===== Z-Index Scale - From HTML Analysis ===== */
 
     --z-index-negative: -1;
     --z-index-0: 0;
@@ -229,6 +255,7 @@
     --z-index-30: 30;
     --z-index-40: 40;
     --z-index-50: 50;
+    --z-index-nav: 200;       /* Navigation bar, modal overlay (from HTML analysis) */
     --z-index-dropdown: 1000;
     --z-index-sticky: 1020;
     --z-index-fixed: 1030;

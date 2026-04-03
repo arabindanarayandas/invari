@@ -1,4 +1,4 @@
-import { eq, and } from 'drizzle-orm';
+import { eq, and, isNull } from 'drizzle-orm';
 import { db, agents } from '../db/index.js';
 
 export class AgentRepository {
@@ -6,7 +6,10 @@ export class AgentRepository {
     const [agent] = await db
       .select()
       .from(agents)
-      .where(eq(agents.id, id))
+      .where(and(
+        eq(agents.id, id),
+        isNull(agents.deletedAt)
+      ))
       .limit(1);
 
     return agent;
@@ -16,7 +19,10 @@ export class AgentRepository {
     const [agent] = await db
       .select()
       .from(agents)
-      .where(eq(agents.invariApiKey, apiKey))
+      .where(and(
+        eq(agents.invariApiKey, apiKey),
+        isNull(agents.deletedAt)
+      ))
       .limit(1);
 
     return agent;
@@ -26,7 +32,10 @@ export class AgentRepository {
     return await db
       .select()
       .from(agents)
-      .where(eq(agents.userId, userId))
+      .where(and(
+        eq(agents.userId, userId),
+        isNull(agents.deletedAt)
+      ))
       .orderBy(agents.createdAt);
   }
 
@@ -58,9 +67,28 @@ export class AgentRepository {
   }
 
   async delete(id: string) {
-    await db
-      .delete(agents)
-      .where(eq(agents.id, id));
+    // Soft delete: set deleted_at timestamp
+    const [agent] = await db
+      .update(agents)
+      .set({ deletedAt: new Date() })
+      .where(and(
+        eq(agents.id, id),
+        isNull(agents.deletedAt)
+      ))
+      .returning();
+
+    return agent;
+  }
+
+  async restore(id: string) {
+    // Restore soft-deleted agent
+    const [agent] = await db
+      .update(agents)
+      .set({ deletedAt: null })
+      .where(eq(agents.id, id))
+      .returning();
+
+    return agent;
   }
 
   async apiKeyExists(apiKey: string): Promise<boolean> {
@@ -72,6 +100,7 @@ export class AgentRepository {
     return await db
       .select()
       .from(agents)
+      .where(isNull(agents.deletedAt))
       .orderBy(agents.createdAt);
   }
 }

@@ -71,7 +71,7 @@ const LoginPage = () => {
       {/* Login Card */}
       <Card variant="outlined" className="w-full max-w-md p-8">
         <div className="mb-8 text-center">
-          <h2 className="text-heading-md font-bold text-on-surface mb-2">
+          <h2 className="font-serif text-[26px] font-normal text-on-surface mb-2">
             Sign In
           </h2>
           <p className="text-on-surface-variant text-body-sm">
@@ -81,7 +81,7 @@ const LoginPage = () => {
 
         {/* Error Message */}
         {error && (
-          <div className="mb-6 p-3 bg-red-500/10 border border-red-500 rounded-sm">
+          <div className="mb-6 p-3 bg-red-500/10 border border-red-500 rounded-[8px]">
             <p className="text-red-500 text-body-sm">{error}</p>
           </div>
         )}

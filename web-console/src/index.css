@@ -14,25 +14,40 @@
 /* ===== CSS Custom Properties (Design Tokens) ===== */
 @layer base {
   :root {
-    /* Colors - Technical Editorial */
-    --color-primary: #1D9E75; /* Emerald green from invari-design.md */
+    /* Colors - Technical Editorial (Complete from HTML Analysis) */
+    --color-primary: #1D9E75; /* Emerald green - main brand color */
     --color-primary-dark: #00694C;
     --color-primary-darker: #008560;
     --color-repair: #D97706;
     --color-success: #059669;
 
-    /* Surface hierarchy - Technical Editorial */
-    --color-surface: #FAF9F6; /* Warm workshop background */
-    --color-surface-container-low: #F4F3F0;
-    --color-surface-container-lowest: #FFFFFF;
-    --color-surface-container: #EFEEEB;
-    --color-surface-container-high: #E3E2DF;
-    --color-surface-container-highest: #E3E2DF;
+    /* Screen-lab specific colors */
+    --color-green: #1D9E75;
+    --color-green-dim: #D4F0E7;
+    --color-green-bg: #F0FAF5;
+    --color-amber: #D97706;
+    --color-amber-dim: #FEF3C7;
+    --color-red: #DC2626;
+    --color-red-dim: #FEE2E2;
+    --color-blue: #1D4ED8;
+    --color-blue-dim: #EFF6FF;
+
+    /* Background and Surface hierarchy - Technical Editorial */
+    --color-bg: #FAF9F6; /* --bg (warm workshop background) */
+    --color-surface: #FFFFFF; /* --surface (white) */
+    --color-surface-container-low: #F4F3F0; /* --surface-low */
+    --color-surface-container-lowest: #FFFFFF; /* --surface (white) */
+    --color-surface-container: #EFEEEB; /* --surface-mid */
+    --color-surface-mid: #EFEEEB; /* Alias for container */
+    --color-surface-container-high: #E9E8E5; /* --surface-high */
+    --color-surface-high: #E9E8E5; /* Alias */
+    --color-surface-container-highest: #E9E8E5;
 
     /* Text */
     --color-on-surface: #1B1C1A;
     --color-on-surface-variant: #45483D;
-    --color-outline: #75786B;
+    --color-muted: #6B6860; /* Secondary text from HTML */
+    --color-outline: #BCCAC1; /* Updated from HTML analysis */
     --color-outline-variant: #BCCAC1;
 
     /* Typography - Technical Editorial */
@@ -40,16 +55,54 @@
     --font-family-sans: 'Manrope', system-ui, sans-serif; /* Body text */
     --font-family-mono: 'JetBrains Mono', 'IBM Plex Mono', monospace; /* Technical data */
 
-    /* Spacing (4px grid) */
-    --spacing-4: 1rem;
-    --spacing-8: 2rem;
-    --spacing-16: 4rem;
-    --spacing-60: 15rem;
+    /* Spacing - Complete scale from HTML analysis */
+    --spacing-px: 1px;
+    --spacing-0-5: 0.125rem;   /* 2px */
+    --spacing-1: 0.1875rem;    /* 3px */
+    --spacing-1-5: 0.25rem;    /* 4px */
+    --spacing-2: 0.3125rem;    /* 5px */
+    --spacing-2-5: 0.375rem;   /* 6px */
+    --spacing-3: 0.4375rem;    /* 7px */
+    --spacing-3-5: 0.5rem;     /* 8px */
+    --spacing-4: 0.5625rem;    /* 9px */
+    --spacing-4-5: 0.625rem;   /* 10px */
+    --spacing-5: 0.6875rem;    /* 11px */
+    --spacing-5-5: 0.75rem;    /* 12px */
+    --spacing-6: 0.8125rem;    /* 13px */
+    --spacing-6-5: 0.875rem;   /* 14px */
+    --spacing-7: 1rem;         /* 16px */
+    --spacing-8: 1.125rem;     /* 18px */
+    --spacing-9: 1.25rem;      /* 20px */
+    --spacing-10: 1.375rem;    /* 22px */
+    --spacing-11: 1.5rem;      /* 24px */
+    --spacing-12: 1.75rem;     /* 28px */
+    --spacing-14: 2rem;        /* 32px */
+    --spacing-16: 2.25rem;     /* 36px */
+    --spacing-18: 2.5rem;      /* 40px */
+    --spacing-20: 3rem;        /* 48px */
+    --spacing-24: 3.5rem;      /* 56px */
+    --spacing-28: 3.75rem;     /* 60px */
+    --spacing-32: 4rem;        /* 64px */
+    --spacing-40: 6rem;        /* 96px */
+    --spacing-60: 15rem;       /* 240px */
+    --spacing-sidebar: 12.5rem; /* 200px */
 
-    /* Border radius */
-    --radius-xs: 0.125rem;
-    --radius-sm: 0.25rem;
-    --radius-md: 0.5rem;
+    /* Border radius - Complete scale from HTML analysis */
+    --radius-xs: 0.1875rem;    /* 3px */
+    --radius-sm: 0.25rem;      /* 4px */
+    --radius-md: 0.3125rem;    /* 5px */
+    --radius-default: 0.375rem; /* 6px */
+    --radius-lg: 0.4375rem;    /* 7px */
+    --radius-xl: 0.5rem;       /* 8px */
+    --radius-2xl: 0.625rem;    /* 10px */
+    --radius-3xl: 0.75rem;     /* 12px */
+    --radius-4xl: 0.875rem;    /* 14px */
+    --radius-5xl: 1rem;        /* 16px */
+    --radius-pill: 100px;      /* Fully rounded */
+
+    /* Shadow tokens */
+    --shadow-card-hover: 0 2px 12px rgba(29, 158, 117, 0.08);
+    --shadow-subtle: 0 1px 3px rgba(0,0,0,0.08);
   }
 
   /* Base styles */
@@ -58,7 +111,7 @@
   }
 
   body {
-    background-color: var(--color-surface);
+    background-color: var(--color-bg);
     color: var(--color-on-surface);
     font-family: var(--font-family-sans);
     -webkit-font-smoothing: antialiased;
@@ -68,33 +121,33 @@
   /* Typography defaults - Technical Editorial */
   h1 {
     font-family: var(--font-family-serif);
-    font-size: 2rem;
+    font-size: 1.625rem; /* 26px - from HTML analysis */
     font-weight: 400; /* Noto Serif uses lighter weights */
-    line-height: 1.25;
+    line-height: 1.3;
   }
 
   h2 {
     font-family: var(--font-family-serif);
-    font-size: 1.5rem;
+    font-size: 1.1875rem; /* 19px - from HTML analysis */
     font-weight: 400;
-    line-height: 1.375;
+    line-height: 1.3;
   }
 
   h3 {
-    font-family: var(--font-family-serif);
-    font-size: 1.25rem;
-    font-weight: 400;
+    font-family: var(--font-family-sans);
+    font-size: 0.875rem; /* 14px - from HTML analysis */
+    font-weight: 600;
     line-height: 1.4;
   }
 
   p {
-    font-size: 0.875rem;
+    font-size: 0.8125rem; /* 13px - from HTML analysis */
     line-height: 1.5;
   }
 
   code, pre {
     font-family: var(--font-family-mono);
-    font-size: 0.6875rem;
+    font-size: 0.6875rem; /* 11px */
   }
 
   /* Focus styles */
@@ -162,12 +215,52 @@
     background-color: var(--color-surface-container-highest);
   }
 
+  .bg-surface-mid {
+    background-color: var(--color-surface-mid);
+  }
+
+  .bg-surface-high {
+    background-color: var(--color-surface-high);
+  }
+
+  .bg-green {
+    background-color: var(--color-green);
+  }
+
+  .bg-green-dim {
+    background-color: var(--color-green-dim);
+  }
+
+  .bg-green-bg {
+    background-color: var(--color-green-bg);
+  }
+
+  .bg-amber {
+    background-color: var(--color-amber);
+  }
+
+  .bg-amber-dim {
+    background-color: var(--color-amber-dim);
+  }
+
+  .bg-red-dim {
+    background-color: var(--color-red-dim);
+  }
+
+  .bg-blue-dim {
+    background-color: var(--color-blue-dim);
+  }
+
   .bg-repair {
     background-color: var(--color-repair);
   }
 
   .bg-success {
     background-color: var(--color-success);
+  }
+
+  .bg-on-surface {
+    background-color: var(--color-on-surface);
   }
 
   /* Text colors */
@@ -187,17 +280,41 @@
     color: var(--color-repair);
   }
 
+  .text-muted {
+    color: var(--color-muted);
+  }
+
+  .text-green {
+    color: var(--color-green);
+  }
+
+  .text-amber {
+    color: var(--color-amber);
+  }
+
   .text-success {
     color: var(--color-success);
   }
 
   /* Border colors */
+  .border-outline {
+    border-color: var(--color-outline);
+  }
+
   .border-outline-variant {
     border-color: var(--color-outline-variant);
   }
 
+  .border-surface-mid {
+    border-color: var(--color-surface-mid);
+  }
+
   .border-primary {
     border-color: var(--color-primary);
+  }
+
+  .border-green {
+    border-color: var(--color-green);
   }
 
   .border-repair {
@@ -209,6 +326,10 @@
   }
 
   /* Fonts */
+  .font-serif {
+    font-family: var(--font-family-serif);
+  }
+
   .font-mono {
     font-family: var(--font-family-mono);
   }
@@ -283,6 +404,24 @@
     font-weight: 500;
   }
 
+  /* Shadow utilities */
+  .shadow-card-hover {
+    box-shadow: var(--shadow-card-hover);
+  }
+
+  .shadow-subtle {
+    box-shadow: var(--shadow-subtle);
+  }
+
+  /* Transition utilities */
+  .transition-quick {
+    transition: all 120ms;
+  }
+
+  .transition-fast {
+    transition: all 100ms;
+  }
+
   /* Hover states */
   .hover\:bg-primary-dark:hover {
     background-color: var(--color-primary-dark);
@@ -292,11 +431,60 @@
     background-color: var(--color-primary-darker);
   }
 
+  .hover\:bg-surface-mid:hover {
+    background-color: var(--color-surface-mid);
+  }
+
+  .hover\:bg-surface-high:hover {
+    background-color: var(--color-surface-high);
+  }
+
   .hover\:bg-surface-container-highest:hover {
     background-color: var(--color-surface-container-highest);
   }
 
-  /* Border radius */
+  .hover\:text-green:hover {
+    color: var(--color-green);
+  }
+
+  .hover\:text-on-surface:hover {
+    color: var(--color-on-surface);
+  }
+
+  .hover\:border-green:hover {
+    border-color: var(--color-green);
+  }
+
+  .hover\:opacity-88:hover {
+    opacity: 0.88;
+  }
+
+  .hover\:shadow-card-hover:hover {
+    box-shadow: var(--shadow-card-hover);
+  }
+
+  /* Group hover utilities */
+  .group:hover .group-hover\:opacity-100 {
+    opacity: 1;
+  }
+
+  .group:hover .group-hover\:bg-green {
+    background-color: var(--color-green);
+  }
+
+  .group:hover .group-hover\:text-white {
+    color: white;
+  }
+
+  .group:hover .group-hover\:text-green {
+    color: var(--color-green);
+  }
+
+  .group:hover .group-hover\:text-on-surface {
+    color: var(--color-on-surface);
+  }
+
+  /* Border radius - Complete scale */
   .rounded-xs {
     border-radius: var(--radius-xs);
   }
@@ -307,6 +495,38 @@
 
   .rounded-md {
     border-radius: var(--radius-md);
+  }
+
+  .rounded-default {
+    border-radius: var(--radius-default);
+  }
+
+  .rounded-lg {
+    border-radius: var(--radius-lg);
+  }
+
+  .rounded-xl {
+    border-radius: var(--radius-xl);
+  }
+
+  .rounded-2xl {
+    border-radius: var(--radius-2xl);
+  }
+
+  .rounded-3xl {
+    border-radius: var(--radius-3xl);
+  }
+
+  .rounded-4xl {
+    border-radius: var(--radius-4xl);
+  }
+
+  .rounded-5xl {
+    border-radius: var(--radius-5xl);
+  }
+
+  .rounded-pill {
+    border-radius: var(--radius-pill);
   }
 
   /* Design system specific */

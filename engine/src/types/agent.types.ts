@@ -31,6 +31,7 @@ export interface Agent {
   targetBaseUrl: string | null; // Nullable for validation-only mode
   invariApiKey: string;
   createdAt: Date;
+  deletedAt?: Date | null;
 }
 
 export interface ApiSchema {

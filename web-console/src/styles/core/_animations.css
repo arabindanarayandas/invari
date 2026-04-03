@@ -5,8 +5,18 @@
 
 @layer invari.animations {
   :root {
-    /* ===== Transition Presets ===== */
+    /* ===== Transition Presets - Complete System from HTML Analysis ===== */
 
+    /* Quick transitions (120ms) - Most interactive elements */
+    --transition-quick: all var(--duration-quick) var(--ease-in-out);
+    --transition-quick-background: background var(--duration-quick) var(--ease-in-out);
+    --transition-quick-opacity: opacity var(--duration-quick) var(--ease-in-out);
+
+    /* Fast transitions (100ms) - Color transitions on links */
+    --transition-fast: all var(--duration-fast) var(--ease-in-out);
+    --transition-fast-color: color var(--duration-fast) var(--ease-in-out);
+
+    /* Standard transitions (150ms) - Cards, forms, upload zones */
     --transition-colors: color var(--duration-normal) var(--ease-in-out),
                          background-color var(--duration-normal) var(--ease-in-out),
                          border-color var(--duration-normal) var(--ease-in-out);
@@ -22,9 +32,12 @@
     --transition-size: width var(--duration-normal) var(--ease-out),
                        height var(--duration-normal) var(--ease-out);
 
-    --transition-fast: all var(--duration-fast) var(--ease-in-out);
+    /* Specific border color transition for forms */
+    --transition-border: border-color var(--duration-normal) var(--ease-in-out);
 
+    /* Slow transitions (300ms) - Grid animations, slower effects */
     --transition-slow: all var(--duration-slow) var(--ease-in-out);
+    --transition-slow-background: background var(--duration-slow) var(--ease-in-out);
   }
 
   /* Respect user preferences for reduced motion */
@@ -143,13 +156,13 @@
     }
   }
 
-  /* Pulse */
+  /* Pulse - Live Indicator (From HTML Analysis) */
   @keyframes pulse {
     0%, 100% {
       opacity: 1;
     }
     50% {
-      opacity: 0.5;
+      opacity: 0.4;
     }
   }
 

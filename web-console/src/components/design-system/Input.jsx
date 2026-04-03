@@ -1,10 +1,12 @@
 import React from 'react';
 
 /**
- * Input component following the "Observational Blueprint" design system
- * - 1px stroke with outline-variant color
- * - On focus: stroke transitions to primary (no outer glows)
- * - 4px corner radius for industrial feel
+ * Input component following the "Technical Editorial" design system
+ * - 8px border radius for refined edges
+ * - Surface-low background (#F4F3F0)
+ * - Outline-variant borders (#BCCAC1)
+ * - Mono labels with uppercase styling
+ * - 10px 13px padding for inputs
  */
 export const Input = React.forwardRef(({
   type = 'text',
@@ -19,12 +21,12 @@ export const Input = React.forwardRef(({
   endIcon,
   ...props
 }, ref) => {
-  const baseClasses = 'block font-sans text-on-surface bg-surface-container-lowest border border-outline-variant rounded-sm focus-clinical focus:border-primary transition-colors duration-150 disabled:opacity-50 disabled:cursor-not-allowed';
+  const baseClasses = 'block font-sans text-on-surface bg-surface-container-low border border-outline-variant rounded-[8px] focus-clinical focus:border-primary transition-colors duration-150 disabled:opacity-50 disabled:cursor-not-allowed';
 
   const sizeClasses = {
-    sm: 'h-8 px-3 text-body-sm',
-    md: 'h-10 px-4 text-body-md',
-    lg: 'h-12 px-5 text-body-lg',
+    sm: 'px-[11px] py-[8px] text-[12px]',
+    md: 'px-[13px] py-[10px] text-[13px]',
+    lg: 'px-[15px] py-[12px] text-[14px]',
   };
 
   const widthClass = fullWidth ? 'w-full' : '';
@@ -43,7 +45,7 @@ export const Input = React.forwardRef(({
   return (
     <div className={`${fullWidth ? 'w-full' : 'inline-block'}`}>
       {label && (
-        <label className="block text-body-sm font-medium text-on-surface mb-1">
+        <label className="block font-mono text-[10px] uppercase tracking-[0.1em] font-semibold text-muted mb-1.5">
           {label}
         </label>
       )}
@@ -91,12 +93,12 @@ export const Textarea = React.forwardRef(({
   rows = 4,
   ...props
 }, ref) => {
-  const baseClasses = 'block font-sans text-on-surface bg-surface-container-lowest border border-outline-variant rounded-sm focus-clinical focus:border-primary transition-colors duration-150 disabled:opacity-50 disabled:cursor-not-allowed resize-y';
+  const baseClasses = 'block font-sans text-on-surface bg-surface-container-low border border-outline-variant rounded-[8px] focus-clinical focus:border-primary transition-colors duration-150 disabled:opacity-50 disabled:cursor-not-allowed resize-y';
 
   const sizeClasses = {
-    sm: 'px-3 py-2 text-body-sm',
-    md: 'px-4 py-2.5 text-body-md',
-    lg: 'px-5 py-3 text-body-lg',
+    sm: 'px-[11px] py-[8px] text-[12px]',
+    md: 'px-[13px] py-[10px] text-[13px]',
+    lg: 'px-[15px] py-[12px] text-[14px]',
   };
 
   const widthClass = fullWidth ? 'w-full' : '';
@@ -113,7 +115,7 @@ export const Textarea = React.forwardRef(({
   return (
     <div className={`${fullWidth ? 'w-full' : 'inline-block'}`}>
       {label && (
-        <label className="block text-body-sm font-medium text-on-surface mb-1">
+        <label className="block font-mono text-[10px] uppercase tracking-[0.1em] font-semibold text-muted mb-1.5">
           {label}
         </label>
       )}

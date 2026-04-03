@@ -60,9 +60,9 @@
     --color-surface: var(--color-surface-base); /* #FAF9F6 */
     --color-surface-container-low: var(--color-surface-low); /* #F4F3F0 */
     --color-surface-container-lowest: var(--color-surface-default); /* #FFFFFF */
-    --color-surface-container: var(--color-surface-container); /* #EFEEEB */
-    --color-surface-container-high: var(--color-surface-high); /* #E3E2DF */
-    --color-surface-container-highest: var(--color-surface-high); /* #E3E2DF */
+    --color-surface-container: var(--color-surface-mid); /* #EFEEEB */
+    --color-surface-container-high: var(--color-surface-high); /* #E9E8E5 */
+    --color-surface-container-highest: var(--color-surface-high); /* #E9E8E5 */
     --color-surface-overlay: var(--color-surface-overlay);
 
     /* Background Colors */
@@ -74,9 +74,9 @@
     --color-bg-overlay: rgba(0, 0, 0, 0.5);
 
     /* Text Colors */
-    --color-text-primary: var(--color-gray-900);
+    --color-text-primary: var(--color-on-surface); /* #1B1C1A */
     --color-text-secondary: var(--color-gray-600);
-    --color-text-tertiary: var(--color-gray-500);
+    --color-text-tertiary: var(--color-muted); /* #6B6860 */
     --color-text-disabled: var(--color-gray-400);
     --color-text-inverse: var(--color-gray-0);
     --color-text-brand: var(--color-primary);
@@ -98,8 +98,9 @@
     --color-repair: var(--color-orange-600); /* #D97706 */
     --color-on-surface: var(--color-on-surface); /* #1B1C1A */
     --color-on-surface-variant: var(--color-on-surface-variant); /* #45483D */
-    --color-outline: var(--color-outline); /* #75786B */
+    --color-outline: var(--color-outline); /* #75786B (lab) or #BCCAC1 */
     --color-outline-variant: var(--color-outline-variant); /* #BCCAC1 */
+    --color-outline-docs: #D1CDC7; /* Docs-specific outline color */
 
     /* Interactive State Colors */
     --color-state-hover: rgba(29, 158, 117, 0.04); /* Emerald primary with opacity */
@@ -154,10 +155,10 @@
     --color-table-row-striped: var(--color-gray-50);
     --color-table-border: var(--color-border-default);
 
-    /* Badges & Tags */
+    /* Badges & Tags - Complete System from HTML Analysis */
     --color-badge-default-bg: var(--color-gray-100);
     --color-badge-default-text: var(--color-gray-700);
-    --color-badge-primary-bg: rgba(29, 158, 117, 0.1); /* Emerald primary */
+    --color-badge-primary-bg: rgba(29, 158, 117, 0.1);
     --color-badge-primary-text: var(--color-primary);
     --color-badge-success-bg: rgba(5, 150, 105, 0.1);
     --color-badge-success-text: var(--color-success);
@@ -168,11 +169,44 @@
     --color-badge-repair-bg: rgba(217, 119, 6, 0.1);
     --color-badge-repair-text: var(--color-repair);
 
+    /* HTTP Method Badges */
+    --color-badge-post-bg: #DBEAFE;
+    --color-badge-post-text: #1D4ED8;
+    --color-badge-patch-bg: #FEF3C7;
+    --color-badge-patch-text: #B45309;
+    --color-badge-get-bg: #DCFCE7;
+    --color-badge-get-text: #166534;
+    --color-badge-delete-bg: #FEE2E2;
+    --color-badge-delete-text: #DC2626;
+
+    /* Industry Chips */
+    --color-chip-health-bg: #DCFCE7;
+    --color-chip-health-text: #166534;
+    --color-chip-finance-bg: #DBEAFE;
+    --color-chip-finance-text: #1E40AF;
+    --color-chip-wellness-bg: var(--color-emerald-100);
+    --color-chip-wellness-text: var(--color-primary);
+    --color-chip-insurance-bg: var(--color-orange-100);
+    --color-chip-insurance-text: var(--color-warning);
+
     /* Code & Technical */
-    --color-code-bg: var(--color-gray-100);
-    --color-code-text: var(--color-gray-900);
+    --color-code-bg: #1E1E1E; /* Dark code background from screen-lab */
+    --color-code-bg-light: var(--color-gray-100); /* Light alternative */
+    --color-code-text: #D4D4D4; /* Light gray text on dark */
+    --color-code-text-dark: var(--color-gray-900); /* Dark text on light */
     --color-code-border: var(--color-gray-200);
     --color-code-selection: rgba(0, 82, 255, 0.2);
+
+    /* Syntax Highlighting */
+    --color-code-comment: #6A9955;
+    --color-code-keyword: #C586C0;
+    --color-code-string: #CE9178;
+    --color-code-number: #B5CEA8;
+    --color-code-key: #9CDCFE;
+
+    /* Diff Colors */
+    --color-diff-removed: #F87171;
+    --color-diff-added: #4ADE80;
 
     /* Scrollbar */
     --color-scrollbar-track: var(--color-surface-container-low);
@@ -182,6 +216,39 @@
     /* Focus Ring */
     --color-focus-ring: var(--color-primary);
     --color-focus-ring-offset: var(--color-gray-0);
+
+    /* Callouts - From HTML Analysis */
+    --color-callout-note-bg: var(--color-blue-50);
+    --color-callout-note-border: var(--color-blue-500);
+    --color-callout-note-text: #1E3A8A; /* Dark blue */
+
+    --color-callout-tip-bg: var(--color-green-50);
+    --color-callout-tip-border: var(--color-success);
+    --color-callout-tip-text: #065F46; /* Dark green */
+
+    --color-callout-warn-bg: var(--color-orange-50);
+    --color-callout-warn-border: var(--color-warning);
+    --color-callout-warn-text: #78350F; /* Dark amber */
+
+    --color-callout-danger-bg: var(--color-red-50);
+    --color-callout-danger-border: var(--color-error);
+    --color-callout-danger-text: #7F1D1D; /* Dark red */
+
+    /* Overlays */
+    --color-overlay-modal: rgba(0, 0, 0, 0.4);
+    --color-overlay-protected: rgba(0, 0, 0, 0.65);
+
+    /* Avatars & Gradients */
+    --color-avatar-gradient: linear-gradient(135deg, var(--color-primary), #0D6B4F);
+
+    /* Special Features */
+    --color-hallucinate: #7C3AED; /* Purple for hallucinate mode */
+    --color-hallucinate-bg: #F5F3FF; /* Purple background */
+
+    /* Code Block Specific */
+    --color-code-block-bg: #1E1E1E;
+    --color-code-block-border: #2A2A2A;
+    --color-code-block-header: #161616;
   }
 
   /* Dark Mode Support (Future) */

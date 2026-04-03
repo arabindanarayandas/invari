@@ -318,7 +318,7 @@ const ServiceMap = ({ flashEffect, setFlashEffect }) => {
   }, [flashEffect]);
 
   return (
-    <div className="relative w-full h-full bg-slate-50 rounded-xl border border-slate-200 overflow-hidden shadow-sm">
+    <div className="relative w-full h-full bg-slate-50 rounded-[12px] border border-slate-200 overflow-hidden shadow-sm">
       <canvas
         ref={canvasRef}
         className="w-full h-full"
@@ -326,7 +326,7 @@ const ServiceMap = ({ flashEffect, setFlashEffect }) => {
       />
 
       {/* Legend */}
-      <div className="absolute bottom-4 left-4 bg-white/95 border border-slate-200 rounded-lg p-3 shadow-sm">
+      <div className="absolute bottom-4 left-4 bg-white/95 border border-slate-200 rounded-[8px] p-3 shadow-sm">
         <div className="text-xs font-semibold text-slate-700 mb-2 uppercase tracking-wider">
           Traffic Legend
         </div>
@@ -351,7 +351,7 @@ const ServiceMap = ({ flashEffect, setFlashEffect }) => {
       </div>
 
       {/* Stats */}
-      <div className="absolute top-4 right-4 bg-white/95 border border-slate-200 rounded-lg p-3 shadow-sm">
+      <div className="absolute top-4 right-4 bg-white/95 border border-slate-200 rounded-[8px] p-3 shadow-sm">
         <div className="text-xs font-semibold text-slate-700 mb-2 uppercase tracking-wider">
           Live Stats
         </div>

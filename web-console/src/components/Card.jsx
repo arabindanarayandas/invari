@@ -1,8 +1,9 @@
 /**
- * Card component following the "Observational Blueprint" design system
+ * Card component following the "Technical Editorial" design system
  * - Tonal layering instead of shadows for depth
- * - Sharp edges (max 8px radius) for industrial feel
- * - Level 2 surface (surface-container-lowest) for active work areas
+ * - 12px border radius for refined card styling
+ * - Outline borders (#BCCAC1) for subtle definition
+ * - Surface hierarchy for visual organization
  */
 const Card = ({
   children,
@@ -19,8 +20,8 @@ const Card = ({
     default: 'bg-surface-container-lowest',
     // Elevated: For floating elements with ghost border
     elevated: 'bg-surface-container-lowest ghost-border',
-    // Outlined: With visible border for data-dense areas
-    outlined: 'bg-surface-container-lowest border border-outline-variant',
+    // Outlined: With visible outline border (#BCCAC1) for definition
+    outlined: 'bg-surface-container-lowest border border-outline',
     // Surface: Level 0 for base sections
     surface: 'bg-surface',
     // Container: Level 1 for secondary panels
@@ -29,7 +30,7 @@ const Card = ({
 
   const hoverClasses = hover && onClick ? 'hover:bg-surface-container-high cursor-pointer' : '';
   const paddingClasses = noPadding ? '' : 'p-4';
-  const radiusClasses = 'rounded-md'; // 8px max for industrial feel
+  const radiusClasses = 'rounded-[12px]'; // 12px for refined card styling
 
   const classes = [
     baseClasses,

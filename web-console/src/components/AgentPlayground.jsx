@@ -1,25 +1,28 @@
 import { useState } from 'react';
-import { Send, Copy, Zap, Code, AlertTriangle, CheckCircle, Shield, ChevronDown, ChevronUp, FileText, X } from 'lucide-react';
+import { Send, Copy, Zap, ChevronDown, ChevronUp, FileText, X, Sparkles } from 'lucide-react';
 import Card from './Card';
 import toast from 'react-hot-toast';
+import HowToTestModal from './HowToTestModal';
 
 const AgentPlayground = ({ application }) => {
   const [selectedEndpoint, setSelectedEndpoint] = useState(null);
   const [requestBody, setRequestBody] = useState('{}');
   const [response, setResponse] = useState(null);
   const [loading, setLoading] = useState(false);
-  const [testMode, setTestMode] = useState('valid'); // valid, drift, attack
   const [isRequestCollapsed, setIsRequestCollapsed] = useState(false);
   const [isResponseCollapsed, setIsResponseCollapsed] = useState(false);
   const [showSpecModal, setShowSpecModal] = useState(false);
+  const [showHowToModal, setShowHowToModal] = useState(false);
+  const [hallucinationInfo, setHallucinationInfo] = useState(null);
+  const [isHallucinating, setIsHallucinating] = useState(false);
 
   const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000';
 
   // Get endpoints from OpenAPI spec
   const endpoints = application?.endpoints || [];
 
-  // Sample payloads for different test modes
-  const getSamplePayload = (endpoint, mode) => {
+  // Generate sample payload from schema
+  const getSamplePayload = (endpoint) => {
     if (!endpoint) return {};
 
     const path = endpoint.path;
@@ -28,7 +31,7 @@ const AgentPlayground = ({ application }) => {
     // Try to get schema from OpenAPI spec
     const schema = application?.spec?.paths?.[path]?.[method.toLowerCase()]?.requestBody?.content?.['application/json']?.schema;
 
-    if (mode === 'valid' && schema?.properties) {
+    if (schema?.properties) {
       // Generate valid payload from schema using examples and formats
       const payload = {};
       Object.keys(schema.properties).forEach(key => {
@@ -63,96 +66,129 @@ const AgentPlayground = ({ application }) => {
       return payload;
     }
 
-    if (mode === 'drift') {
-      // Generate payload with schema drift (wrong field names, wrong types)
-      // This simulates an AI agent using outdated API knowledge
-      if (schema?.properties) {
-        const payload = {};
-        Object.keys(schema.properties).forEach(key => {
-          const prop = schema.properties[key];
-          // Introduce drift: wrong field names and wrong types
-          if (key === 'userId' || key === 'customerId') {
-            payload['usr_id'] = prop.example || "12345"; // Wrong field name
-          } else if (key === 'amount' || key === 'partySize') {
-            payload['amt'] = String(prop.example || 100); // Wrong field name + wrong type
-          } else if (key === 'date') {
-            payload['dt'] = prop.example || "2026-02-15"; // Wrong field name
-          } else if (key === 'time') {
-            payload['tm'] = prop.example || "19:30"; // Wrong field name
-          } else if (key === 'phoneNumber') {
-            payload['phone'] = prop.example || "+1-555-0100"; // Wrong field name
-          } else if (key === 'customerName') {
-            payload['name'] = prop.example || "John Doe"; // Wrong field name
-          } else if (prop.type === 'number' || prop.type === 'integer') {
-            payload[key] = String(prop.example || 123); // Wrong type (string instead of number)
-          } else if (prop.type === 'string') {
-            payload[key] = prop.example || prop.default || 'value';
-          }
-        });
-        return payload;
-      }
-      return {
-        usr_id: "123",
-        amt: "100.00",
-        curr: "USD"
-      };
-    }
-
-    if (mode === 'malicious') {
-      // Generate payload with malicious values injected into normal-looking fields
-      // This simulates an AI agent being manipulated to inject malicious code
-      if (schema?.properties) {
-        const payload = {};
-        const keys = Object.keys(schema.properties);
-        keys.forEach((key, index) => {
-          const prop = schema.properties[key];
-          // Inject different types of attacks into string fields
-          if (prop.type === 'string') {
-            if (key === 'customerName' || key === 'name' || index === 0) {
-              // SQL Injection in name fields
-              payload[key] = "admin' OR '1'='1' --";
-            } else if (key === 'email' || (prop.format === 'email' && index === 1)) {
-              // Email with XSS
-              payload[key] = "user+<script>alert('xss')</script>@example.com";
-            } else if (key === 'specialRequests' || key === 'notes' || key === 'query') {
-              // Command Injection in free-text fields
-              payload[key] = "normal request; cat /etc/passwd; echo 'done'";
-            } else {
-              // Use example or generate realistic value with injection attempt
-              payload[key] = prop.example || "normal_value";
-            }
-          } else if (prop.type === 'number' || prop.type === 'integer') {
-            payload[key] = prop.example || prop.minimum || 100;
-          } else if (prop.type === 'boolean') {
-            payload[key] = true;
-          }
-        });
-        return payload;
-      }
-      // Fallback malicious payload
-      return {
-        userId: "1' OR '1'='1' --",
-        query: "SELECT * FROM users; DROP TABLE users;--",
-        command: "test && rm -rf /tmp/*"
-      };
-    }
-
     return {};
   };
 
   const handleEndpointSelect = (endpoint) => {
     setSelectedEndpoint(endpoint);
-    const samplePayload = getSamplePayload(endpoint, testMode);
+    const samplePayload = getSamplePayload(endpoint);
     setRequestBody(JSON.stringify(samplePayload, null, 2));
     setResponse(null);
+    setHallucinationInfo(null);
   };
 
-  const handleTestModeChange = (mode) => {
-    setTestMode(mode);
-    if (selectedEndpoint) {
-      const samplePayload = getSamplePayload(selectedEndpoint, mode);
-      setRequestBody(JSON.stringify(samplePayload, null, 2));
-    }
+  const hallucinateRequestBody = () => {
+    if (!requestBody || isHallucinating) return;
+
+    setIsHallucinating(true);
+
+    // Small delay for visual feedback
+    setTimeout(() => {
+      try {
+        const body = JSON.parse(requestBody);
+        const keys = Object.keys(body);
+        if (keys.length === 0) {
+          setIsHallucinating(false);
+          return;
+        }
+
+        // Shuffle keys to vary which field gets transformed
+        const shuffledKeys = [...keys].sort(() => Math.random() - 0.5);
+
+        // Try each key until we find one we can transform
+        for (const key of shuffledKeys) {
+          const originalValue = body[key];
+          let newValue = originalValue;
+          let changeType = '';
+          let transformed = false;
+
+          // Apply TYPE COERCION transformations
+          if (typeof originalValue === 'number') {
+            // Number → String with various formats
+            const formats = [
+              originalValue.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ','), // Comma formatting
+              originalValue.toString() + '.0', // Add decimal
+              ' ' + originalValue.toString() + ' ', // Add spaces
+              originalValue.toString()
+            ];
+            newValue = formats[Math.floor(Math.random() * formats.length)];
+            changeType = 'Number → String';
+            transformed = true;
+          } else if (typeof originalValue === 'boolean') {
+            // Boolean → String (various formats)
+            const formats = [
+              originalValue ? 'yes' : 'no',
+              originalValue ? 'true' : 'false',
+              originalValue ? 'True' : 'False',
+              originalValue ? 'YES' : 'NO',
+              originalValue ? '1' : '0'
+            ];
+            newValue = formats[Math.floor(Math.random() * formats.length)];
+            changeType = 'Boolean → String';
+            transformed = true;
+          } else if (typeof originalValue === 'string' && originalValue.trim() !== '') {
+            // String transformations
+            if (/^\d+$/.test(originalValue)) {
+              // String → Number (integer)
+              newValue = parseInt(originalValue);
+              changeType = 'String → Number';
+              transformed = true;
+            } else if (/^\d+\.\d+$/.test(originalValue)) {
+              // String → Number (float)
+              newValue = parseFloat(originalValue);
+              changeType = 'String → Number';
+              transformed = true;
+            } else if (originalValue.toLowerCase() === 'true' || originalValue.toLowerCase() === 'false') {
+              // String → Boolean
+              newValue = originalValue.toLowerCase() === 'true';
+              changeType = 'String → Boolean';
+              transformed = true;
+            } else if (originalValue.toLowerCase() === 'yes' || originalValue.toLowerCase() === 'no') {
+              // String → Boolean
+              newValue = originalValue.toLowerCase() === 'yes';
+              changeType = 'String → Boolean';
+              transformed = true;
+            } else {
+              // Case transformations for non-transformable strings
+              const caseTransforms = [
+                originalValue.toUpperCase(),
+                originalValue.toLowerCase(),
+                originalValue.charAt(0).toUpperCase() + originalValue.slice(1).toLowerCase()
+              ].filter(v => v !== originalValue);
+
+              if (caseTransforms.length > 0) {
+                newValue = caseTransforms[Math.floor(Math.random() * caseTransforms.length)];
+                changeType = 'Case Change';
+                transformed = true;
+              }
+            }
+          }
+
+          // If we successfully transformed this field, apply it and break
+          if (transformed && newValue !== originalValue) {
+            body[key] = newValue;
+            setRequestBody(JSON.stringify(body, null, 2));
+
+            // Set hallucination info for display
+            setHallucinationInfo({
+              field: key,
+              from: JSON.stringify(originalValue),
+              to: JSON.stringify(newValue),
+              type: changeType
+            });
+
+            setIsHallucinating(false);
+            return;
+          }
+        }
+
+        // If we couldn't transform any field, just clear loading state
+        setIsHallucinating(false);
+      } catch (e) {
+        console.error('Failed to hallucinate:', e);
+        setIsHallucinating(false);
+      }
+    }, 300); // 300ms delay for visual feedback
   };
 
   const sendRequest = async (endpointOverride = null, bodyOverride = null) => {
@@ -196,21 +232,24 @@ const AgentPlayground = ({ application }) => {
       const responseTime = Date.now() - startTime;
       const data = await res.json();
 
-      // Extract Invari metadata from headers
-      const invariStatus = res.headers.get('X-Invari-Status');
-      const invariOverhead = res.headers.get('X-Invari-Overhead');
-      const invariRepaired = res.headers.get('X-Invari-Repaired');
-      const invariMode = res.headers.get('X-Invari-Mode');
+      // Extract Invari metadata from nested _invari_metadata object
+      const invariStatus = data._invari_metadata?.status;
+      const invariOverhead = data._invari_metadata?.overhead;
+      const invariRepaired = data._invari_metadata?.repaired;
+      const invariMode = data._invari_metadata?.mode;
+
+      // Remove Invari wrapper fields from response display, keep only actual API response
+      const { _invari_metadata, message, validationStatus, validated, repaired, ...actualData } = data;
 
       setResponse({
         status: res.status,
         statusText: res.ok ? 'OK' : 'Error',
         responseTime,
-        data,
+        data: actualData,
         invariMetadata: {
           status: invariStatus,
           overhead: invariOverhead,
-          repaired: invariRepaired === 'true',
+          repaired: invariRepaired,
           mode: invariMode,
         },
       });
@@ -252,48 +291,20 @@ const AgentPlayground = ({ application }) => {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-lg font-semibold text-slate-900 mb-2">Agent Simulation Playground</h2>
+          <div className="flex items-center gap-3 mb-2">
+            <h2 className="font-serif text-[22px] font-normal text-on-surface">Agent Simulation Playground</h2>
+            <span
+              onClick={() => setShowHowToModal(true)}
+              className="text-[13px] text-green hover:text-green-dark cursor-pointer transition-colors underline"
+              title="How to test your agent"
+            >
+              How to test
+            </span>
+          </div>
           <p className="text-slate-600">
-            Test how AI agents interact with Invari proxy. Simulate valid requests, schema drift, and attacks.
+            Test how AI agents interact with Invari proxy. Use the Hallucinate button to introduce realistic AI errors.
           </p>
         </div>
-      </div>
-
-      {/* Test Mode Selector */}
-      <div className="flex gap-3">
-        <button
-          onClick={() => handleTestModeChange('valid')}
-          className={`flex items-center gap-2 px-4 py-2 rounded-lg font-medium transition-all ${
-            testMode === 'valid'
-              ? 'bg-emerald-50 border-2 border-emerald-500 text-emerald-700'
-              : 'bg-white border border-slate-300 text-slate-700 hover:border-slate-400'
-          }`}
-        >
-          <CheckCircle className="w-4 h-4" />
-          Valid Request
-        </button>
-        <button
-          onClick={() => handleTestModeChange('drift')}
-          className={`flex items-center gap-2 px-4 py-2 rounded-lg font-medium transition-all ${
-            testMode === 'drift'
-              ? 'bg-amber-50 border-2 border-amber-500 text-amber-700'
-              : 'bg-white border border-slate-300 text-slate-700 hover:border-slate-400'
-          }`}
-        >
-          <Code className="w-4 h-4" />
-          Schema Drift
-        </button>
-        <button
-          onClick={() => handleTestModeChange('malicious')}
-          className={`flex items-center gap-2 px-4 py-2 rounded-lg font-medium transition-all ${
-            testMode === 'malicious'
-              ? 'bg-red-50 border-2 border-red-500 text-red-700'
-              : 'bg-white border border-slate-300 text-slate-700 hover:border-slate-400'
-          }`}
-        >
-          <Shield className="w-4 h-4" />
-          Malicious Injection
-        </button>
       </div>
 
       <div className="grid grid-cols-2 gap-6">
@@ -311,7 +322,7 @@ const AgentPlayground = ({ application }) => {
                 {endpoints.map((endpoint, idx) => (
                   <div
                     key={idx}
-                    className={`relative w-full text-left p-3 rounded-lg border transition-all ${
+                    className={`relative w-full text-left p-3 rounded-[8px] border transition-all ${
                       selectedEndpoint === endpoint
                         ? 'bg-indigo-50 border-indigo-500'
                         : 'bg-white border-slate-300 hover:border-slate-400'
@@ -322,12 +333,13 @@ const AgentPlayground = ({ application }) => {
                       className="cursor-pointer"
                     >
                       <div className="flex items-center gap-3">
-                        <span className={`px-2 py-0.5 text-[10px] font-bold rounded ${
-                          endpoint.method === 'GET' ? 'bg-blue-100 text-blue-700' :
-                          endpoint.method === 'POST' ? 'bg-emerald-100 text-emerald-700' :
-                          endpoint.method === 'PUT' ? 'bg-amber-100 text-amber-700' :
-                          endpoint.method === 'DELETE' ? 'bg-red-100 text-red-700' :
-                          'bg-slate-100 text-slate-700'
+                        <span className={`px-2 py-0.5 text-[10px] font-bold font-mono rounded ${
+                          endpoint.method === 'GET' ? 'bg-[#dcfce7] text-[#166534]' :
+                          endpoint.method === 'POST' ? 'bg-[#dbeafe] text-[#1d4ed8]' :
+                          endpoint.method === 'PUT' ? 'bg-[#fef3c7] text-[#b45309]' :
+                          endpoint.method === 'PATCH' ? 'bg-[#fef3c7] text-[#b45309]' :
+                          endpoint.method === 'DELETE' ? 'bg-[#fee2e2] text-[#dc2626]' :
+                          'bg-surface-container-high text-on-surface-variant'
                         }`}>
                           {endpoint.method}
                         </span>
@@ -344,28 +356,25 @@ const AgentPlayground = ({ application }) => {
                         e.stopPropagation();
                         if (selectedEndpoint === endpoint) {
                           // If already selected, simulate directly
-                          const samplePayload = getSamplePayload(endpoint, testMode);
+                          const samplePayload = getSamplePayload(endpoint);
                           const payloadString = JSON.stringify(samplePayload, null, 2);
                           setRequestBody(payloadString);
                           setResponse(null);
+                          setHallucinationInfo(null);
                           sendRequest(endpoint, samplePayload);
                         }
                       }}
                       disabled={selectedEndpoint !== endpoint}
-                      className={`absolute top-2 right-2 p-2 rounded-lg border transition-all group ${
+                      className={`absolute top-2 right-2 p-2 rounded-[8px] border transition-all group ${
                         selectedEndpoint === endpoint
-                          ? testMode === 'valid' ? 'bg-emerald-50 hover:bg-emerald-100 border-emerald-300 hover:border-emerald-400 cursor-pointer' :
-                            testMode === 'drift' ? 'bg-amber-50 hover:bg-amber-100 border-amber-300 hover:border-amber-400 cursor-pointer' :
-                            'bg-red-50 hover:bg-red-100 border-red-300 hover:border-red-400 cursor-pointer'
+                          ? 'bg-emerald-50 hover:bg-emerald-100 border-emerald-300 hover:border-emerald-400 cursor-pointer'
                           : 'bg-slate-50 border-slate-300 opacity-50 cursor-not-allowed pointer-events-none'
                       }`}
-                      title={selectedEndpoint === endpoint ? `Simulate ${testMode === 'valid' ? 'valid' : testMode === 'drift' ? 'drift' : 'malicious'} request` : 'Select endpoint first'}
+                      title={selectedEndpoint === endpoint ? 'Simulate request' : 'Select endpoint first'}
                     >
                       <Zap className={`w-4 h-4 ${
                         selectedEndpoint === endpoint
-                          ? testMode === 'valid' ? 'text-emerald-600 group-hover:text-emerald-700' :
-                            testMode === 'drift' ? 'text-amber-600 group-hover:text-amber-700' :
-                            'text-red-600 group-hover:text-red-700'
+                          ? 'text-emerald-600 group-hover:text-emerald-700'
                           : 'text-slate-400'
                       }`} />
                     </button>
@@ -407,14 +416,15 @@ const AgentPlayground = ({ application }) => {
               {!isRequestCollapsed && (
                 <div className="space-y-4">
                   {/* Selected Endpoint Info */}
-                  <div className="p-3 bg-slate-50 border border-slate-200 rounded-lg">
+                  <div className="p-3 bg-slate-50 border border-slate-200 rounded-[8px]">
                     <div className="flex items-center gap-3 mb-2">
-                      <span className={`px-2 py-0.5 text-[10px] font-bold rounded ${
-                        selectedEndpoint.method === 'GET' ? 'bg-blue-100 text-blue-700' :
-                        selectedEndpoint.method === 'POST' ? 'bg-emerald-100 text-emerald-700' :
-                        selectedEndpoint.method === 'PUT' ? 'bg-amber-100 text-amber-700' :
-                        selectedEndpoint.method === 'DELETE' ? 'bg-red-100 text-red-700' :
-                        'bg-slate-100 text-slate-700'
+                      <span className={`px-2 py-0.5 text-[10px] font-bold font-mono rounded ${
+                        selectedEndpoint.method === 'GET' ? 'bg-[#dcfce7] text-[#166534]' :
+                        selectedEndpoint.method === 'POST' ? 'bg-[#dbeafe] text-[#1d4ed8]' :
+                        selectedEndpoint.method === 'PUT' ? 'bg-[#fef3c7] text-[#b45309]' :
+                        selectedEndpoint.method === 'PATCH' ? 'bg-[#fef3c7] text-[#b45309]' :
+                        selectedEndpoint.method === 'DELETE' ? 'bg-[#fee2e2] text-[#dc2626]' :
+                        'bg-surface-container-high text-on-surface-variant'
                       }`}>
                         {selectedEndpoint.method}
                       </span>
@@ -431,28 +441,71 @@ const AgentPlayground = ({ application }) => {
                       <label className="block text-xs font-semibold text-slate-700">
                         Request Body (JSON)
                       </label>
-                      <button
-                        onClick={() => copyToClipboard(requestBody)}
-                        className="text-xs text-indigo-600 hover:text-indigo-700 flex items-center gap-1"
-                      >
-                        <Copy className="w-3 h-3" />
-                        Copy
-                      </button>
+                      <div className="flex items-center gap-2">
+                        <button
+                          onClick={() => copyToClipboard(requestBody)}
+                          className="text-xs text-indigo-600 hover:text-indigo-700 flex items-center gap-1 cursor-pointer"
+                        >
+                          <Copy className="w-3 h-3" />
+                          Copy
+                        </button>
+                        <button
+                          onClick={hallucinateRequestBody}
+                          disabled={isHallucinating}
+                          className={`flex items-center gap-1.5 px-2 py-1 text-[10px] font-medium rounded transition-colors ${
+                            isHallucinating
+                              ? 'text-purple-400 bg-purple-50 cursor-not-allowed'
+                              : 'text-purple-600 hover:text-purple-700 hover:bg-purple-50 cursor-pointer'
+                          }`}
+                          title="Introduce an AI hallucination (error) to test repair functionality"
+                        >
+                          <Sparkles className={`w-3.5 h-3.5 ${isHallucinating ? 'animate-spin' : ''}`} />
+                          {isHallucinating ? 'Hallucinating...' : 'Hallucinate'}
+                        </button>
+                      </div>
                     </div>
                     <textarea
                       value={requestBody}
-                      onChange={(e) => setRequestBody(e.target.value)}
+                      onChange={(e) => {
+                        setRequestBody(e.target.value);
+                        // Clear hallucination info when user manually edits
+                        if (hallucinationInfo) {
+                          setHallucinationInfo(null);
+                        }
+                      }}
                       rows={10}
-                      className="w-full px-3 py-2 bg-white border border-slate-300 rounded-lg text-sm text-slate-900 font-mono focus:outline-none focus:border-indigo-500 resize-none"
+                      className="w-full px-3 py-2 bg-white border border-slate-300 rounded-[8px] text-sm text-slate-900 font-mono focus:outline-none focus:border-indigo-500 resize-none"
                       placeholder='{"userId": 123, "amount": 100}'
                     />
+                    {hallucinationInfo && (
+                      <div className="mt-2 p-2 bg-purple-50 border border-purple-200 rounded-lg flex items-start gap-2">
+                        <Sparkles className="w-4 h-4 text-purple-600 mt-0.5 flex-shrink-0" />
+                        <div className="flex-1 text-[12px]">
+                          <p className="font-semibold text-purple-900 mb-0.5">
+                            Hallucinated field: <span className="font-mono bg-purple-100 px-1.5 py-0.5 rounded">{hallucinationInfo.field}</span>
+                          </p>
+                          <p className="text-purple-700">
+                            <span className="font-medium">{hallucinationInfo.type}:</span>{' '}
+                            <span className="font-mono">{hallucinationInfo.from}</span>
+                            {' → '}
+                            <span className="font-mono font-semibold">{hallucinationInfo.to}</span>
+                          </p>
+                        </div>
+                        <button
+                          onClick={() => setHallucinationInfo(null)}
+                          className="text-purple-400 hover:text-purple-600 transition-colors cursor-pointer"
+                        >
+                          ✕
+                        </button>
+                      </div>
+                    )}
                   </div>
 
                   {/* Send Button */}
                   <button
                     onClick={() => sendRequest()}
                     disabled={!selectedEndpoint || loading}
-                    className="w-full px-4 py-3 bg-indigo-600 hover:bg-indigo-700 disabled:bg-slate-300 disabled:text-slate-500 text-white rounded-lg font-medium transition-all flex items-center justify-center gap-2 disabled:cursor-not-allowed"
+                    className="w-full px-[18px] py-[9px] bg-primary hover:opacity-88 disabled:bg-surface-container-high disabled:text-on-surface-variant text-white rounded-[8px] font-medium text-[13px] transition-all flex items-center justify-center gap-2 disabled:cursor-not-allowed"
                   >
                     {loading ? (
                       'Sending...'
@@ -495,7 +548,7 @@ const AgentPlayground = ({ application }) => {
               <div className="space-y-4">
                 {/* Status */}
                 <div className="flex items-center gap-3">
-                  <span className={`px-3 py-1 rounded-lg font-semibold ${
+                  <span className={`px-3 py-1 rounded-[8px] font-semibold ${
                     response.status >= 200 && response.status < 300
                       ? 'bg-emerald-100 text-emerald-700'
                       : 'bg-red-100 text-red-700'
@@ -509,7 +562,7 @@ const AgentPlayground = ({ application }) => {
 
                 {/* Invari Metadata */}
                 {response.invariMetadata && (
-                  <div className="p-3 bg-slate-100 border border-slate-300 rounded-lg">
+                  <div className="p-3 bg-slate-100 border border-slate-300 rounded-[8px]">
                     <div className="text-xs font-semibold text-slate-700 mb-2">Invari Metadata</div>
                     <div className="space-y-1 text-xs">
                       <div className="flex items-center justify-between">
@@ -526,12 +579,12 @@ const AgentPlayground = ({ application }) => {
                         <span className="text-slate-600">Overhead:</span>
                         <span className="text-slate-700">{response.invariMetadata.overhead || 'N/A'}</span>
                       </div>
-                      {response.invariMetadata.mode && (
+                      {/* {response.invariMetadata.mode && (
                         <div className="flex items-center justify-between">
                           <span className="text-slate-600">Mode:</span>
                           <span className="text-slate-700 font-mono text-[10px]">{response.invariMetadata.mode}</span>
                         </div>
-                      )}
+                      )} */}
                       {response.invariMetadata.repaired && (
                         <div className="mt-2 pt-2 border-t border-slate-300">
                           <span className="text-amber-700 font-medium">✓ Request was auto-repaired by Invari</span>
@@ -555,7 +608,7 @@ const AgentPlayground = ({ application }) => {
                       Copy
                     </button>
                   </div>
-                  <div className="bg-white border border-slate-300 rounded-lg p-3 max-h-96 overflow-auto">
+                  <div className="bg-white border border-slate-300 rounded-[8px] p-3 max-h-96 overflow-auto">
                     <pre className="text-xs text-slate-900 font-mono whitespace-pre-wrap">
                       {JSON.stringify(response.data, null, 2)}
                     </pre>
@@ -567,111 +620,79 @@ const AgentPlayground = ({ application }) => {
         </div>
       </div>
 
-      {/* Info Cards */}
-      <div className="grid grid-cols-3 gap-4">
-        <Card className="p-4 bg-emerald-50 border-emerald-200 shadow-sm">
-          <div className="flex items-start gap-3">
-            <CheckCircle className="w-5 h-5 text-emerald-600 flex-shrink-0 mt-0.5" />
-            <div>
-              <h4 className="text-xs font-semibold text-emerald-700 mb-1">Valid Request</h4>
-              <p className="text-xs text-slate-600">
-                Sends a properly formatted request that matches your OpenAPI schema. Should pass through without modification.
-              </p>
-            </div>
-          </div>
-        </Card>
-
-        <Card className="p-4 bg-amber-50 border-amber-200 shadow-sm">
-          <div className="flex items-start gap-3">
-            <Code className="w-5 h-5 text-amber-600 flex-shrink-0 mt-0.5" />
-            <div>
-              <h4 className="text-xs font-semibold text-amber-700 mb-1">Schema Drift</h4>
-              <p className="text-xs text-slate-600">
-                Sends wrong field names or types. Invari will attempt to auto-repair using fuzzy matching and type coercion.
-              </p>
-            </div>
-          </div>
-        </Card>
-
-        <Card className="p-4 bg-red-50 border-red-200 shadow-sm">
-          <div className="flex items-start gap-3">
-            <Shield className="w-5 h-5 text-red-600 flex-shrink-0 mt-0.5" />
-            <div>
-              <h4 className="text-xs font-semibold text-red-700 mb-1">Malicious Injection</h4>
-              <p className="text-xs text-slate-600">
-                Injects SQL injection and command injection patterns into request field values. Invari scans all values and blocks malicious content.
-              </p>
-            </div>
-          </div>
-        </Card>
-      </div>
+      {/* How To Test Modal */}
+      {showHowToModal && (
+        <HowToTestModal
+          onClose={() => setShowHowToModal(false)}
+          proxyUrl={`${API_BASE_URL}/proxy/${application?.id}`}
+        />
+      )}
 
       {/* Spec Modal */}
       {showSpecModal && selectedEndpoint && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-lg shadow-xl max-w-4xl w-full max-h-[90vh] overflow-hidden flex flex-col">
+        <div
+          className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 p-4"
+          onClick={() => setShowSpecModal(false)}
+        >
+          <div
+            className="bg-surface rounded-[16px] max-w-4xl w-full max-h-[90vh] overflow-hidden flex flex-col shadow-2xl"
+            onClick={(e) => e.stopPropagation()}
+          >
             {/* Modal Header */}
-            <div className="flex items-center justify-between p-6 border-b border-slate-200">
-              <div>
-                <h3 className="text-lg font-semibold text-slate-900">API Specification</h3>
-                <div className="flex items-center gap-3 mt-2">
-                  <span className={`px-2 py-0.5 text-[10px] font-bold rounded ${
-                    selectedEndpoint.method === 'GET' ? 'bg-blue-100 text-blue-700' :
-                    selectedEndpoint.method === 'POST' ? 'bg-emerald-100 text-emerald-700' :
-                    selectedEndpoint.method === 'PUT' ? 'bg-amber-100 text-amber-700' :
-                    selectedEndpoint.method === 'DELETE' ? 'bg-red-100 text-red-700' :
-                    'bg-slate-100 text-slate-700'
-                  }`}>
-                    {selectedEndpoint.method}
-                  </span>
-                  <span className="font-mono text-xs text-slate-900">{selectedEndpoint.path}</span>
-                </div>
+            <div className="p-7 pb-4">
+              <h2 className="font-serif text-[21px] font-normal text-on-surface mb-[6px]">API Specification</h2>
+              <div className="flex items-center gap-3">
+                <span className={`px-2 py-0.5 text-[10px] font-bold font-mono rounded ${
+                  selectedEndpoint.method === 'GET' ? 'bg-[#dcfce7] text-[#166534]' :
+                  selectedEndpoint.method === 'POST' ? 'bg-[#dbeafe] text-[#1d4ed8]' :
+                  selectedEndpoint.method === 'PUT' ? 'bg-[#fef3c7] text-[#b45309]' :
+                  selectedEndpoint.method === 'PATCH' ? 'bg-[#fef3c7] text-[#b45309]' :
+                  selectedEndpoint.method === 'DELETE' ? 'bg-[#fee2e2] text-[#dc2626]' :
+                  'bg-surface-container-high text-on-surface-variant'
+                }`}>
+                  {selectedEndpoint.method}
+                </span>
+                <span className="font-mono text-[13px] text-muted">{selectedEndpoint.path}</span>
               </div>
-              <button
-                onClick={() => setShowSpecModal(false)}
-                className="p-2 hover:bg-slate-100 rounded transition-all"
-              >
-                <X className="w-5 h-5 text-slate-600" />
-              </button>
             </div>
 
             {/* Modal Body */}
-            <div className="flex-1 overflow-y-auto p-6">
+            <div className="flex-1 overflow-y-auto p-7 pt-4">
               {(() => {
                 const spec = getEndpointSpec();
-                if (!spec) return <p className="text-slate-600">No specification available</p>;
+                if (!spec) return <p className="text-muted text-[13px]">No specification available</p>;
 
                 return (
                   <div className="space-y-6">
                     {/* Summary & Description */}
                     {(spec.summary || spec.description) && (
                       <div>
-                        {spec.summary && <h4 className="text-sm font-semibold text-slate-900 mb-2">{spec.summary}</h4>}
-                        {spec.description && <p className="text-sm text-slate-600">{spec.description}</p>}
+                        {spec.summary && <h4 className="text-[14px] font-semibold text-on-surface mb-2">{spec.summary}</h4>}
+                        {spec.description && <p className="text-[13px] text-muted">{spec.description}</p>}
                       </div>
                     )}
 
                     {/* Parameters */}
                     {spec.parameters && spec.parameters.length > 0 && (
                       <div>
-                        <h4 className="text-sm font-semibold text-slate-900 mb-3">Parameters</h4>
+                        <h4 className="font-mono text-[10px] uppercase tracking-[0.1em] text-muted font-semibold mb-3">Parameters</h4>
                         <div className="space-y-3">
                           {spec.parameters.map((param, idx) => (
-                            <div key={idx} className="p-3 bg-slate-50 border border-slate-200 rounded-lg">
+                            <div key={idx} className="p-3 bg-surface-low border border-outline rounded-[8px]">
                               <div className="flex items-center gap-2 mb-1">
-                                <span className="font-mono text-sm font-medium text-slate-900">{param.name}</span>
-                                <span className="px-2 py-0.5 text-xs font-medium rounded bg-blue-100 text-blue-700">
+                                <span className="font-mono text-[13px] font-medium text-on-surface">{param.name}</span>
+                                <span className="px-2 py-0.5 text-[10px] font-medium rounded bg-blue-100 text-blue-700">
                                   {param.in}
                                 </span>
                                 {param.required && (
-                                  <span className="px-2 py-0.5 text-xs font-medium rounded bg-red-100 text-red-700">
+                                  <span className="px-2 py-0.5 text-[10px] font-medium rounded bg-red-100 text-red-700">
                                     required
                                   </span>
                                 )}
                               </div>
-                              {param.description && <p className="text-xs text-slate-600 mt-1">{param.description}</p>}
+                              {param.description && <p className="text-[12px] text-muted mt-1">{param.description}</p>}
                               {param.schema && (
-                                <div className="text-xs text-slate-500 mt-1">
+                                <div className="text-[12px] text-muted mt-1">
                                   Type: <code className="font-mono">{param.schema.type || 'any'}</code>
                                   {param.schema.enum && ` (${param.schema.enum.join(', ')})`}
                                 </div>
@@ -685,16 +706,16 @@ const AgentPlayground = ({ application }) => {
                     {/* Request Body */}
                     {spec.requestBody && (
                       <div>
-                        <h4 className="text-sm font-semibold text-slate-900 mb-3">Request Body</h4>
-                        <div className="p-4 bg-slate-50 border border-slate-200 rounded-lg">
+                        <h4 className="font-mono text-[10px] uppercase tracking-[0.1em] text-muted font-semibold mb-3">Request Body</h4>
+                        <div className="p-4 bg-surface-low border border-outline rounded-[8px]">
                           {spec.requestBody.required && (
-                            <span className="inline-block px-2 py-0.5 text-xs font-medium rounded bg-red-100 text-red-700 mb-2">
+                            <span className="inline-block px-2 py-0.5 text-[10px] font-medium rounded bg-red-100 text-red-700 mb-2">
                               required
                             </span>
                           )}
                           {spec.requestBody.content?.['application/json']?.schema && (
                             <div className="mt-2">
-                              <pre className="text-xs text-slate-900 font-mono whitespace-pre-wrap overflow-x-auto">
+                              <pre className="text-[12px] text-on-surface font-mono whitespace-pre-wrap overflow-x-auto">
                                 {JSON.stringify(spec.requestBody.content['application/json'].schema, null, 2)}
                               </pre>
                             </div>
@@ -706,24 +727,24 @@ const AgentPlayground = ({ application }) => {
                     {/* Responses */}
                     {spec.responses && (
                       <div>
-                        <h4 className="text-sm font-semibold text-slate-900 mb-3">Responses</h4>
+                        <h4 className="font-mono text-[10px] uppercase tracking-[0.1em] text-muted font-semibold mb-3">Responses</h4>
                         <div className="space-y-3">
                           {Object.entries(spec.responses).map(([status, response]) => (
-                            <div key={status} className="p-3 bg-slate-50 border border-slate-200 rounded-lg">
+                            <div key={status} className="p-3 bg-surface-low border border-outline rounded-[8px]">
                               <div className="flex items-center gap-2 mb-2">
-                                <span className={`px-2 py-0.5 text-xs font-semibold rounded ${
+                                <span className={`px-2 py-0.5 text-[10px] font-semibold rounded ${
                                   status.startsWith('2') ? 'bg-emerald-100 text-emerald-700' :
                                   status.startsWith('4') ? 'bg-amber-100 text-amber-700' :
                                   status.startsWith('5') ? 'bg-red-100 text-red-700' :
-                                  'bg-slate-100 text-slate-700'
+                                  'bg-gray-100 text-gray-700'
                                 }`}>
                                   {status}
                                 </span>
-                                <span className="text-sm text-slate-900">{response.description}</span>
+                                <span className="text-[13px] text-on-surface">{response.description}</span>
                               </div>
                               {response.content?.['application/json']?.schema && (
                                 <div className="mt-2">
-                                  <pre className="text-xs text-slate-700 font-mono whitespace-pre-wrap overflow-x-auto">
+                                  <pre className="text-[12px] text-muted font-mono whitespace-pre-wrap overflow-x-auto">
                                     {JSON.stringify(response.content['application/json'].schema, null, 2)}
                                   </pre>
                                 </div>
@@ -737,10 +758,10 @@ const AgentPlayground = ({ application }) => {
                     {/* Tags */}
                     {spec.tags && spec.tags.length > 0 && (
                       <div>
-                        <h4 className="text-sm font-semibold text-slate-900 mb-2">Tags</h4>
+                        <h4 className="font-mono text-[10px] uppercase tracking-[0.1em] text-muted font-semibold mb-2">Tags</h4>
                         <div className="flex flex-wrap gap-2">
                           {spec.tags.map((tag, idx) => (
-                            <span key={idx} className="px-3 py-1 text-xs font-medium rounded-full bg-indigo-100 text-indigo-700">
+                            <span key={idx} className="px-3 py-1 text-[10px] font-medium rounded-full bg-green-bg text-green border border-green">
                               {tag}
                             </span>
                           ))}
@@ -753,10 +774,10 @@ const AgentPlayground = ({ application }) => {
             </div>
 
             {/* Modal Footer */}
-            <div className="p-6 border-t border-slate-200 bg-slate-50">
+            <div className="p-7 pt-4">
               <button
                 onClick={() => setShowSpecModal(false)}
-                className="w-full px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg font-medium transition-all"
+                className="w-full px-[18px] py-[9px] bg-primary text-white border-0 rounded-[8px] text-[13px] font-medium hover:opacity-88 transition-all"
               >
                 Close
               </button>

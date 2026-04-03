@@ -233,38 +233,36 @@ const EditProjectModal = ({ project, onClose, onUpdate }) => {
   };
 
   return (
-    <div className="fixed inset-0 bg-black/20 flex items-center justify-center z-50 p-4">
-      <div className="bg-surface rounded-sm max-w-2xl w-full max-h-[90vh] overflow-y-auto border border-outline-variant">
+    <div
+      className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 p-4"
+      onClick={onClose}
+    >
+      <div
+        className="bg-surface rounded-[14px] max-w-[500px] w-full max-h-[90vh] overflow-y-auto shadow-2xl"
+        onClick={(e) => e.stopPropagation()}
+      >
         {/* Header */}
-        <div className="flex items-center justify-between p-6 border-b border-outline-variant">
-          <div>
-            <h2 className="text-heading-lg font-bold text-on-surface">Edit Agent</h2>
-            <p className="text-body-sm text-on-surface-variant mt-1">Update agent details and OpenAPI specification</p>
-          </div>
-          <button
-            onClick={onClose}
-            className="p-2 hover:bg-surface-container-high rounded-sm transition-colors"
-          >
-            <X className="w-5 h-5 text-on-surface-variant" />
-          </button>
+        <div className="p-7 pb-0">
+          <h2 className="font-serif text-[21px] font-normal text-on-surface mb-[6px]">Edit Agent</h2>
+          <p className="text-[13px] text-muted mb-[22px]">Update agent details and OpenAPI specification</p>
         </div>
 
         {/* Error Message */}
         {error && (
-          <div className="mx-6 mt-6 p-4 bg-red-50 border border-red-200 rounded-sm flex items-start gap-3">
+          <div className="mx-7 p-4 bg-red-50 border border-red-200 rounded-[8px] flex items-start gap-3">
             <AlertCircle className="w-5 h-5 text-red-600 flex-shrink-0 mt-0.5" />
             <div className="flex-1">
-              <div className="text-body-sm font-medium text-red-900 mb-1">Error</div>
-              <div className="text-body-sm text-red-700">{error}</div>
+              <div className="text-[13px] font-semibold text-red-900 mb-1">Error</div>
+              <div className="text-[13px] text-red-700">{error}</div>
             </div>
           </div>
         )}
 
         {/* Form */}
-        <form onSubmit={handleSubmit} className="p-6 space-y-6">
+        <form onSubmit={handleSubmit} className="p-7 pt-0">
           {/* Agent Name */}
-          <div>
-            <label className="block text-label-md font-medium text-on-surface-variant mb-2">
+          <div className="mb-4">
+            <label className="block font-mono text-[10px] uppercase tracking-[0.1em] text-muted font-semibold mb-[6px]">
               Agent Name *
             </label>
             <input
@@ -273,13 +271,13 @@ const EditProjectModal = ({ project, onClose, onUpdate }) => {
               onChange={(e) => setName(e.target.value)}
               placeholder="My AI Agent"
               required
-              className="w-full px-4 py-2 border border-outline-variant rounded-sm focus:outline-none focus:border-primary focus:border-transparent text-on-surface"
+              className="w-full px-[13px] py-[10px] border border-outline-variant rounded-[8px] bg-surface-container-low text-[13px] text-on-surface transition-colors duration-150 focus:border-primary focus:outline-none"
             />
           </div>
 
           {/* Target Base URL */}
-          <div>
-            <label className="block text-label-md font-medium text-on-surface-variant mb-2">
+          <div className="mb-4">
+            <label className="block font-mono text-[10px] uppercase tracking-[0.1em] text-muted font-semibold mb-[6px]">
               Target Base URL
             </label>
             <input
@@ -287,41 +285,36 @@ const EditProjectModal = ({ project, onClose, onUpdate }) => {
               value={targetBaseUrl}
               onChange={(e) => setTargetBaseUrl(e.target.value)}
               placeholder="https://api.example.com"
-              className="w-full px-4 py-2 border border-outline-variant rounded-sm focus:outline-none focus:border-primary focus:border-transparent text-on-surface"
+              className="w-full px-[13px] py-[10px] border border-outline-variant rounded-[8px] bg-surface-container-low text-[13px] text-on-surface transition-colors duration-150 focus:border-primary focus:outline-none"
             />
-            <p className="text-label-sm text-on-surface-variant mt-1">
-              The base URL where your API is hosted
-            </p>
           </div>
 
           {/* Schema Source Mode Toggle */}
-          <div>
-            <label className="block text-label-md font-medium text-on-surface-variant mb-3">
+          <div className="mb-4">
+            <label className="block font-mono text-[10px] uppercase tracking-[0.1em] text-muted font-semibold mb-[6px]">
               Schema Source
             </label>
-            <div className="flex gap-3">
+            <div className="grid grid-cols-2 gap-[6px]">
               <button
                 type="button"
                 onClick={() => setSchemaMode('upload')}
-                className={`flex-1 px-4 py-3 border-2 rounded-sm font-medium transition-all flex items-center justify-center gap-2 ${
+                className={`px-[9px] py-[9px] rounded-[7px] border-[1.5px] text-[13px] text-center transition-all duration-[120ms] ${
                   schemaMode === 'upload'
-                    ? 'border-primary bg-primary/10 text-primary'
-                    : 'border-outline-variant bg-surface-container-lowest text-on-surface-variant hover:border-outline'
+                    ? 'border-green bg-green-bg text-green font-semibold'
+                    : 'border-outline bg-transparent text-muted hover:border-green/50'
                 }`}
               >
-                <Upload className="w-4 h-4" />
                 Upload File
               </button>
               <button
                 type="button"
                 onClick={() => setSchemaMode('auto-sync')}
-                className={`flex-1 px-4 py-3 border-2 rounded-sm font-medium transition-all flex items-center justify-center gap-2 ${
+                className={`px-[9px] py-[9px] rounded-[7px] border-[1.5px] text-[13px] text-center transition-all duration-[120ms] ${
                   schemaMode === 'auto-sync'
-                    ? 'border-primary bg-primary/10 text-primary'
-                    : 'border-outline-variant bg-surface-container-lowest text-on-surface-variant hover:border-outline'
+                    ? 'border-green bg-green-bg text-green font-semibold'
+                    : 'border-outline bg-transparent text-muted hover:border-green/50'
                 }`}
               >
-                <Link className="w-4 h-4" />
                 Auto-Sync URL
               </button>
             </div>
@@ -329,7 +322,7 @@ const EditProjectModal = ({ project, onClose, onUpdate }) => {
 
           {/* Show current auto-sync status if enabled */}
           {hasSubscription && schemaMode === 'auto-sync' && (
-            <div className="bg-success/10 border border-success/20 rounded-sm p-4">
+            <div className="bg-success/10 border border-success/20 rounded-[8px] p-4">
               <div className="flex items-start gap-3">
                 <CheckCircle className="w-5 h-5 text-success flex-shrink-0 mt-0.5" />
                 <div className="flex-1">
@@ -374,8 +367,8 @@ const EditProjectModal = ({ project, onClose, onUpdate }) => {
           {/* Auto-Sync URL Fields - Only show for auto-sync mode */}
           {schemaMode === 'auto-sync' ? (
             <>
-              <div>
-                <label className="block text-label-md font-medium text-on-surface-variant mb-2">
+              <div className="mb-4">
+                <label className="block font-mono text-[10px] uppercase tracking-[0.1em] text-muted font-semibold mb-[6px]">
                   OpenAPI Spec URL *
                 </label>
                 <input
@@ -383,21 +376,18 @@ const EditProjectModal = ({ project, onClose, onUpdate }) => {
                   value={schemaSourceUrl}
                   onChange={(e) => setSchemaSourceUrl(e.target.value)}
                   placeholder="https://api.example.com/openapi.json"
-                  className="w-full px-4 py-2 border border-outline-variant rounded-sm focus:outline-none focus:border-primary focus:border-transparent text-on-surface"
+                  className="w-full px-[13px] py-[10px] border border-outline-variant rounded-[8px] bg-surface-container-low text-[13px] text-on-surface transition-colors duration-150 focus:border-primary focus:outline-none"
                 />
-                <p className="text-label-sm text-on-surface-variant mt-1">
-                  URL to your OpenAPI specification (JSON or YAML)
-                </p>
               </div>
 
-              <div>
-                <label className="block text-label-md font-medium text-on-surface-variant mb-2">
+              <div className="mb-4">
+                <label className="block font-mono text-[10px] uppercase tracking-[0.1em] text-muted font-semibold mb-[6px]">
                   Sync Interval *
                 </label>
                 <select
                   value={schemaSyncInterval}
                   onChange={(e) => setSchemaSyncInterval(e.target.value)}
-                  className="w-full px-4 py-2 border border-outline-variant rounded-sm focus:outline-none focus:border-primary focus:border-transparent text-on-surface"
+                  className="w-full px-[13px] py-[10px] border border-outline-variant rounded-[8px] bg-surface-container-low text-[13px] text-on-surface transition-colors duration-150 focus:border-primary focus:outline-none"
                 >
                   {SYNC_INTERVALS.map((interval) => (
                     <option key={interval.value} value={interval.value}>
@@ -405,9 +395,6 @@ const EditProjectModal = ({ project, onClose, onUpdate }) => {
                     </option>
                   ))}
                 </select>
-                <p className="text-label-sm text-on-surface-variant mt-1">
-                  How often to check for updates to your OpenAPI spec
-                </p>
               </div>
 
               {/* Validate Button for Auto-Sync Mode */}
@@ -416,7 +403,7 @@ const EditProjectModal = ({ project, onClose, onUpdate }) => {
                   type="button"
                   onClick={handleValidateUrl}
                   disabled={isValidating}
-                  className="w-full px-4 py-2 bg-primary hover:bg-blue-700 disabled:bg-surface-container-high disabled:text-on-surface-variant text-white rounded-sm font-medium transition-all disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                  className="w-full px-4 py-2 bg-primary hover:bg-blue-700 disabled:bg-surface-container-high disabled:text-on-surface-variant text-white rounded-[8px] font-medium transition-all disabled:cursor-not-allowed flex items-center justify-center gap-2"
                 >
                   {isValidating ? (
                     <>
@@ -434,7 +421,7 @@ const EditProjectModal = ({ project, onClose, onUpdate }) => {
 
               {/* Validation Result for Auto-Sync Mode */}
               {validationResult && schemaMode === 'auto-sync' && (
-                <div className="p-4 bg-success/10 border border-success/20 rounded-sm">
+                <div className="p-4 bg-success/10 border border-success/20 rounded-[8px]">
                   <div className="flex items-center gap-2">
                     <CheckCircle className="w-5 h-5 text-success" />
                     <div className="flex-1">
@@ -449,7 +436,7 @@ const EditProjectModal = ({ project, onClose, onUpdate }) => {
 
               {/* Validation Error for Auto-Sync Mode */}
               {validationError && schemaMode === 'auto-sync' && (
-                <div className="p-4 bg-red-50 border border-red-200 rounded-sm">
+                <div className="p-4 bg-red-50 border border-red-200 rounded-[8px]">
                   <div className="flex items-center gap-2">
                     <AlertCircle className="w-5 h-5 text-red-600" />
                     <div className="flex-1">
@@ -463,12 +450,16 @@ const EditProjectModal = ({ project, onClose, onUpdate }) => {
           ) : (
             <>
               {/* OpenAPI Spec Upload - Only show for upload mode */}
-          <div>
-            <label className="block text-label-md font-medium text-on-surface-variant mb-2">
+          <div className="mb-4">
+            <label className="block font-mono text-[10px] uppercase tracking-[0.1em] text-muted font-semibold mb-[6px]">
               Upload New OpenAPI Specification (Optional)
             </label>
 
-            <div className="border-2 border-dashed border-outline-variant rounded-sm p-6 hover:border-primary transition-colors">
+            <div className={`border-2 border-dashed rounded-[10px] p-6 text-center cursor-pointer transition-all duration-150 ${
+              fileName
+                ? 'border-green bg-green-bg border-solid'
+                : 'border-outline hover:border-green hover:bg-green-bg'
+            }`}>
               <input
                 type="file"
                 id="schema-upload"
@@ -480,28 +471,17 @@ const EditProjectModal = ({ project, onClose, onUpdate }) => {
                 htmlFor="schema-upload"
                 className="cursor-pointer flex flex-col items-center"
               >
-                <div className="w-12 h-12 bg-primary/10 rounded-sm flex items-center justify-center mb-3">
-                  <Upload className="w-6 h-6 text-primary" />
+                <div className="text-[22px] mb-[6px]">
+                  {fileName ? '✓' : '↑'}
                 </div>
-                <div className="text-body-sm font-medium text-on-surface mb-1">
+                <div className={`text-[13px] font-semibold mb-[3px] ${fileName ? 'text-green' : 'text-on-surface'}`}>
                   {fileName || 'Click to upload or drag and drop'}
                 </div>
-                <div className="text-label-sm text-on-surface-variant">
+                <div className="text-[12px] text-muted">
                   JSON or YAML files (.json, .yaml, .yml)
                 </div>
               </label>
             </div>
-
-            {fileName && (
-              <div className="mt-3 flex items-center gap-2 text-body-sm text-success bg-success/10 border border-success/20 rounded-sm p-3">
-                <FileText className="w-4 h-4" />
-                <span className="font-medium">{fileName}</span>
-              </div>
-            )}
-
-            <p className="text-label-sm text-on-surface-variant mt-2">
-              Leave empty to keep current specification. Upload a new JSON or YAML file to update.
-            </p>
           </div>
 
           {/* Validate Button for Upload Mode */}
@@ -510,7 +490,7 @@ const EditProjectModal = ({ project, onClose, onUpdate }) => {
               type="button"
               onClick={handleValidateUpload}
               disabled={isValidating}
-              className="w-full px-4 py-2 bg-primary hover:bg-blue-700 disabled:bg-surface-container-high disabled:text-on-surface-variant text-white rounded-sm font-medium transition-all disabled:cursor-not-allowed flex items-center justify-center gap-2"
+              className="w-full px-4 py-2 bg-primary hover:bg-blue-700 disabled:bg-surface-container-high disabled:text-on-surface-variant text-white rounded-[8px] font-medium transition-all disabled:cursor-not-allowed flex items-center justify-center gap-2"
             >
               {isValidating ? (
                 <>
@@ -528,7 +508,7 @@ const EditProjectModal = ({ project, onClose, onUpdate }) => {
 
           {/* Validation Result for Upload Mode */}
           {validationResult && schemaMode === 'upload' && (
-            <div className="p-4 bg-success/10 border border-success/20 rounded-sm">
+            <div className="p-4 bg-success/10 border border-success/20 rounded-[8px]">
               <div className="flex items-center gap-2">
                 <CheckCircle className="w-5 h-5 text-success" />
                 <div className="flex-1">
@@ -543,7 +523,7 @@ const EditProjectModal = ({ project, onClose, onUpdate }) => {
 
           {/* Validation Error for Upload Mode */}
           {validationError && schemaMode === 'upload' && (
-            <div className="p-4 bg-red-50 border border-red-200 rounded-sm">
+            <div className="p-4 bg-red-50 border border-red-200 rounded-[8px]">
               <div className="flex items-center gap-2">
                 <AlertCircle className="w-5 h-5 text-red-600" />
                 <div className="flex-1">
@@ -555,32 +535,28 @@ const EditProjectModal = ({ project, onClose, onUpdate }) => {
           )}
 
           {/* Current Spec Info */}
-          <div className="bg-surface-container-low border border-outline-variant rounded-sm p-4">
-            <div className="text-label-sm font-semibold text-on-surface-variant mb-2">Current Specification</div>
-            <div className="space-y-1 text-label-sm text-on-surface-variant">
-              <div>Endpoints: {project.endpoints?.length || 0}</div>
-              <div>Version: {project.spec?.info?.version || 'N/A'}</div>
-              <div>Title: {project.spec?.info?.title || 'N/A'}</div>
-            </div>
+          <div className="bg-surface-container-low border border-outline-variant rounded-[8px] p-3 mb-5 text-[12px] text-muted leading-[1.8]">
+            Current Specification<br/>
+            Endpoints: <span className="text-on-surface font-semibold">{project.endpoints?.length || 0}</span> · Version: <span className="text-on-surface font-semibold">{project.spec?.info?.version || 'N/A'}</span> · Title: <span className="text-on-surface font-semibold">{project.spec?.info?.title || 'N/A'}</span>
           </div>
             </>
           )}
 
           {/* Action Buttons */}
-          <div className="flex gap-3 pt-4 border-t border-outline-variant">
+          <div className="flex gap-[10px] justify-end">
             <button
               type="button"
               onClick={onClose}
-              className="flex-1 px-4 py-2 border border-outline-variant text-on-surface-variant rounded-sm hover:bg-surface-container-low font-medium transition-colors"
+              className="px-[18px] py-[9px] bg-transparent border border-outline rounded-[8px] text-[13px] text-on-surface hover:bg-surface-container-high transition-all"
             >
               Cancel
             </button>
             <button
               type="submit"
               disabled={isUploading || !name.trim()}
-              className="flex-1 px-4 py-2 bg-primary hover:bg-blue-700 disabled:bg-surface-container-high disabled:text-on-surface-variant text-white rounded-sm font-medium transition-colors disabled:cursor-not-allowed"
+              className="px-[18px] py-[9px] bg-primary text-white border-0 rounded-[8px] text-[13px] font-medium hover:opacity-88 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
             >
-              {isUploading ? 'Updating...' : 'Update Agent'}
+              {isUploading ? 'Updating…' : 'Update Agent'}
             </button>
           </div>
         </form>

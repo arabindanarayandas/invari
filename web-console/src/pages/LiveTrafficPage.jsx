@@ -74,18 +74,19 @@ const LiveTrafficPage = ({ application }) => {
         <Card variant="outlined" className="flex flex-col h-[calc(100vh-250px)] min-h-[600px]">
           <div className="p-4 border-b border-outline-variant">
             <div className="flex items-center justify-between mb-3">
-              <div className="flex items-center gap-2">
-                <Activity className="w-4 h-4 text-success" />
-                <h2 className="text-body-sm font-semibold text-on-surface">Live Traffic Monitor</h2>
+              <div className="flex items-center gap-2.5">
+                <h2 className="font-serif text-[16px] font-normal text-on-surface flex items-center gap-2.5">
+                  Live Traffic Monitor
+                </h2>
                 {isLive ? (
-                  <div className="flex items-center gap-1.5 px-2 py-0.5 bg-success/10 border border-success/20 rounded-xs text-success text-[10px] font-semibold font-mono">
-                    <div className="w-1.5 h-1.5 rounded-full bg-success animate-pulse"></div>
-                    Live
+                  <div className="flex items-center gap-1.5 px-2.5 py-1 bg-primary text-white rounded-full text-[10px] font-mono">
+                    <div className="w-1.5 h-1.5 rounded-full bg-white animate-pulse"></div>
+                    LIVE
                   </div>
                 ) : (
-                  <div className="flex items-center gap-1.5 px-2 py-0.5 bg-surface-container-low border border-outline-variant rounded-xs text-on-surface-variant text-[10px] font-semibold font-mono">
+                  <div className="flex items-center gap-1.5 px-2.5 py-1 bg-surface-container-low border border-outline rounded-full text-on-surface-variant text-[10px] font-mono">
                     <Pause className="w-2.5 h-2.5" />
-                    Paused
+                    PAUSED
                   </div>
                 )}
               </div>
@@ -131,9 +132,9 @@ const LiveTrafficPage = ({ application }) => {
             </div>
           </div>
 
-          {/* Table Header */}
-          <div className="px-4 py-2 bg-surface-container-low border-b border-outline-variant">
-            <div className="grid grid-cols-[auto_auto_1fr_auto_auto] gap-3 text-[10px] font-semibold text-on-surface-variant uppercase tracking-wider items-center font-mono">
+          {/* Table Header - Matches HTML th styling */}
+          <div className="px-3.5 py-2 bg-surface-container-low border-b border-outline sticky top-0 z-10">
+            <div className="grid grid-cols-[auto_auto_1fr_auto_auto] gap-3 text-[10px] font-mono font-semibold text-muted uppercase tracking-[0.1em] items-center">
               <button
                 onClick={() => handleSort('timestamp')}
                 className="flex items-center gap-1 hover:text-on-surface transition-colors cursor-pointer w-32"
@@ -171,43 +172,52 @@ const LiveTrafficPage = ({ application }) => {
                 return (
                   <div
                     key={log.id}
-                    className={`px-4 py-3 border-b border-outline-variant transition-all ${
+                    className={`px-3.5 py-2.5 border-b border-surface-mid transition-all cursor-pointer ${
                       selectedLog?.id === log.id
-                        ? 'bg-primary/5 border-l-2 border-l-primary'
-                        : 'hover:bg-surface-container-high'
+                        ? 'bg-green-bg'
+                        : 'hover:bg-surface-container-low'
                     }`}
                   >
-                    <div className="grid grid-cols-[auto_auto_1fr_auto_auto] gap-3 items-center">
-                      <div className="text-label-sm text-on-surface-variant font-mono w-32">
+                    <div
+                      className="grid grid-cols-[auto_auto_1fr_auto_auto] gap-3 items-center"
+                      onClick={() => {
+                        if (selectedLog?.id === log.id) {
+                          setSelectedLog(null);
+                        } else {
+                          setSelectedLog(log);
+                        }
+                      }}
+                    >
+                      <div className="text-[11px] text-muted font-mono w-32">
                         {timestamp}
                       </div>
                       <div className="w-16">
-                        <span className={`px-1.5 py-0.5 text-[10px] font-bold rounded-xs font-mono ${
-                          log.httpMethod === 'GET' ? 'bg-primary/10 text-primary border border-primary/20' :
-                          log.httpMethod === 'POST' ? 'bg-success/10 text-success border border-success/20' :
-                          log.httpMethod === 'PUT' || log.httpMethod === 'PATCH' ? 'bg-repair/10 text-repair border border-repair/20' :
-                          log.httpMethod === 'DELETE' ? 'bg-red-500/10 text-red-600 border border-red-500/20' :
-                          'bg-surface-container-high text-on-surface-variant border border-outline-variant'
+                        <span className={`px-2 py-0.5 text-[10px] font-bold rounded font-mono ${
+                          log.httpMethod === 'GET' ? 'bg-[#dcfce7] text-[#166534]' :
+                          log.httpMethod === 'POST' ? 'bg-[#dbeafe] text-[#1d4ed8]' :
+                          log.httpMethod === 'PATCH' ? 'bg-[#fef3c7] text-[#b45309]' :
+                          log.httpMethod === 'DELETE' ? 'bg-[#fee2e2] text-[#dc2626]' :
+                          'bg-surface-container-high text-on-surface-variant'
                         }`}>
                           {log.httpMethod}
                         </span>
                       </div>
-                      <div
-                        className="text-label-sm text-on-surface font-mono truncate cursor-pointer"
-                        onClick={() => {
-                          if (selectedLog?.id === log.id) {
-                            setSelectedLog(null);
-                          } else {
-                            setSelectedLog(log);
-                          }
-                        }}
-                      >
+                      <div className="text-[11px] text-on-surface font-mono truncate">
                         {log.endpointPath}
                       </div>
                       <div className="w-24">
-                        <Badge status={log.status} />
+                        <span className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-bold font-mono ${
+                          log.status === 'stable' || log.status === 'passed' ? 'bg-green-dim text-primary' :
+                          log.status === 'repaired' ? 'bg-amber-dim text-repair' :
+                          log.status === 'blocked' ? 'bg-red-dim text-red-600' :
+                          'bg-surface-container-high text-on-surface-variant'
+                        }`}>
+                          {log.status === 'stable' || log.status === 'passed' ? 'PASSED' :
+                           log.status === 'repaired' ? 'REPAIRED' :
+                           log.status === 'blocked' ? 'BLOCKED' : log.status?.toUpperCase()}
+                        </span>
                       </div>
-                      <div className="text-label-sm text-primary text-right font-mono w-20">
+                      <div className="text-[11px] text-muted text-right font-mono w-20">
                         {log.overheadMs}ms
                       </div>
                     </div>

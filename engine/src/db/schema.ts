@@ -25,6 +25,7 @@ export const agents = pgTable('agents', {
   invariApiKey: varchar('flux_api_key', { length: 64 }).notNull().unique(),
 
   createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
+  deletedAt: timestamp('deleted_at', { withTimezone: true }),
 });
 
 // API Schemas table - The "Instruction Manual" uploaded by the user
